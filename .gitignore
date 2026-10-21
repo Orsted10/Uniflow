@@ -1,0 +1,21 @@
+
+# Dependencies
+node_modules/
+
+# Supabase local dev
+supabase/.env
+supabase/accelerated-migrations
+supabase/wrappers
+supabase/migrations/legacy
+
+# Build artifacts and caches
+.next/
+out/
+*.tsbuildinfo
+.env.local
+.env
+.DS_Store
+Thumbs.db
+.idea/
+.freebuff/
+*.log

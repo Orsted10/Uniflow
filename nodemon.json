@@ -1,0 +1,8 @@
+{
+  "restartable": "rs",
+  "ignore": ["node_modules"],
+  "env": {},
+  "ext": "js,json",
+  "watch": [],
+  "delay": "0"
+}

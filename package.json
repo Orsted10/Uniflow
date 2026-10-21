@@ -1,0 +1,36 @@
+{
+  "name": "uniflow",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "format": "eslint . --fix",
+    "format:check": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "npx tsx --test tests/unit/*.test.ts",
+    "db:validate": "npx tsx db/validate_schema.ts"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.118.0",
+    "next": "^15.5.28",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@next/eslint-plugin-next": "^16.4.3",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "autoprefixer": "^10.6.2",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.4.3",
+    "postcss": "^8.5.32",
+    "tailwindcss": "^3.4.19",
+    "typescript": "^6.0.0"
+  }
+}
