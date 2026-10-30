@@ -6,7 +6,7 @@
 ![Next.js](https://img.shields.io/badge/Next.js-15.5-black?style=flat-square)
 ![React](https://img.shields.io/badge/React-19-cyan?style=flat-square)
 ![Supabase](https://img.shields.io/badge/Supabase-Auth%20%26%20Postgres-emerald?style=flat-square)
-![Tests](https://img.shields.io/badge/Tests-37%20Passed-success?style=flat-square)
+![Tests](https://img.shields.io/badge/Tests-45%20Passed-success?style=flat-square)
 
 ---
 
@@ -27,8 +27,8 @@
 | **Phase 2** | Supabase Auth, PostgreSQL Migrations, RLS Policies & Tenant Isolation | **COMPLETED** |
 | **Phase 3** | Spec Parsing, Schema Normalization & Pure Deterministic Diff Engine | **COMPLETED** |
 | **Phase 4** | Server-Side Groq AI Advisory Engine, Bounded Payloads, Safety & Review UI | **COMPLETED** |
-| **Phase 5** | Transformation Plan Compiler, Trusted Interpreter & Adapter Generation | *Next* |
-| **Phase 6** | Equivalence Test Suite Execution, Evidence Persistence & Report Export | *Upcoming* |
+| **Phase 5** | Transformation Plan Compiler, Trusted Interpreter & Adapter Generation | **COMPLETED** |
+| **Phase 6** | Azure Cloud Integrations (Blob & SQL), Evidence Persistence & Report Export | *Next* |
 
 ---
 
@@ -58,6 +58,12 @@
 - **Interactive Review Actions:** Supports Accept, Reject, Edit, and detailed Audit Trail inspection to track changes and decisions.
 - **Manual Mapping:** Provides a deterministic modal interface for creating and verifying field mappings without relying on AI.
 - **Offline Resilience:** Automatically falls back to heuristic-based processing and manual mapping when Groq is unconfigured or unavailable, ensuring uninterrupted functionality.
+
+### 5. Trusted Compiler, Interpreter & Adapter Generator (Phase 5)
+- **Constrained Plan Compiler**: Compiles approved mappings into typed `TransformationPlan` IR. Enforces target required coverage and rejects unapproved/ambiguous steps.
+- **Zero-Eval Trusted Interpreter**: Deterministically executes all 7 allowed operations (`copy`, `rename`, `readNested`, `constructObject`, `typeConversion`, `default`, `lookup`) with strict missing-value policies (`fail`, `useDefault`, `omit`).
+- **Target Contract Conformance**: Validates output payloads against target schemas, catching required field omissions, nullability violations, type conflicts, enum mismatches, and date-time format errors.
+- **Standalone TypeScript Adapter Generator**: Generates clean, zero-dependency TypeScript adapter functions (`adapt` / `transform`) with direct `.ts` download and full interpreter-adapter equivalence verification.
 ---
 
 ## Service Ownership Boundaries
@@ -136,7 +142,7 @@ Navigate to [http://localhost:3000](http://localhost:3000) to open the UNIFLOW â
 All quality gates run and pass cleanly:
 
 ```bash
-# Run 37 Unit & Equivalence Tests
+# Run 45 Unit & Equivalence Tests
 npm test
 
 # Run TypeScript Typecheck

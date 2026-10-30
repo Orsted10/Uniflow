@@ -18,6 +18,7 @@ export const ALLOWED_CONVERSIONS = [
   "string-to-number",
   "boolean-to-string",
   "string-to-boolean",
+  "isoDate-to-timestamp",
   "date-to-string",
   "string-to-date",
 ] as const;

@@ -95,7 +95,8 @@ export function executeTransformationPlan(
         case "copy":
         case "rename":
         case "readNested":
-          finalVal = sourceVal;
+        case "constructObject":
+          finalVal = sourceVal !== undefined ? sourceVal : (step.defaultValue ?? {});
           break;
 
         case "typeConversion":
@@ -205,6 +206,11 @@ function applyTypeConversion(val: unknown, conversionType?: string): unknown {
     case "string-to-boolean": {
       const s = String(val).toLowerCase().trim();
       return s === "true" || s === "1" || s === "yes";
+    }
+    case "isoDate-to-timestamp": {
+      const d = new Date(String(val));
+      if (isNaN(d.getTime())) throw new Error(`Invalid date value '${val}'.`);
+      return d.getTime();
     }
     case "date-to-string": {
       const d = new Date(String(val));

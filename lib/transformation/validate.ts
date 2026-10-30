@@ -48,7 +48,7 @@ export function validateAgainstTargetSchema(
 
     // Check nullability rule
     if (val === null) {
-      if (!field.nullable && field.required) {
+      if (!field.nullable) {
         errors.push({
           path,
           expectedType: field.type,
@@ -71,6 +71,20 @@ export function validateAgainstTargetSchema(
         message: `Target contract violation: Field '${path}' expects type '${field.type}', but received '${actualType}'.`,
       });
       continue;
+    }
+
+    // Check format rule
+    if (field.format === "date-time" && typeof val === "string") {
+      const parsedTime = Date.parse(val);
+      if (isNaN(parsedTime)) {
+        errors.push({
+          path,
+          expectedType: "string(date-time)",
+          actualType: "string(invalid-date-time)",
+          rule: "type",
+          message: `Target contract violation: Value '${val}' at '${path}' is not a valid ISO 8601 date-time string.`,
+        });
+      }
     }
 
     // Check enum rule

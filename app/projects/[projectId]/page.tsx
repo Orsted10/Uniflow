@@ -89,6 +89,13 @@ export default function ProjectWorkspacePage() {
   const [reportData, setReportData] = React.useState<CompatibilityReportData | null>(null);
   const [reportMarkdown, setReportMarkdown] = React.useState<string | null>(null);
 
+  // Phase 5: Test runner & adapter states
+  const [selectedFixtureIdx, setSelectedFixtureIdx] = React.useState<number>(0);
+  const [customPayloadText, setCustomPayloadText] = React.useState<string>(
+    JSON.stringify(CANONICAL_TEST_FIXTURES[0].payload, null, 2)
+  );
+  const [showStepInspector, setShowStepInspector] = React.useState(false);
+
   // Feedback states
   const [loading, setLoading] = React.useState(true);
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
@@ -510,17 +517,30 @@ export default function ProjectWorkspacePage() {
     }
   }
 
-  async function executePlan() {
+  async function executePlan(customPayload?: unknown) {
     if (!projectId || !plan) return;
     setLoading(true);
     setErrorMsg(null);
     setSuccessMsg(null);
 
     try {
+      let payloadToSend: unknown;
+      if (customPayload !== undefined) {
+        payloadToSend = customPayload;
+      } else if (selectedFixtureIdx >= 0 && selectedFixtureIdx < CANONICAL_TEST_FIXTURES.length) {
+        payloadToSend = CANONICAL_TEST_FIXTURES[selectedFixtureIdx].payload;
+      } else {
+        try {
+          payloadToSend = JSON.parse(customPayloadText);
+        } catch {
+          throw new Error("Invalid JSON in custom test payload.");
+        }
+      }
+
       const res = await fetch(`/api/projects/${projectId}/execute`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ payload: CANONICAL_TEST_FIXTURES[0].payload }),
+        body: JSON.stringify({ payload: payloadToSend }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Execution failed.");
@@ -529,12 +549,27 @@ export default function ProjectWorkspacePage() {
       setValidationResult(data.validation);
       setTestSuite(data.testSuite);
       setAdapterCode(data.adapterCode);
-      setSuccessMsg("Transformation executed in trusted interpreter. Target contract validated.");
+      if (data.execution?.success) {
+        setSuccessMsg("Transformation executed in trusted interpreter. Target contract validated.");
+      } else {
+        setErrorMsg(data.execution?.error || "Transformation execution failed in interpreter.");
+      }
     } catch (err: unknown) {
       setErrorMsg(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
+  }
+
+  function downloadAdapterCode() {
+    if (!adapterCode || !plan) return;
+    const blob = new Blob([adapterCode], { type: "text/typescript" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `uniflow-adapter-${plan.planId}.ts`;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   async function generateReport() {
@@ -1653,6 +1688,76 @@ export default function ProjectWorkspacePage() {
                 </div>
               )}
 
+              {/* Phase 5: Interactive Test Runner & Fixture Selector */}
+              {plan && (
+                <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs space-y-3">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                    <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                      Interactive Fixture Test Runner
+                    </span>
+                    <span className="text-[11px] text-slate-500">
+                      Choose a canonical test case or paste custom payload
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-xs">
+                    {CANONICAL_TEST_FIXTURES.map((fix, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => {
+                          setSelectedFixtureIdx(idx);
+                          setCustomPayloadText(JSON.stringify(fix.payload, null, 2));
+                        }}
+                        className={`p-2 rounded border text-left transition ${
+                          selectedFixtureIdx === idx
+                            ? "border-blue-500 bg-blue-50/50 text-blue-900 font-medium"
+                            : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                        }`}
+                      >
+                        <div className="font-semibold text-[11px]">Fixture #{idx + 1}</div>
+                        <div className="text-[10px] text-slate-500 truncate">{fix.description}</div>
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedFixtureIdx(-1)}
+                      className={`p-2 rounded border text-left transition ${
+                        selectedFixtureIdx === -1
+                          ? "border-purple-500 bg-purple-50/50 text-purple-900 font-medium"
+                          : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                      }`}
+                    >
+                      <div className="font-semibold text-[11px]">Custom Payload</div>
+                      <div className="text-[10px] text-slate-500">Edit JSON input directly</div>
+                    </button>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-semibold text-slate-700 flex items-center justify-between">
+                      <span>Source Payload Input (JSON):</span>
+                      <button
+                        type="button"
+                        onClick={() => executePlan()}
+                        disabled={loading}
+                        className="text-[11px] text-blue-600 hover:text-blue-800 underline font-medium"
+                      >
+                        Execute with this payload →
+                      </button>
+                    </label>
+                    <textarea
+                      rows={5}
+                      value={customPayloadText}
+                      onChange={(e) => {
+                        setCustomPayloadText(e.target.value);
+                        setSelectedFixtureIdx(-1);
+                      }}
+                      className="font-mono text-xs w-full p-2.5 border border-slate-300 rounded bg-slate-50 text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-500 resize-none"
+                    />
+                  </div>
+                </div>
+              )}
+
               {executionResult && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs">
@@ -1666,6 +1771,49 @@ export default function ProjectWorkspacePage() {
                     <pre className="font-mono text-xs bg-slate-50 p-3 rounded border border-slate-200 overflow-auto max-h-72">
                       {JSON.stringify(executionResult.outputPayload, null, 2)}
                     </pre>
+
+                    {executionResult.stepResults && executionResult.stepResults.length > 0 && (
+                      <div className="mt-3 pt-2 border-t border-slate-100">
+                        <button
+                          type="button"
+                          onClick={() => setShowStepInspector(!showStepInspector)}
+                          className="text-[11px] text-slate-500 hover:text-slate-800 underline font-medium"
+                        >
+                          {showStepInspector
+                            ? "Hide Step Execution Details ▲"
+                            : `Show Step Execution Details (${executionResult.stepResults.length} steps) ▼`}
+                        </button>
+
+                        {showStepInspector && (
+                          <div className="mt-2 overflow-x-auto border border-slate-200 rounded">
+                            <table className="w-full text-left font-mono text-[10px]">
+                              <thead className="bg-slate-100 text-slate-700">
+                                <tr>
+                                  <th className="py-1 px-2">Path</th>
+                                  <th className="py-1 px-2">Op</th>
+                                  <th className="py-1 px-2">In</th>
+                                  <th className="py-1 px-2">Out</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-100">
+                                {executionResult.stepResults.map((st) => (
+                                  <tr key={st.stepId} className={st.success ? "" : "bg-rose-50"}>
+                                    <td className="py-1 px-2 text-slate-900 font-bold">{st.targetPath}</td>
+                                    <td className="py-1 px-2 text-blue-700">{st.operation}</td>
+                                    <td className="py-1 px-2 text-slate-500 truncate max-w-[80px]">
+                                      {st.inputValue !== undefined ? JSON.stringify(st.inputValue) : "undefined"}
+                                    </td>
+                                    <td className="py-1 px-2 text-slate-900 truncate max-w-[80px]">
+                                      {st.outputValue !== undefined ? JSON.stringify(st.outputValue) : "-"}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs">
@@ -1713,9 +1861,18 @@ export default function ProjectWorkspacePage() {
 
               {adapterCode && (
                 <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs">
-                  <h3 className="text-xs font-semibold text-slate-900 mb-2 uppercase tracking-wider">
-                    Generated Standalone TypeScript Adapter
-                  </h3>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-wider">
+                      Generated Standalone TypeScript Adapter
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={downloadAdapterCode}
+                      className="text-xs bg-slate-900 hover:bg-slate-800 text-white px-3 py-1 rounded font-medium shadow-xs transition"
+                    >
+                      Download .ts Adapter
+                    </button>
+                  </div>
                   <CodeViewer code={adapterCode} language="typescript" maxHeight="350px" />
                 </div>
               )}

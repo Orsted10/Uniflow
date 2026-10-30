@@ -99,6 +99,8 @@ export function generateTypeScriptAdapter(plan: TransformationPlan): string {
   lines.push("  return target;");
   lines.push("}");
   lines.push("");
+  lines.push("export const transform = adapt;");
+  lines.push("");
 
   return lines.join("\n");
 }
@@ -131,7 +133,12 @@ function generateStepCode(step: TransformationStep, lines: string[]): void {
     case "copy":
     case "rename":
     case "readNested":
-      lines.push(`    setValueByPath(target, ${targetPathLiteral}, ${valVar});`);
+    case "constructObject":
+      lines.push(
+        `    setValueByPath(target, ${targetPathLiteral}, ${valVar} !== undefined ? ${valVar} : ${JSON.stringify(
+          step.defaultValue ?? {}
+        )});`
+      );
       break;
 
     case "typeConversion":
@@ -178,6 +185,8 @@ function generateConversionExpression(valVar: string, conv?: string): string {
       return `Boolean(${valVar}) ? "true" : "false"`;
     case "string-to-boolean":
       return `String(${valVar}).toLowerCase() === "true" || String(${valVar}) === "1"`;
+    case "isoDate-to-timestamp":
+      return `new Date(String(${valVar})).getTime()`;
     case "date-to-string":
     case "string-to-date":
       return `new Date(String(${valVar})).toISOString()`;

@@ -87,8 +87,74 @@ Execute Phase 4 of UNIFLOW ∞: Implement the AI-assisted mapping proposal workf
 | :--- | :--- | :--- | :--- |
 | **Lint** | `npm run lint` | **PASSED** | 0 errors, 0 warnings across all files (`eslint .`) |
 | **Typecheck** | `npm run typecheck` | **PASSED** | 0 TypeScript errors (`tsc --noEmit`) |
-| **Unit Tests** | `npm test` | **PASSED** | 37 passed, 0 failed across core, security, Phase 3, and Phase 4 suites |
+| **Unit Tests** | `npm test` | **PASSED** | 45 passed, 0 failed across core, security, Phase 3, Phase 4, and Phase 5 suites |
 | **Production Build** | `npm run build` | **PASSED** | Next.js 15.5.28 compiled all 9 static and dynamic routes cleanly |
+
+---
+
+# Phase 5 — Transformation Plan Compiler, Trusted Interpreter & TypeScript Adapter Generation
+
+## Purpose
+Execute Phase 5 of UNIFLOW ∞: Complete the deterministic compilation, trusted interpreter execution, target schema conformance validation, standalone TypeScript adapter emission, and automated fixture equivalence verification.
+
+1. **Constrained Transformation Compiler (`lib/transformation/compiler.ts`)**:
+   - Enforces human approval gate: only mappings in `accepted` or `edited` status are compiled.
+   - Strictly excludes `rejected` or `needs_confirmation` proposals.
+   - Enforces 100% required target field coverage (rejects compilation if any required target leaf lacks an approved step).
+   - Validates all 7 allowlisted operations: `["copy", "rename", "readNested", "constructObject", "typeConversion", "default", "lookup"]`.
+   - Validates all supported type conversions against `ALLOWED_CONVERSIONS`.
+
+2. **Zero-Eval Trusted Interpreter (`lib/transformation/interpreter.ts`)**:
+   - Executes approved `TransformationPlan` steps on input payloads strictly without `eval()` or dynamic code execution.
+   - High-fidelity path parsing for bracketed strings (`$["order"]["items"][0]["price"]`) and escaped quotes.
+   - Evaluates missing value policies: `fail` (aborts execution with structured error), `useDefault` (falls back to approved default), or `omit`.
+   - Supports ISO-8601 string to millisecond epoch timestamp conversion (`isoDate-to-timestamp`).
+   - Collects step-by-step execution metrics (`StepExecutionResult[]`).
+
+3. **Target Contract Conformance Validator (`lib/transformation/validate.ts`)**:
+   - Validates transformed output against target schema rules:
+     - `rule: "required"`: Catches missing required fields.
+     - `rule: "nullable"`: Catches null values on non-nullable fields.
+     - `rule: "type"`: Catches scalar and container type mismatches.
+     - `rule: "enum"`: Catches values not in the allowed target enum list.
+     - Format validation: Verifies date-time formatting for ISO-8601 compliance.
+
+4. **Standalone TypeScript Adapter Generator (`lib/transformation/generator.ts`)**:
+   - Emits self-contained, zero-dependency TypeScript adapter code (`adapt` and `transform` functions).
+   - Inlines path traversal helpers and static lookup tables.
+   - Zero dynamic eval or unsafe string interpolation.
+
+5. **Equivalence Verification Suite (`lib/transformation/equivalence.ts`)**:
+   - Runs canonical test fixtures across both interpreter and adapter execution.
+   - Asserts 100% output equality (`allEqual: true`) and valid target conformance.
+
+6. **Interactive Workspace UI Updates (`app/projects/[projectId]/page.tsx`)**:
+   - Added interactive Fixture Selector (Fixture 1: Standard, Fixture 2: EUR, Fixture 3: Negative Case).
+   - Added Custom JSON Payload input editor for arbitrary payload testing.
+   - Added Step-by-Step Transformation Inspector table.
+   - Added one-click **Download .ts Adapter** button.
+
+---
+
+## Added & Updated Files
+
+- `tests/unit/phase5_compiler_and_adapter.test.ts`: 7 comprehensive test suites covering plan compilation guardrails, interpreter execution (all 7 operations), missing value policies, target validation negative cases, adapter code generation, and equivalence verification.
+- `lib/transformation/ir.ts`: Added `isoDate-to-timestamp` to `ALLOWED_CONVERSIONS`.
+- `lib/transformation/interpreter.ts`: Added `constructObject` support, `isoDate-to-timestamp` conversion handler.
+- `lib/transformation/generator.ts`: Added `constructObject`, `isoDate-to-timestamp`, and `transform` export alias.
+- `lib/transformation/validate.ts`: Enforced strict nullability checks and date-time format validations.
+- `app/projects/[projectId]/page.tsx`: Added interactive test runner, custom payload editor, step inspector, and adapter download.
+
+---
+
+## Verification Run & Results (Phase 5)
+
+| Gate | Command | Result | Details |
+| :--- | :--- | :--- | :--- |
+| **Lint** | `npm run lint` | **PASSED** | 0 errors, 0 warnings across all files (`eslint .`) |
+| **Typecheck** | `npm run typecheck` | **PASSED** | 0 TypeScript errors (`tsc --noEmit`) |
+| **Unit Tests** | `npm test` | **PASSED** | 45 passed, 0 failed across all 5 test suites |
+| **Production Build** | `npm run build` | **PASSED** | All 9 routes compiled cleanly in Next.js 15.5 |
 
 ---
 
