@@ -54,11 +54,10 @@
 - **Human Approval Gate**: Ambiguous semantics, missing required sources, differing enums, or type conversions automatically trigger `needs_confirmation` flags.
 
 ### 4. Human Review Workbench UI (Phase 4)
-- Side-by-side property inspection with uncertainty badges (`LOW`, `MEDIUM`, `HIGH`, `UNKNOWN`) and AI-surfaced unresolved questions.
-- Interactive actions: Accept, Reject, Edit, and Audit Trail history inspection.
-- Deterministic Manual Mapping modal dialog for creating verified field mappings without AI involvement.
-- Full offline resilience: Gracefully falls back to heuristic baseline and manual mapping when Groq is unconfigured or unavailable.
-
+- **Side-by-Side Property Comparison:** Displays property inspections with uncertainty indicators (`LOW`, `MEDIUM`, `HIGH`, `UNKNOWN`) and AI-generated unresolved questions.
+- **Interactive Review Actions:** Supports Accept, Reject, Edit, and detailed Audit Trail inspection to track changes and decisions.
+- **Manual Mapping:** Provides a deterministic modal interface for creating and verifying field mappings without relying on AI.
+- **Offline Resilience:** Automatically falls back to heuristic-based processing and manual mapping when Groq is unconfigured or unavailable, ensuring uninterrupted functionality.
 ---
 
 ## Service Ownership Boundaries
