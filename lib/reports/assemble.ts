@@ -1,23 +1,41 @@
+import crypto from "crypto";
 import { NormalizedSchema, StructuralDiff } from "../specs/types";
 import { CandidateMapping } from "../mapping/types";
 import { TransformationPlan } from "../transformation/ir";
 import { EquivalenceTestSuiteResult } from "../transformation/equivalence";
 
-export type CompatibilityReportData = {
+export interface ArtifactChecksums {
+  sourceSchemaHash: string;
+  targetSchemaHash: string;
+  planHash: string | null;
+  adapterHash: string | null;
+}
+
+export interface CloudEvidenceMetadata {
+  azureSqlRunId: string | null;
+  azureBlobReportMdUrl: string | null;
+  azureBlobReportJsonUrl: string | null;
+  persistedAt: string | null;
+}
+
+export interface CompatibilityReportData {
   reportId: string;
   projectId: string;
   generatedAt: string;
+  checksums: ArtifactChecksums;
   sourceContract: {
     title: string;
     version: string;
     format: string;
     fieldCount: number;
+    sha256: string;
   };
   targetContract: {
     title: string;
     version: string;
     format: string;
     fieldCount: number;
+    sha256: string;
   };
   status: "COMPATIBLE" | "CONDITIONALLY_COMPATIBLE" | "INCOMPATIBLE";
   summary: {
@@ -39,6 +57,7 @@ export type CompatibilityReportData = {
   }>;
   transformationPlanSummary: {
     planId: string;
+    planHash: string | null;
     stepsCount: number;
     conversions: string[];
   };
@@ -46,9 +65,11 @@ export type CompatibilityReportData = {
     allPassed: boolean;
     equivalenceVerified: boolean;
     testCasesCount: number;
+    passedCasesCount: number;
   };
+  cloudEvidence: CloudEvidenceMetadata;
   limitationsAndDisclosures: string[];
-};
+}
 
 export function assembleCompatibilityReport(
   projectId: string,
@@ -57,7 +78,9 @@ export function assembleCompatibilityReport(
   diff: StructuralDiff,
   mappings: CandidateMapping[],
   plan: TransformationPlan | null,
-  testSuite: EquivalenceTestSuiteResult | null
+  testSuite: EquivalenceTestSuiteResult | null,
+  adapterCode?: string | null,
+  cloudEvidence?: Partial<CloudEvidenceMetadata>
 ): { reportData: CompatibilityReportData; markdown: string } {
   const approvedMappings = mappings.filter((m) => m.status === "accepted" || m.status === "edited");
   const targetRequiredCount = Object.values(targetSchema.flatFields).filter(
@@ -84,26 +107,57 @@ export function assembleCompatibilityReport(
       : "INCOMPATIBLE";
 
   const limitations = [
-    "Adapter equivalence is formally verified on tested fixtures; equivalence is not mathematically guaranteed for arbitrary out-of-spec payloads.",
+    "Adapter equivalence is formally verified on supplied and generated test fixtures; equivalence is not mathematically guaranteed for arbitrary out-of-spec payloads.",
     "Approved default values substitute missing source data and must be verified by integration domain owners.",
-    "Type conversions operate within safe numeric and ISO string boundaries without silent decimal truncation.",
+    "Type conversions operate within safe numeric and ISO-8601 string boundaries without silent decimal truncation.",
+    "Azure SQL execution evidence stores tamper-evident input/output run hashes but does not mutate the Supabase core system of record.",
   ];
 
+  // Cryptographic checksum calculations
+  const sourceHash = crypto
+    .createHash("sha256")
+    .update(JSON.stringify(sourceSchema), "utf8")
+    .digest("hex");
+
+  const targetHash = crypto
+    .createHash("sha256")
+    .update(JSON.stringify(targetSchema), "utf8")
+    .digest("hex");
+
+  const planHash = plan
+    ? crypto.createHash("sha256").update(JSON.stringify(plan), "utf8").digest("hex")
+    : null;
+
+  const adapterHash = adapterCode
+    ? crypto.createHash("sha256").update(adapterCode, "utf8").digest("hex")
+    : null;
+
+  const reportId = `rep-${Date.now().toString(36)}-${crypto.randomBytes(4).toString("hex")}`;
+  const now = new Date().toISOString();
+
   const reportData: CompatibilityReportData = {
-    reportId: `rep-${Date.now()}`,
+    reportId,
     projectId,
-    generatedAt: new Date().toISOString(),
+    generatedAt: now,
+    checksums: {
+      sourceSchemaHash: sourceHash,
+      targetSchemaHash: targetHash,
+      planHash,
+      adapterHash,
+    },
     sourceContract: {
       title: sourceSchema.title,
       version: sourceSchema.version,
       format: sourceSchema.metadata.format,
       fieldCount: sourceSchema.metadata.fieldCount,
+      sha256: sourceHash,
     },
     targetContract: {
       title: targetSchema.title,
       version: targetSchema.version,
       format: targetSchema.metadata.format,
       fieldCount: targetSchema.metadata.fieldCount,
+      sha256: targetHash,
     },
     status,
     summary: {
@@ -125,6 +179,7 @@ export function assembleCompatibilityReport(
     })),
     transformationPlanSummary: {
       planId: plan?.planId || "none",
+      planHash,
       stepsCount: plan?.steps.length || 0,
       conversions: plan
         ? plan.steps
@@ -136,6 +191,13 @@ export function assembleCompatibilityReport(
       allPassed: testSuite?.allValid ?? false,
       equivalenceVerified: testSuite?.allEqual ?? false,
       testCasesCount: testSuite?.totalCases ?? 0,
+      passedCasesCount: testSuite?.passedCases ?? 0,
+    },
+    cloudEvidence: {
+      azureSqlRunId: cloudEvidence?.azureSqlRunId || null,
+      azureBlobReportMdUrl: cloudEvidence?.azureBlobReportMdUrl || null,
+      azureBlobReportJsonUrl: cloudEvidence?.azureBlobReportJsonUrl || null,
+      persistedAt: cloudEvidence?.persistedAt || null,
     },
     limitationsAndDisclosures: limitations,
   };
@@ -148,7 +210,20 @@ export function assembleCompatibilityReport(
   };
 }
 
-function generateMarkdownReport(r: CompatibilityReportData): string {
+export function generateMarkdownReport(r: CompatibilityReportData): string {
+  const cloudSection = r.cloudEvidence.azureSqlRunId
+    ? `
+---
+
+## 6. Multi-Cloud Execution Evidence (Azure)
+
+- **Azure SQL Run ID:** \`${r.cloudEvidence.azureSqlRunId}\`
+- **Azure Blob Markdown Artifact:** ${r.cloudEvidence.azureBlobReportMdUrl || "N/A"}
+- **Azure Blob JSON Artifact:** ${r.cloudEvidence.azureBlobReportJsonUrl || "N/A"}
+- **Certified At:** ${r.cloudEvidence.persistedAt || r.generatedAt}
+`
+    : "";
+
   return `# UNIFLOW ∞ — API Compatibility Report
 
 **Report ID:** \`${r.reportId}\`  
@@ -165,10 +240,20 @@ function generateMarkdownReport(r: CompatibilityReportData): string {
 | **Version** | ${r.sourceContract.version} | ${r.targetContract.version} |
 | **Format** | ${r.sourceContract.format} | ${r.targetContract.format} |
 | **Field Count** | ${r.sourceContract.fieldCount} | ${r.targetContract.fieldCount} |
+| **SHA-256 Digest** | \`${r.sourceContract.sha256.slice(0, 16)}...\` | \`${r.targetContract.sha256.slice(0, 16)}...\` |
 
 ---
 
-## 2. Structural Diff Metrics
+## 2. Cryptographic Digest Ledger
+
+- **Source Schema Checksum (SHA-256):** \`${r.checksums.sourceSchemaHash}\`
+- **Target Schema Checksum (SHA-256):** \`${r.checksums.targetSchemaHash}\`
+- **Plan IR Checksum (SHA-256):** \`${r.checksums.planHash || "N/A"}\`
+- **Generated Adapter Checksum (SHA-256):** \`${r.checksums.adapterHash || "N/A"}\`
+
+---
+
+## 3. Structural Diff Metrics
 
 - **Total Target Leaf Fields:** ${r.structuralDiff.totalTargetFields}
 - **Exact Path & Type Matches:** ${r.structuralDiff.exactMatches}
@@ -180,22 +265,22 @@ function generateMarkdownReport(r: CompatibilityReportData): string {
 
 ---
 
-## 3. Approved Transformation Plan
+## 4. Approved Transformation Plan
 
 **Plan ID:** \`${r.transformationPlanSummary.planId}\` (${r.transformationPlanSummary.stepsCount} compiled steps)
 
 | Target Path | Source Path | Operation | Rationale |
 | :--- | :--- | :--- | :--- |
-${r.approvedMappings
+${r.approvedMappings.length > 0 ? r.approvedMappings
   .map(
     (m) =>
       `| \`${m.targetPath}\` | \`${m.sourcePath || "(default)"}\` | \`${m.operation}\` | ${m.rationale} |`
   )
-  .join("\n")}
+  .join("\n") : "| (No approved mappings) | - | - | - |"}
 
 ---
 
-## 4. Deterministic Test & Equivalence Verification
+## 5. Deterministic Test & Equivalence Verification
 
 - **Total Test Cases Executed:** ${r.summary.totalTests}
 - **Passed Test Cases:** ${r.summary.testsPassed}
@@ -203,10 +288,10 @@ ${r.approvedMappings
 - **Interpreter vs Adapter Output Equivalence:** ${
     r.testResults.equivalenceVerified ? "VERIFIED (Deterministic equality)" : "UNVERIFIED"
   }
-
+${cloudSection}
 ---
 
-## 5. Security & Trust Disclosures
+## 7. Security & Trust Disclosures
 
 ${r.limitationsAndDisclosures.map((d) => `- ${d}`).join("\n")}
 `;
