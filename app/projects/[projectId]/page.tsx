@@ -694,11 +694,11 @@ export default function ProjectWorkspacePage() {
   }, [mappings, mappingFilterStatus, mappingFilterUncertainty, mappingSearchQuery]);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#0b0f17] text-slate-100 flex flex-col font-sans selection:bg-teal-500 selection:text-white">
       <TopBar />
 
       {/* Project Subheader */}
-      <div className="bg-white border-b border-slate-200 px-4 sm:px-6 lg:px-8 py-3">
+      <div className="bg-slate-900/60 border-b border-slate-800 px-4 sm:px-6 lg:px-8 py-3">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
           <div>
             <Breadcrumb
@@ -707,13 +707,13 @@ export default function ProjectWorkspacePage() {
                 { label: "Projects", href: "/projects" },
                 { label: project?.name || projectId, current: true },
               ]}
-              className="mb-1"
+              className="mb-1 text-slate-400"
             />
             <div className="flex items-center space-x-2 flex-wrap gap-y-1">
-              <h1 className="text-base font-bold text-slate-900 tracking-tight">
+              <h1 className="text-base font-bold text-white tracking-tight">
                 {project?.name || "Workspace"}
               </h1>
-              <span className="font-mono text-[11px] text-slate-400">({projectId})</span>
+              <span className="font-mono text-[11px] text-slate-500">({projectId})</span>
 
               {cloudStatus && (
                 <div className="flex items-center space-x-1.5 ml-2">
@@ -721,8 +721,8 @@ export default function ProjectWorkspacePage() {
                     title={cloudStatus.supabase.configured ? "Supabase Connected" : "Local Mock Storage"}
                     className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono border ${
                       cloudStatus.supabase.configured
-                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                        : "bg-slate-100 text-slate-600 border-slate-200"
+                        ? "bg-emerald-950/80 text-emerald-400 border-emerald-800/60"
+                        : "bg-slate-800 text-slate-400 border-slate-700"
                     }`}
                   >
                     Postgres: {cloudStatus.supabase.configured ? "Ready" : "Local"}
@@ -731,8 +731,8 @@ export default function ProjectWorkspacePage() {
                     title={cloudStatus.groq.configured ? `Groq LLM: ${cloudStatus.groq.model}` : "Groq Not Configured (Offline Mode)"}
                     className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono border ${
                       cloudStatus.groq.configured
-                        ? "bg-blue-50 text-blue-700 border-blue-200"
-                        : "bg-slate-100 text-slate-600 border-slate-200"
+                        ? "bg-blue-950/80 text-blue-400 border-blue-800/60"
+                        : "bg-slate-800 text-slate-400 border-slate-700"
                     }`}
                   >
                     Groq: {cloudStatus.groq.configured ? "Online" : "Mock"}
@@ -741,8 +741,8 @@ export default function ProjectWorkspacePage() {
                     title={cloudStatus.azureSql.configured ? `Azure SQL: ${cloudStatus.azureSql.server}` : "Azure SQL Bridge (Simulated / Local Fallback)"}
                     className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono border ${
                       cloudStatus.azureSql.configured
-                        ? "bg-teal-50 text-teal-700 border-teal-200"
-                        : "bg-amber-50 text-amber-700 border-amber-200"
+                        ? "bg-teal-950/80 text-teal-400 border-teal-800/60"
+                        : "bg-amber-950/80 text-amber-400 border-amber-800/60"
                     }`}
                   >
                     Azure SQL: {cloudStatus.azureSql.configured ? "Connected" : "Simulated"}
@@ -751,8 +751,8 @@ export default function ProjectWorkspacePage() {
                     title={cloudStatus.azureBlob.configured ? `Azure Blob: ${cloudStatus.azureBlob.accountName}` : "Azure Blob Storage (Simulated / In-Memory)"}
                     className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono border ${
                       cloudStatus.azureBlob.configured
-                        ? "bg-cyan-50 text-cyan-700 border-cyan-200"
-                        : "bg-slate-100 text-slate-600 border-slate-200"
+                        ? "bg-cyan-950/80 text-cyan-400 border-cyan-800/60"
+                        : "bg-slate-800 text-slate-400 border-slate-700"
                     }`}
                   >
                     Azure Blob: {cloudStatus.azureBlob.configured ? "Connected" : "Simulated"}
@@ -766,14 +766,14 @@ export default function ProjectWorkspacePage() {
             <button
               type="button"
               onClick={loadCanonicalFixtures}
-              className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-2.5 py-1 rounded font-medium transition"
+              className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-2.5 py-1 rounded font-medium transition"
             >
               Load Canonical Pair
             </button>
             <button
               type="button"
               onClick={loadSampleJsonFixture}
-              className="text-xs bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 px-2.5 py-1 rounded font-medium transition"
+              className="text-xs bg-amber-950/60 hover:bg-amber-900/60 text-amber-300 border border-amber-800/60 px-2.5 py-1 rounded font-medium transition"
               title="Demonstrate schema inference from arbitrary sample JSON payload"
             >
               Load Sample JSON
@@ -782,7 +782,7 @@ export default function ProjectWorkspacePage() {
               type="button"
               onClick={() => triggerImport(false)}
               disabled={loading}
-              className="text-xs bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white px-3 py-1 rounded font-medium transition shadow-xs"
+              className="text-xs bg-teal-500 hover:bg-teal-400 disabled:opacity-50 text-slate-950 font-semibold font-mono px-3 py-1 rounded transition shadow-sm"
             >
               Parse & Compare
             </button>

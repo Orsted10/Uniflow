@@ -26,9 +26,9 @@ export function ProjectSidebar({
   ];
 
   return (
-    <aside className="w-full md:w-56 shrink-0 border-b md:border-b-0 md:border-r border-slate-200 bg-white p-3 flex md:flex-col justify-start space-x-1 md:space-x-0 md:space-y-1 overflow-x-auto">
-      <div className="hidden md:block px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-        Workspace Navigation
+    <aside className="w-full md:w-56 shrink-0 border-b md:border-b-0 md:border-r border-slate-800/80 bg-slate-900/40 p-3 flex md:flex-col justify-start space-x-1 md:space-x-0 md:space-y-1 overflow-x-auto rounded-lg">
+      <div className="hidden md:block px-3 py-2 text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-400">
+        Workspace Tabs
       </div>
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
@@ -37,17 +37,17 @@ export function ProjectSidebar({
             key={tab.id}
             type="button"
             onClick={() => onTabChange(tab.id)}
-            className={`flex items-center justify-between px-3 py-2 rounded text-xs font-medium transition text-left whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 ${
+            className={`flex items-center justify-between px-3 py-2 rounded text-xs font-medium transition text-left whitespace-nowrap focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-teal-500 ${
               isActive
-                ? "bg-slate-900 text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
+                ? "bg-teal-500 text-slate-950 font-semibold shadow-xs"
+                : "text-slate-300 hover:text-white hover:bg-slate-800/60"
             }`}
           >
             <span>{tab.label}</span>
             {tab.badge !== undefined && (
               <span
                 className={`ml-2 text-[10px] px-1.5 py-0.2 rounded font-mono ${
-                  isActive ? "bg-slate-800 text-slate-200" : "bg-slate-100 text-slate-600 border border-slate-200"
+                  isActive ? "bg-slate-950/20 text-slate-950" : "bg-slate-800 text-slate-300 border border-slate-700"
                 }`}
               >
                 {tab.badge}
