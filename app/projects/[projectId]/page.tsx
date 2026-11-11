@@ -88,6 +88,14 @@ export default function ProjectWorkspacePage() {
   const [adapterCode, setAdapterCode] = React.useState<string | null>(null);
   const [reportData, setReportData] = React.useState<CompatibilityReportData | null>(null);
   const [reportMarkdown, setReportMarkdown] = React.useState<string | null>(null);
+  const [reportFormatView, setReportFormatView] = React.useState<"markdown" | "json">("markdown");
+  const [cloudStatus, setCloudStatus] = React.useState<{
+    supabase: { configured: boolean; status: string; endpoint: string | null };
+    groq: { configured: boolean; status: string; model: string };
+    azureBlob: { configured: boolean; status: string; accountName: string | null; containerName: string };
+    azureSql: { configured: boolean; status: string; server: string | null; database: string | null };
+  } | null>(null);
+  const [persistingToCloud, setPersistingToCloud] = React.useState(false);
 
   // Phase 5: Test runner & adapter states
   const [selectedFixtureIdx, setSelectedFixtureIdx] = React.useState<number>(0);
@@ -145,6 +153,17 @@ export default function ProjectWorkspacePage() {
         if (healthRes.ok) {
           const healthData = await healthRes.json();
           setProviderConfig(healthData);
+        }
+
+        // Fetch Multi-Cloud status safely (Supabase, Groq, Azure Blob, Azure SQL)
+        try {
+          const cloudRes = await fetch("/api/cloud/status");
+          if (cloudRes.ok) {
+            const cloudData = await cloudRes.json();
+            setCloudStatus(cloudData.services);
+          }
+        } catch {
+          // ignore offline
         }
       } catch (err: unknown) {
         setErrorMsg(err instanceof Error ? err.message : String(err));
@@ -605,6 +624,34 @@ export default function ProjectWorkspacePage() {
     URL.revokeObjectURL(url);
   }
 
+  async function persistEvidence(action: "azure_sql" | "azure_blob" | "all" = "all") {
+    if (!projectId) return;
+    setPersistingToCloud(true);
+    setErrorMsg(null);
+    try {
+      const res = await fetch(`/api/projects/${projectId}/report`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to persist execution evidence.");
+      setReportData(data.reportData);
+      setReportMarkdown(data.markdown);
+      setSuccessMsg(
+        action === "azure_sql"
+          ? `Evidence recorded in Azure SQL (Run ID: ${data.reportData.cloudEvidence?.azureSqlRunId || "Logged"}).`
+          : action === "azure_blob"
+          ? "Report artifacts (.md and .json) uploaded to Azure Blob Storage."
+          : `Evidence certified: Azure SQL Run ID ${data.reportData.cloudEvidence?.azureSqlRunId?.slice(0, 8)}... & Azure Blob artifacts synchronized.`
+      );
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : String(err));
+    } finally {
+      setPersistingToCloud(false);
+    }
+  }
+
   const filteredDiffItems = React.useMemo(() => {
     if (!diff) return [];
     return diff.items.filter((item) => {
@@ -662,11 +709,56 @@ export default function ProjectWorkspacePage() {
               ]}
               className="mb-1"
             />
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 flex-wrap gap-y-1">
               <h1 className="text-base font-bold text-slate-900 tracking-tight">
                 {project?.name || "Workspace"}
               </h1>
               <span className="font-mono text-[11px] text-slate-400">({projectId})</span>
+
+              {cloudStatus && (
+                <div className="flex items-center space-x-1.5 ml-2">
+                  <span
+                    title={cloudStatus.supabase.configured ? "Supabase Connected" : "Local Mock Storage"}
+                    className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono border ${
+                      cloudStatus.supabase.configured
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        : "bg-slate-100 text-slate-600 border-slate-200"
+                    }`}
+                  >
+                    Postgres: {cloudStatus.supabase.configured ? "Ready" : "Local"}
+                  </span>
+                  <span
+                    title={cloudStatus.groq.configured ? `Groq LLM: ${cloudStatus.groq.model}` : "Groq Not Configured (Offline Mode)"}
+                    className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono border ${
+                      cloudStatus.groq.configured
+                        ? "bg-blue-50 text-blue-700 border-blue-200"
+                        : "bg-slate-100 text-slate-600 border-slate-200"
+                    }`}
+                  >
+                    Groq: {cloudStatus.groq.configured ? "Online" : "Mock"}
+                  </span>
+                  <span
+                    title={cloudStatus.azureSql.configured ? `Azure SQL: ${cloudStatus.azureSql.server}` : "Azure SQL Bridge (Simulated / Local Fallback)"}
+                    className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono border ${
+                      cloudStatus.azureSql.configured
+                        ? "bg-teal-50 text-teal-700 border-teal-200"
+                        : "bg-amber-50 text-amber-700 border-amber-200"
+                    }`}
+                  >
+                    Azure SQL: {cloudStatus.azureSql.configured ? "Connected" : "Simulated"}
+                  </span>
+                  <span
+                    title={cloudStatus.azureBlob.configured ? `Azure Blob: ${cloudStatus.azureBlob.accountName}` : "Azure Blob Storage (Simulated / In-Memory)"}
+                    className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono border ${
+                      cloudStatus.azureBlob.configured
+                        ? "bg-cyan-50 text-cyan-700 border-cyan-200"
+                        : "bg-slate-100 text-slate-600 border-slate-200"
+                    }`}
+                  >
+                    Azure Blob: {cloudStatus.azureBlob.configured ? "Connected" : "Simulated"}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -1882,19 +1974,19 @@ export default function ProjectWorkspacePage() {
           {/* TAB: REPORT */}
           {activeTab === "report" && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <h2 className="text-sm font-semibold text-slate-900">Evidence-Backed Compatibility Report</h2>
                   <p className="text-xs text-slate-500">
-                    Comprehensive audit trail including specs metadata, diff metrics, approved mappings, test results, and disclosures.
+                    Cryptographic audit trail including spec checksums, diff matrix, approved mappings, test results, and Azure cloud certification.
                   </p>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 flex-wrap gap-y-2">
                   <button
                     type="button"
                     onClick={generateReport}
-                    disabled={loading}
-                    className="text-xs bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded font-medium shadow-xs transition"
+                    disabled={loading || persistingToCloud}
+                    className="text-xs bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white px-3 py-1.5 rounded font-medium shadow-xs transition"
                   >
                     Assemble Report
                   </button>
@@ -1903,14 +1995,14 @@ export default function ProjectWorkspacePage() {
                       <button
                         type="button"
                         onClick={() => downloadReport("md")}
-                        className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-3 py-1.5 rounded font-medium transition"
+                        className="text-xs bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-3 py-1.5 rounded font-medium transition"
                       >
                         Export .MD
                       </button>
                       <button
                         type="button"
                         onClick={() => downloadReport("json")}
-                        className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-3 py-1.5 rounded font-medium transition"
+                        className="text-xs bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-3 py-1.5 rounded font-medium transition"
                       >
                         Export .JSON
                       </button>
@@ -1919,11 +2011,175 @@ export default function ProjectWorkspacePage() {
                 </div>
               </div>
 
+              {reportData && (
+                <>
+                  {/* Executive Header & Cloud Certification Card */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs">
+                      <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block mb-1">
+                        Compatibility Status
+                      </span>
+                      <div className="flex items-center space-x-2">
+                        <StatusChip
+                          variant={
+                            reportData.status === "COMPATIBLE"
+                              ? "accepted"
+                              : reportData.status === "CONDITIONALLY_COMPATIBLE"
+                              ? "proposed"
+                              : "rejected"
+                          }
+                          label={reportData.status}
+                        />
+                        <span className="text-xs font-mono font-bold text-slate-800">
+                          {reportData.summary.compatibilityScore}%
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 mt-2">
+                        {reportData.summary.approvedMappingsCount} approved mappings across {reportData.summary.totalTargetFields} target fields.
+                      </p>
+                    </div>
+
+                    <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs">
+                      <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block mb-1">
+                        Equivalence Verification
+                      </span>
+                      <div className="text-xs text-slate-800 font-medium">
+                        {reportData.testResults.equivalenceVerified ? (
+                          <span className="text-emerald-700 font-bold flex items-center gap-1">
+                            ✓ Deterministic Equality Verified
+                          </span>
+                        ) : (
+                          <span className="text-amber-700 font-bold flex items-center gap-1">
+                            ⚠ Equivalence Not Certified
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-slate-500 mt-2">
+                        Passed {reportData.testResults.passedCasesCount} of {reportData.testResults.testCasesCount} deterministic test fixtures.
+                      </p>
+                    </div>
+
+                    <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs">
+                      <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block mb-1">
+                        Azure Cloud Evidence
+                      </span>
+                      <div className="text-xs font-mono truncate">
+                        {reportData.cloudEvidence?.azureSqlRunId ? (
+                          <span className="text-teal-700 font-medium" title={reportData.cloudEvidence.azureSqlRunId}>
+                            SQL Run: {reportData.cloudEvidence.azureSqlRunId.slice(0, 16)}...
+                          </span>
+                        ) : (
+                          <span className="text-slate-500">Uncertified (Not persisted)</span>
+                        )}
+                      </div>
+                      <div className="mt-2 flex items-center space-x-1.5">
+                        <button
+                          type="button"
+                          onClick={() => persistEvidence("all")}
+                          disabled={persistingToCloud}
+                          className="text-[11px] bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white px-2.5 py-1 rounded font-medium transition"
+                        >
+                          {persistingToCloud ? "Persisting..." : "Certify to Azure"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => persistEvidence("azure_sql")}
+                          disabled={persistingToCloud}
+                          className="text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-2 py-1 rounded font-medium transition"
+                        >
+                          SQL Only
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => persistEvidence("azure_blob")}
+                          disabled={persistingToCloud}
+                          className="text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-2 py-1 rounded font-medium transition"
+                        >
+                          Blob Only
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Cryptographic Digest Ledger */}
+                  <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs">
+                    <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-2">
+                      Cryptographic SHA-256 Digest Ledger
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
+                      <div className="p-2.5 bg-slate-50 border border-slate-200 rounded">
+                        <span className="text-slate-500 block text-[10px] uppercase">Source Spec Checksum:</span>
+                        <span className="text-slate-800 break-all select-all font-semibold">
+                          {reportData.checksums.sourceSchemaHash}
+                        </span>
+                      </div>
+                      <div className="p-2.5 bg-slate-50 border border-slate-200 rounded">
+                        <span className="text-slate-500 block text-[10px] uppercase">Target Spec Checksum:</span>
+                        <span className="text-slate-800 break-all select-all font-semibold">
+                          {reportData.checksums.targetSchemaHash}
+                        </span>
+                      </div>
+                      <div className="p-2.5 bg-slate-50 border border-slate-200 rounded">
+                        <span className="text-slate-500 block text-[10px] uppercase">Plan IR Checksum:</span>
+                        <span className="text-slate-800 break-all select-all">
+                          {reportData.checksums.planHash || "No compiled plan"}
+                        </span>
+                      </div>
+                      <div className="p-2.5 bg-slate-50 border border-slate-200 rounded">
+                        <span className="text-slate-500 block text-[10px] uppercase">Adapter Code Checksum:</span>
+                        <span className="text-slate-800 break-all select-all">
+                          {reportData.checksums.adapterHash || "No adapter generated"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* View Format Selector & Content */}
               {reportMarkdown ? (
-                <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-xs">
-                  <pre className="whitespace-pre-wrap font-mono text-xs bg-slate-50 p-4 rounded border border-slate-200 text-slate-800 overflow-auto max-h-[500px]">
-                    {reportMarkdown}
-                  </pre>
+                <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-xs space-y-3">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                    <div className="flex items-center space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => setReportFormatView("markdown")}
+                        className={`text-xs px-2.5 py-1 rounded font-medium transition ${
+                          reportFormatView === "markdown"
+                            ? "bg-slate-900 text-white"
+                            : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                        }`}
+                      >
+                        Markdown View
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setReportFormatView("json")}
+                        className={`text-xs px-2.5 py-1 rounded font-medium transition ${
+                          reportFormatView === "json"
+                            ? "bg-slate-900 text-white"
+                            : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                        }`}
+                      >
+                        Structured JSON View
+                      </button>
+                    </div>
+                    <span className="text-[11px] font-mono text-slate-400">
+                      Report ID: {reportData?.reportId || "N/A"}
+                    </span>
+                  </div>
+
+                  {reportFormatView === "markdown" ? (
+                    <pre className="whitespace-pre-wrap font-mono text-xs bg-slate-50 p-4 rounded border border-slate-200 text-slate-800 overflow-auto max-h-[500px]">
+                      {reportMarkdown}
+                    </pre>
+                  ) : (
+                    <CodeViewer
+                      code={JSON.stringify(reportData, null, 2)}
+                      language="json"
+                      maxHeight="500px"
+                    />
+                  )}
                 </div>
               ) : (
                 <EmptyState
