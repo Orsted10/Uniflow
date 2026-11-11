@@ -35,8 +35,8 @@ export class GroqProviderError extends Error {
 export function getGroqProviderConfig(): GroqProviderConfig {
   const key = process.env.GROQ_API_KEY?.trim();
   const configured = Boolean(key && key.length > 8 && !key.includes("placeholder"));
-  const model = process.env.GROQ_MODEL?.trim() || "llama-3.3-70b-versatile";
-  const fastModel = process.env.GROQ_FAST_MODEL?.trim() || "llama-3.1-8b-instant";
+  const model = process.env.GROQ_MODEL?.trim() || "openai/gpt-oss-120b";
+  const fastModel = process.env.GROQ_FAST_MODEL?.trim() || "openai/gpt-oss-20b";
   const timeoutMs = parseInt(process.env.GROQ_TIMEOUT_MS || "15000", 10);
 
   return {

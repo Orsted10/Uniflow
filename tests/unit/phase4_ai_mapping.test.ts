@@ -29,7 +29,7 @@ test("Phase 4 — AI-Assisted Mapping Proposal Workflow & Safety Controls", asyn
       process.env.GROQ_API_KEY = "gsk_live_super_secret_test_key_123456789";
       const configWithKey = getGroqProviderConfig();
       assert.equal(configWithKey.configured, true);
-      assert.equal(configWithKey.model, "llama-3.3-70b-versatile");
+      assert.equal(configWithKey.model, "openai/gpt-oss-120b");
       assert.ok(configWithKey.timeoutMs > 0);
       // Key must never be in returned config object
       assert.equal((configWithKey as unknown as Record<string, unknown>).apiKey, undefined);
