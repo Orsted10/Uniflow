@@ -8,8 +8,8 @@ export function Table({
   className?: string;
 }) {
   return (
-    <div className={`w-full overflow-x-auto border border-slate-200 rounded-md bg-white shadow-xs ${className}`}>
-      <table className="w-full text-left text-xs text-slate-800">{children}</table>
+    <div className={`w-full overflow-x-auto border border-zinc-800 rounded-lg bg-zinc-900/50 ${className}`}>
+      <table className="w-full text-left text-xs text-zinc-200">{children}</table>
     </div>
   );
 }
@@ -21,7 +21,7 @@ export function TableHeader({
   children: React.ReactNode;
   className?: string;
 }) {
-  return <thead className={`bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 ${className}`}>{children}</thead>;
+  return <thead className={`bg-zinc-950/80 text-zinc-400 font-medium border-b border-zinc-800 ${className}`}>{children}</thead>;
 }
 
 export function TableBody({
@@ -31,7 +31,7 @@ export function TableBody({
   children: React.ReactNode;
   className?: string;
 }) {
-  return <tbody className={`divide-y divide-slate-100 ${className}`}>{children}</tbody>;
+  return <tbody className={`divide-y divide-zinc-800/70 ${className}`}>{children}</tbody>;
 }
 
 export function TableRow({
@@ -41,7 +41,7 @@ export function TableRow({
   children: React.ReactNode;
   className?: string;
 }) {
-  return <tr className={`hover:bg-slate-50/80 transition-colors ${className}`}>{children}</tr>;
+  return <tr className={`hover:bg-zinc-800/40 transition-colors ${className}`}>{children}</tr>;
 }
 
 export function TableHead({
@@ -61,5 +61,5 @@ export function TableCell({
   children: React.ReactNode;
   className?: string;
 }) {
-  return <td className={`py-2.5 px-3 text-xs ${className}`}>{children}</td>;
+  return <td className={`py-2.5 px-3 align-middle ${className}`}>{children}</td>;
 }

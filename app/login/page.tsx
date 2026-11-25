@@ -41,7 +41,6 @@ function LoginForm() {
     }
 
     if (!isSupabaseConfigured) {
-      // Fallback local mode
       router.push(redirectPath);
       return;
     }
@@ -117,40 +116,37 @@ function LoginForm() {
   }
 
   return (
-    <div className="bg-white border border-slate-200 rounded-lg p-6 shadow-xs">
-      <div className="text-center mb-6">
-        <div className="w-10 h-10 rounded bg-slate-900 text-white mx-auto flex items-center justify-center font-bold text-base mb-2">
-          ∞
-        </div>
-        <h1 className="text-lg font-semibold text-slate-900 tracking-tight">
-          {isSignUp ? "Create Uniflow Account" : "Sign in to Uniflow"}
+    <div className="bg-zinc-900/70 border border-zinc-800 rounded-xl p-6 sm:p-7 shadow-2xl">
+      <div className="mb-6">
+        <h1 className="text-lg font-semibold text-white tracking-tight">
+          {isSignUp ? "Create your workspace account" : "Sign in to UNIFLOW"}
         </h1>
-        <p className="text-xs text-slate-500 mt-1">
-          API Compatibility Compiler &bull; PostgreSQL Source of Truth
+        <p className="text-xs text-zinc-400 mt-1">
+          PostgreSQL Row-Level Security &amp; isolated execution environments
         </p>
       </div>
 
       {!isSupabaseConfigured ? (
-        <div className="p-3 mb-5 bg-amber-50/80 border border-amber-200 text-amber-900 text-xs rounded-md space-y-2">
-          <div className="flex items-center gap-1.5 font-semibold">
-            <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-            Local Developer Mode (Phase 2 Offline)
+        <div className="p-3 mb-5 bg-amber-950/30 border border-amber-800/50 text-amber-200 text-xs rounded-lg space-y-2">
+          <div className="flex items-center gap-1.5 font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+            Local Developer Mode
           </div>
-          <p className="text-[11px] leading-relaxed text-amber-800">
+          <p className="text-[11px] leading-relaxed text-amber-300/80">
             Supabase credentials are not detected in <code>.env.local</code>. You can explore all compiler workflows using isolated in-memory tenant state.
           </p>
           <button
             type="button"
             onClick={() => router.push(redirectPath)}
-            className="w-full text-center bg-amber-600 hover:bg-amber-700 text-white font-medium py-1.5 rounded text-xs transition"
+            className="w-full text-center bg-amber-500 hover:bg-amber-400 text-zinc-950 font-semibold py-1.5 rounded-md text-xs transition"
           >
             Continue as Local Developer →
           </button>
         </div>
       ) : (
-        <div className="p-2.5 mb-5 bg-emerald-50/80 border border-emerald-200 text-emerald-900 text-xs rounded-md flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span>Supabase Auth Connected with Row-Level Security</span>
+        <div className="p-2.5 mb-5 bg-emerald-950/30 border border-emerald-800/50 text-emerald-300 text-xs rounded-lg flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+          <span>Supabase Auth connected with Row-Level Security</span>
         </div>
       )}
 
@@ -159,12 +155,12 @@ function LoginForm() {
       )}
 
       {successMsg && (
-        <div className="p-3 mb-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded text-xs">
+        <div className="p-3 mb-4 bg-emerald-950/40 border border-emerald-800/60 text-emerald-200 rounded-lg text-xs">
           {successMsg}
         </div>
       )}
 
-      <div className="flex border-b border-slate-200 mb-4 text-xs font-medium">
+      <div className="flex border-b border-zinc-800 mb-5 text-xs font-medium">
         <button
           type="button"
           onClick={() => {
@@ -172,13 +168,13 @@ function LoginForm() {
             setErrorMsg(null);
             setSuccessMsg(null);
           }}
-          className={`pb-2 px-3 border-b-2 transition ${
+          className={`pb-2.5 px-3 border-b-2 transition ${
             mode === "password"
-              ? "border-slate-900 text-slate-900 font-semibold"
-              : "border-transparent text-slate-400 hover:text-slate-600"
+              ? "border-emerald-400 text-white font-semibold"
+              : "border-transparent text-zinc-500 hover:text-zinc-300"
           }`}
         >
-          Email & Password
+          Email &amp; Password
         </button>
         <button
           type="button"
@@ -187,10 +183,10 @@ function LoginForm() {
             setErrorMsg(null);
             setSuccessMsg(null);
           }}
-          className={`pb-2 px-3 border-b-2 transition ${
+          className={`pb-2.5 px-3 border-b-2 transition ${
             mode === "magic_link"
-              ? "border-slate-900 text-slate-900 font-semibold"
-              : "border-transparent text-slate-400 hover:text-slate-600"
+              ? "border-emerald-400 text-white font-semibold"
+              : "border-transparent text-zinc-500 hover:text-zinc-300"
           }`}
         >
           Magic Link
@@ -200,7 +196,7 @@ function LoginForm() {
       {mode === "password" ? (
         <form onSubmit={handlePasswordAuth} className="space-y-4 text-xs">
           <div>
-            <label htmlFor="email" className="block font-medium text-slate-700 mb-1">
+            <label htmlFor="email" className="block font-medium text-zinc-300 mb-1.5">
               Email Address
             </label>
             <input
@@ -209,12 +205,12 @@ function LoginForm() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-slate-300 rounded px-3 py-2 text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-500 font-mono text-xs"
+              className="w-full border border-zinc-800 bg-zinc-950 rounded-md px-3 py-2 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono text-xs"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block font-medium text-slate-700 mb-1">
+            <label htmlFor="password" className="block font-medium text-zinc-300 mb-1.5">
               Password
             </label>
             <input
@@ -223,26 +219,26 @@ function LoginForm() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-slate-300 rounded px-3 py-2 text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-500 font-mono text-xs"
+              className="w-full border border-zinc-800 bg-zinc-950 rounded-md px-3 py-2 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono text-xs"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-2 rounded transition shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 disabled:opacity-50"
+            className="w-full bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold py-2 rounded-md transition shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 disabled:opacity-50"
           >
-            {loading ? "Processing..." : isSignUp ? "Sign Up with Email" : "Sign In with Password"}
+            {loading ? "Processing..." : isSignUp ? "Sign Up with Email" : "Sign In"}
           </button>
 
-          <div className="pt-2 text-center text-[11px] text-slate-500">
+          <div className="pt-2 text-center text-[11px] text-zinc-400">
             {isSignUp ? (
               <span>
                 Already have an account?{" "}
                 <button
                   type="button"
                   onClick={() => setIsSignUp(false)}
-                  className="text-slate-900 underline font-medium"
+                  className="text-emerald-400 hover:text-emerald-300 underline font-medium"
                 >
                   Sign In
                 </button>
@@ -253,7 +249,7 @@ function LoginForm() {
                 <button
                   type="button"
                   onClick={() => setIsSignUp(true)}
-                  className="text-slate-900 underline font-medium"
+                  className="text-emerald-400 hover:text-emerald-300 underline font-medium"
                 >
                   Sign Up
                 </button>
@@ -264,7 +260,7 @@ function LoginForm() {
       ) : (
         <form onSubmit={handleMagicLink} className="space-y-4 text-xs">
           <div>
-            <label htmlFor="magicEmail" className="block font-medium text-slate-700 mb-1">
+            <label htmlFor="magicEmail" className="block font-medium text-zinc-300 mb-1.5">
               Email Address
             </label>
             <input
@@ -274,27 +270,27 @@ function LoginForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="developer@example.com"
-              className="w-full border border-slate-300 rounded px-3 py-2 text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-500 font-mono text-xs"
+              className="w-full border border-zinc-800 bg-zinc-950 rounded-md px-3 py-2 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono text-xs"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-2 rounded transition shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 disabled:opacity-50"
+            className="w-full bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold py-2 rounded-md transition shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 disabled:opacity-50"
           >
             {loading ? "Sending Magic Link..." : "Send Magic Sign-in Link"}
           </button>
 
-          <p className="text-[11px] text-slate-500 text-center">
+          <p className="text-[11px] text-zinc-500 text-center">
             We will send a passwordless login link to your email.
           </p>
         </form>
       )}
 
-      <div className="mt-6 pt-4 border-t border-slate-100 text-center text-[11px] text-slate-500">
-        <Link href="/projects" className="text-slate-700 hover:text-slate-900 underline font-medium">
-          Explore Demo Projects Workspace →
+      <div className="mt-6 pt-4 border-t border-zinc-800/80 text-center text-[11px] text-zinc-400">
+        <Link href="/projects" className="text-zinc-300 hover:text-white underline font-medium">
+          Explore Workspaces →
         </Link>
       </div>
     </div>
@@ -303,7 +299,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#09090b] text-zinc-100 flex flex-col font-sans">
       <TopBar />
 
       <main className="max-w-md mx-auto px-4 py-12 w-full flex-1 flex flex-col justify-center">
@@ -311,7 +307,7 @@ export default function LoginPage() {
 
         <React.Suspense
           fallback={
-            <div className="bg-white border border-slate-200 rounded-lg p-8 text-center text-xs text-slate-400">
+            <div className="bg-zinc-900/70 border border-zinc-800 rounded-xl p-8 text-center text-xs text-zinc-400">
               Loading authentication...
             </div>
           }
@@ -319,10 +315,6 @@ export default function LoginPage() {
           <LoginForm />
         </React.Suspense>
       </main>
-
-      <footer className="border-t border-slate-200 bg-white py-3 text-center text-xs text-slate-400">
-        UNIFLOW ∞ — API Compatibility Compiler &bull; Phase 2 Auth & RLS
-      </footer>
     </div>
   );
 }

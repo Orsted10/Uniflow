@@ -48,10 +48,10 @@ export function FileDropzone({
       onDragLeave={() => setDragOver(false)}
       onDrop={handleDrop}
       onClick={() => fileInputRef.current?.click()}
-      className={`border-2 border-dashed rounded-lg p-5 text-center cursor-pointer transition-colors ${
+      className={`border border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors ${
         dragOver
-          ? "border-slate-500 bg-slate-50"
-          : "border-slate-300 hover:border-slate-400 bg-white"
+          ? "border-emerald-500/60 bg-emerald-950/20"
+          : "border-zinc-800 hover:border-zinc-700 bg-zinc-950/60"
       } ${className}`}
     >
       <input
@@ -65,11 +65,11 @@ export function FileDropzone({
           }
         }}
       />
-      <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 mx-auto flex items-center justify-center text-slate-500 text-xs font-mono mb-2">
+      <div className="w-7 h-7 rounded-md bg-zinc-900 border border-zinc-800 mx-auto flex items-center justify-center text-zinc-400 text-xs font-mono mb-2">
         ↑
       </div>
-      <p className="text-xs font-semibold text-slate-800">{fileName || label}</p>
-      <p className="text-[11px] text-slate-500 mt-1">{sublabel}</p>
+      <p className="text-xs font-medium text-zinc-200">{fileName || label}</p>
+      <p className="text-[11px] text-zinc-500 mt-0.5">{sublabel}</p>
     </div>
   );
 }

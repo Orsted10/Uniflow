@@ -2,21 +2,32 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+
+interface CloudServices {
+  supabase: { configured: boolean; status: string };
+  groq: { configured: boolean; status: string; model: string };
+  azureBlob: { configured: boolean; status: string };
+  azureSql: { configured: boolean; status: string };
+}
 
 export function TopBar() {
   const router = useRouter();
+  const pathname = usePathname();
   const [userEmail, setUserEmail] = React.useState<string | null>(null);
-  const [cloudStatus, setCloudStatus] = React.useState<{
-    supabase: { configured: boolean };
-    groq: { configured: boolean; model: string };
-    azureBlob: { configured: boolean };
-    azureSql: { configured: boolean };
-  } | null>(null);
+  const [cloudStatus, setCloudStatus] = React.useState<CloudServices | null>(null);
 
   React.useEffect(() => {
-    // Check Supabase session
+    // 1. Always fetch live multi-cloud health (no early return!)
+    fetch("/api/cloud/status")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.services) setCloudStatus(data.services);
+      })
+      .catch(() => {});
+
+    // 2. Check Supabase browser auth session
     const supabase = createSupabaseBrowserClient();
     if (supabase) {
       supabase.auth.getUser().then(({ data: { user } }) => {
@@ -33,12 +44,6 @@ export function TopBar() {
         subscription.unsubscribe();
       };
     }
-
-    // Fetch multi-cloud health
-    fetch("/api/cloud/status")
-      .then((r) => r.json())
-      .then((data) => setCloudStatus(data.services))
-      .catch(() => {});
   }, []);
 
   async function handleSignOut() {
@@ -51,127 +56,127 @@ export function TopBar() {
   }
 
   return (
-    <header className="border-b border-slate-800/80 bg-[#0b0f17]/95 backdrop-blur-md sticky top-0 z-50 text-slate-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
-        {/* Brand & Nav Links */}
-        <div className="flex items-center space-x-6">
+    <header className="border-b border-zinc-800/80 bg-[#09090b]/90 backdrop-blur-md sticky top-0 z-50 text-zinc-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-4">
+        {/* Brand & Primary Nav */}
+        <div className="flex items-center gap-6">
           <Link
             href="/"
-            className="flex items-center space-x-2.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-teal-500 rounded px-1 transition"
+            className="flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-500 rounded px-1 transition"
           >
-            <div className="w-7 h-7 rounded bg-teal-500/10 border border-teal-500/30 text-teal-400 flex items-center justify-center font-bold text-sm tracking-widest shadow-xs">
-              ∞
-            </div>
-            <div className="flex items-baseline space-x-2">
-              <span className="font-bold tracking-tight text-sm sm:text-base text-white">
-                UNIFLOW <span className="text-teal-400">∞</span>
-              </span>
-              <span className="text-[10px] font-mono text-slate-400 bg-slate-800/60 border border-slate-700/60 px-1.5 py-0.5 rounded hidden sm:inline-block">
-                Compiler v1.0
-              </span>
-            </div>
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="text-emerald-400 shrink-0"
+              aria-hidden="true"
+            >
+              <rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" strokeWidth="1.75" />
+              <path
+                d="M7.5 12C7.5 10.3431 8.84315 9 10.5 9C12.1569 9 13.5 10.3431 13.5 12C13.5 13.6569 14.8431 15 16.5 15C18.1569 15 19.5 13.6569 19.5 12"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                strokeLinecap="round"
+              />
+              <circle cx="7.5" cy="12" r="1.25" fill="currentColor" />
+            </svg>
+            <span className="font-semibold tracking-tight text-sm text-white">UNIFLOW</span>
           </Link>
 
-          <nav className="hidden md:flex items-center space-x-4 text-xs font-medium text-slate-400">
-            <Link href="/projects" className="hover:text-white transition-colors">
-              Projects
+          <nav className="hidden md:flex items-center gap-1 text-xs font-medium">
+            <Link
+              href="/"
+              className={`px-2.5 py-1.5 rounded-md transition-colors ${
+                pathname === "/" ? "text-white bg-zinc-800/80" : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900"
+              }`}
+            >
+              Overview
             </Link>
-            <Link href="/projects/new" className="hover:text-white transition-colors">
-              + New Workspace
+            <Link
+              href="/projects"
+              className={`px-2.5 py-1.5 rounded-md transition-colors ${
+                pathname === "/projects"
+                  ? "text-white bg-zinc-800/80"
+                  : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900"
+              }`}
+            >
+              Workspaces
+            </Link>
+            <Link
+              href="/projects/new"
+              className={`px-2.5 py-1.5 rounded-md transition-colors ${
+                pathname === "/projects/new"
+                  ? "text-white bg-zinc-800/80"
+                  : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900"
+              }`}
+            >
+              New Project
             </Link>
           </nav>
         </div>
 
-        {/* Live Multi-Cloud HUD */}
-        <div className="flex items-center space-x-3 text-xs">
-          <div className="hidden lg:flex items-center space-x-2 font-mono text-[11px]">
-            <span
-              title="Supabase PostgreSQL System of Record"
-              className={`inline-flex items-center px-2 py-0.5 rounded border ${
-                cloudStatus?.supabase.configured
-                  ? "bg-emerald-950/60 text-emerald-400 border-emerald-800/60"
-                  : "bg-slate-800/60 text-slate-400 border-slate-700/60"
-              }`}
-            >
-              <span
-                className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                  cloudStatus?.supabase.configured ? "bg-emerald-400 animate-pulse" : "bg-slate-500"
-                }`}
-              ></span>
-              Postgres
-            </span>
-            <span
-              title={`Groq LLM Advisory Engine (${cloudStatus?.groq.model || "120B"})`}
-              className={`inline-flex items-center px-2 py-0.5 rounded border ${
-                cloudStatus?.groq.configured
-                  ? "bg-sky-950/60 text-sky-400 border-sky-800/60"
-                  : "bg-slate-800/60 text-slate-400 border-slate-700/60"
-              }`}
-            >
-              <span
-                className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                  cloudStatus?.groq.configured ? "bg-sky-400" : "bg-slate-500"
-                }`}
-              ></span>
-              Groq 120B
-            </span>
-            <span
-              title="Azure SQL Execution Evidence Store"
-              className={`inline-flex items-center px-2 py-0.5 rounded border ${
-                cloudStatus?.azureSql.configured
-                  ? "bg-teal-950/60 text-teal-400 border-teal-800/60"
-                  : "bg-slate-800/60 text-slate-400 border-slate-700/60"
-              }`}
-            >
-              <span
-                className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                  cloudStatus?.azureSql.configured ? "bg-teal-400" : "bg-slate-500"
-                }`}
-              ></span>
-              Azure SQL
-            </span>
-            <span
-              title="Azure Blob Storage (Specs & Reports)"
-              className={`inline-flex items-center px-2 py-0.5 rounded border ${
-                cloudStatus?.azureBlob.configured
-                  ? "bg-cyan-950/60 text-cyan-400 border-cyan-800/60"
-                  : "bg-slate-800/60 text-slate-400 border-slate-700/60"
-              }`}
-            >
-              <span
-                className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                  cloudStatus?.azureBlob.configured ? "bg-cyan-400" : "bg-slate-500"
-                }`}
-              ></span>
-              Azure Blob
-            </span>
+        {/* Live Cloud Telemetry Strip + Session */}
+        <div className="flex items-center gap-3 text-xs">
+          <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-900/90 border border-zinc-800 font-mono text-[11px]">
+            <StatusDot
+              label="Supabase"
+              active={Boolean(cloudStatus?.supabase.configured)}
+              tooltip={cloudStatus?.supabase.configured ? "Supabase PostgreSQL Connected" : "Local Store Fallback"}
+            />
+            <span className="text-zinc-700">/</span>
+            <StatusDot
+              label="Groq"
+              active={Boolean(cloudStatus?.groq.configured)}
+              tooltip={cloudStatus?.groq.configured ? `Groq ${cloudStatus.groq.model}` : "Groq Offline"}
+            />
+            <span className="text-zinc-700">/</span>
+            <StatusDot
+              label="Azure SQL"
+              active={Boolean(cloudStatus?.azureSql.configured)}
+              tooltip={cloudStatus?.azureSql.configured ? "Azure SQL Evidence Store Ready" : "Simulated Ledger"}
+            />
+            <span className="text-zinc-700">/</span>
+            <StatusDot
+              label="Azure Blob"
+              active={Boolean(cloudStatus?.azureBlob.configured)}
+              tooltip={cloudStatus?.azureBlob.configured ? "Azure Blob Storage Connected" : "In-Memory Blob"}
+            />
           </div>
 
-          {/* User Auth or Quick Demo Access */}
           {userEmail ? (
-            <div className="flex items-center space-x-2">
-              <span className="font-mono text-[11px] text-slate-300 bg-slate-800/80 px-2.5 py-1 rounded border border-slate-700/80 max-w-[160px] truncate">
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-[11px] text-zinc-300 bg-zinc-900 px-2.5 py-1 rounded-md border border-zinc-800 max-w-[160px] truncate">
                 {userEmail}
               </span>
               <button
                 type="button"
                 onClick={handleSignOut}
-                className="text-xs text-rose-400 hover:text-rose-300 hover:underline font-medium px-2 py-1 transition"
+                className="text-xs text-zinc-400 hover:text-rose-400 font-medium px-2 py-1 transition"
               >
-                Sign Out
+                Sign out
               </button>
             </div>
           ) : (
             <Link
               href="/login"
-              className="inline-flex items-center space-x-1.5 text-xs text-slate-300 hover:text-white border border-slate-700/80 hover:border-slate-600 bg-slate-800/60 px-2.5 py-1 rounded transition"
+              className="inline-flex items-center gap-1.5 text-xs text-zinc-200 hover:text-white border border-zinc-800 hover:border-zinc-700 bg-zinc-900 px-3 py-1.5 rounded-md transition font-medium"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-              <span className="font-mono text-[11px]">Developer Session</span>
+              Sign in
             </Link>
           )}
         </div>
       </div>
     </header>
+  );
+}
+
+function StatusDot({ label, active, tooltip }: { label: string; active: boolean; tooltip: string }) {
+  return (
+    <span title={tooltip} className="inline-flex items-center gap-1.5 text-zinc-300 px-1 cursor-default">
+      <span className={`w-1.5 h-1.5 rounded-full ${active ? "bg-emerald-400" : "bg-zinc-600"}`} />
+      <span className={active ? "text-zinc-200" : "text-zinc-500"}>{label}</span>
+    </span>
   );
 }

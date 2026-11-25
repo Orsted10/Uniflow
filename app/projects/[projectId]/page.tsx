@@ -694,11 +694,11 @@ export default function ProjectWorkspacePage() {
   }, [mappings, mappingFilterStatus, mappingFilterUncertainty, mappingSearchQuery]);
 
   return (
-    <div className="min-h-screen bg-[#0b0f17] text-slate-100 flex flex-col font-sans selection:bg-teal-500 selection:text-white">
+    <div className="min-h-screen bg-[#09090b] text-slate-100 flex flex-col font-sans selection:bg-teal-950/400 selection:text-white">
       <TopBar />
 
       {/* Project Subheader */}
-      <div className="bg-slate-900/60 border-b border-slate-800 px-4 sm:px-6 lg:px-8 py-3">
+      <div className="bg-zinc-900/60 border-b border-zinc-800 px-4 sm:px-6 lg:px-8 py-3">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
           <div>
             <Breadcrumb
@@ -707,13 +707,13 @@ export default function ProjectWorkspacePage() {
                 { label: "Projects", href: "/projects" },
                 { label: project?.name || projectId, current: true },
               ]}
-              className="mb-1 text-slate-400"
+              className="mb-1 text-zinc-500"
             />
             <div className="flex items-center space-x-2 flex-wrap gap-y-1">
               <h1 className="text-base font-bold text-white tracking-tight">
                 {project?.name || "Workspace"}
               </h1>
-              <span className="font-mono text-[11px] text-slate-500">({projectId})</span>
+              <span className="font-mono text-[11px] text-zinc-400">({projectId})</span>
 
               {cloudStatus && (
                 <div className="flex items-center space-x-1.5 ml-2">
@@ -722,7 +722,7 @@ export default function ProjectWorkspacePage() {
                     className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono border ${
                       cloudStatus.supabase.configured
                         ? "bg-emerald-950/80 text-emerald-400 border-emerald-800/60"
-                        : "bg-slate-800 text-slate-400 border-slate-700"
+                        : "bg-zinc-800 text-zinc-500 border-zinc-700"
                     }`}
                   >
                     Postgres: {cloudStatus.supabase.configured ? "Ready" : "Local"}
@@ -732,7 +732,7 @@ export default function ProjectWorkspacePage() {
                     className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono border ${
                       cloudStatus.groq.configured
                         ? "bg-blue-950/80 text-blue-400 border-blue-800/60"
-                        : "bg-slate-800 text-slate-400 border-slate-700"
+                        : "bg-zinc-800 text-zinc-500 border-zinc-700"
                     }`}
                   >
                     Groq: {cloudStatus.groq.configured ? "Online" : "Mock"}
@@ -752,7 +752,7 @@ export default function ProjectWorkspacePage() {
                     className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono border ${
                       cloudStatus.azureBlob.configured
                         ? "bg-cyan-950/80 text-cyan-400 border-cyan-800/60"
-                        : "bg-slate-800 text-slate-400 border-slate-700"
+                        : "bg-zinc-800 text-zinc-500 border-zinc-700"
                     }`}
                   >
                     Azure Blob: {cloudStatus.azureBlob.configured ? "Connected" : "Simulated"}
@@ -766,7 +766,7 @@ export default function ProjectWorkspacePage() {
             <button
               type="button"
               onClick={loadCanonicalFixtures}
-              className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-2.5 py-1 rounded font-medium transition"
+              className="text-xs bg-zinc-800 hover:bg-slate-700 text-slate-200 border border-zinc-700 px-2.5 py-1 rounded font-medium transition"
             >
               Load Canonical Pair
             </button>
@@ -782,7 +782,7 @@ export default function ProjectWorkspacePage() {
               type="button"
               onClick={() => triggerImport(false)}
               disabled={loading}
-              className="text-xs bg-teal-500 hover:bg-teal-400 disabled:opacity-50 text-slate-950 font-semibold font-mono px-3 py-1 rounded transition shadow-sm"
+              className="text-xs bg-teal-950/400 hover:bg-teal-400 disabled:opacity-50 text-slate-950 font-semibold font-mono px-3 py-1 rounded transition shadow-sm"
             >
               Parse & Compare
             </button>
@@ -794,9 +794,9 @@ export default function ProjectWorkspacePage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full mt-3">
         {errorMsg && <ErrorPanel message={errorMsg} onDismiss={() => setErrorMsg(null)} className="mb-2" />}
         {successMsg && (
-          <div className="p-3 mb-2 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded flex items-center justify-between">
+          <div className="p-3 mb-2 bg-emerald-950/40 border border-emerald-800/60 text-emerald-300 text-xs rounded flex items-center justify-between">
             <span>{successMsg}</span>
-            <button type="button" onClick={() => setSuccessMsg(null)} className="text-emerald-700 font-bold ml-2">
+            <button type="button" onClick={() => setSuccessMsg(null)} className="text-emerald-400 font-bold ml-2">
               ×
             </button>
           </div>
@@ -817,91 +817,91 @@ export default function ProjectWorkspacePage() {
           {/* TAB: OVERVIEW */}
           {activeTab === "overview" && (
             <div className="space-y-4">
-              <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-xs">
-                <h2 className="text-sm font-semibold text-slate-900 mb-1">Project Summary</h2>
-                <p className="text-xs text-slate-600 leading-relaxed mb-4">
+              <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-5 shadow-xs">
+                <h2 className="text-sm font-semibold text-zinc-100 mb-1">Project Summary</h2>
+                <p className="text-xs text-zinc-400 leading-relaxed mb-4">
                   {project?.description || "This workspace manages the comparison, mapping review, and adapter compilation between source and target API contracts."}
                 </p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 border-t border-slate-100 pt-4 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 border-t border-zinc-800/70 pt-4 text-xs">
                   <div>
-                    <span className="text-slate-500 block text-[11px]">Owner Tenant:</span>
-                    <span className="font-mono text-slate-800">developer@uniflow.internal</span>
+                    <span className="text-zinc-400 block text-[11px]">Owner Tenant:</span>
+                    <span className="font-mono text-zinc-200">developer@uniflow.internal</span>
                   </div>
                   <div>
-                    <span className="text-slate-500 block text-[11px]">Created At:</span>
-                    <span className="text-slate-800">
+                    <span className="text-zinc-400 block text-[11px]">Created At:</span>
+                    <span className="text-zinc-200">
                       {project?.created_at ? new Date(project.created_at).toLocaleDateString() : "Just now"}
                     </span>
                   </div>
                   <div>
-                    <span className="text-slate-500 block text-[11px]">Core Engine:</span>
+                    <span className="text-zinc-400 block text-[11px]">Core Engine:</span>
                     <StatusChip label="Deterministic IR Ready" variant="low" />
                   </div>
                 </div>
               </div>
 
               {/* Workflow Stepper Card */}
-              <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-xs">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">
+              <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-5 shadow-xs">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-3">
                   Compiler Pipeline Stages
                 </h3>
 
                 <div className="space-y-2.5 text-xs">
-                  <div className="flex items-center justify-between p-2 rounded bg-slate-50 border border-slate-200">
-                    <span className="font-medium text-slate-800">1. Ingest Contracts & Schema Trees</span>
+                  <div className="flex items-center justify-between p-2 rounded bg-zinc-950 border border-zinc-800">
+                    <span className="font-medium text-zinc-200">1. Ingest Contracts & Schema Trees</span>
                     {sourceText && targetText ? (
                       <StatusChip label="Contracts Loaded" variant="accepted" />
                     ) : (
                       <button
                         type="button"
                         onClick={() => setActiveTab("specs")}
-                        className="text-[11px] underline text-slate-700 hover:text-slate-900"
+                        className="text-[11px] underline text-zinc-300 hover:text-zinc-100"
                       >
                         Import Specs →
                       </button>
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between p-2 rounded bg-slate-50 border border-slate-200">
-                    <span className="font-medium text-slate-800">2. Deterministic Structural Diff</span>
+                  <div className="flex items-center justify-between p-2 rounded bg-zinc-950 border border-zinc-800">
+                    <span className="font-medium text-zinc-200">2. Deterministic Structural Diff</span>
                     {diff ? (
                       <StatusChip label={`${diff.summary.totalTargetFields} fields diffed`} variant="info" />
                     ) : (
-                      <span className="text-[11px] text-slate-400">Pending import</span>
+                      <span className="text-[11px] text-zinc-500">Pending import</span>
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between p-2 rounded bg-slate-50 border border-slate-200">
-                    <span className="font-medium text-slate-800">3. Human Review Gate</span>
+                  <div className="flex items-center justify-between p-2 rounded bg-zinc-950 border border-zinc-800">
+                    <span className="font-medium text-zinc-200">3. Human Review Gate</span>
                     {mappings.length > 0 ? (
                       <button
                         type="button"
                         onClick={() => setActiveTab("mappings")}
-                        className="text-[11px] underline text-slate-700 hover:text-slate-900"
+                        className="text-[11px] underline text-zinc-300 hover:text-zinc-100"
                       >
                         Review {mappings.length} mappings →
                       </button>
                     ) : (
-                      <span className="text-[11px] text-slate-400">Pending diff</span>
+                      <span className="text-[11px] text-zinc-500">Pending diff</span>
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between p-2 rounded bg-slate-50 border border-slate-200">
-                    <span className="font-medium text-slate-800">4. Compile Plan & Execute Test Fixtures</span>
+                  <div className="flex items-center justify-between p-2 rounded bg-zinc-950 border border-zinc-800">
+                    <span className="font-medium text-zinc-200">4. Compile Plan & Execute Test Fixtures</span>
                     {plan ? (
                       <StatusChip label="Plan Compiled" variant="compiled" />
                     ) : (
-                      <span className="text-[11px] text-slate-400">Requires approved mappings</span>
+                      <span className="text-[11px] text-zinc-500">Requires approved mappings</span>
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between p-2 rounded bg-slate-50 border border-slate-200">
-                    <span className="font-medium text-slate-800">5. Generated Adapter & Compatibility Report</span>
+                  <div className="flex items-center justify-between p-2 rounded bg-zinc-950 border border-zinc-800">
+                    <span className="font-medium text-zinc-200">5. Generated Adapter & Compatibility Report</span>
                     {adapterCode ? (
                       <StatusChip label="Adapter Ready" variant="executed" />
                     ) : (
-                      <span className="text-[11px] text-slate-400">Pending execution</span>
+                      <span className="text-[11px] text-zinc-500">Pending execution</span>
                     )}
                   </div>
                 </div>
@@ -913,10 +913,10 @@ export default function ProjectWorkspacePage() {
           {activeTab === "specs" && (
             <div className="space-y-5">
               {/* Top Summary Banner */}
-              <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs flex flex-wrap items-center justify-between gap-3">
+              <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-xs flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <h2 className="text-sm font-semibold text-slate-900">Contract Specifications & Schema Trees</h2>
-                  <p className="text-xs text-slate-500">
+                  <h2 className="text-sm font-semibold text-zinc-100">Contract Specifications & Schema Trees</h2>
+                  <p className="text-xs text-zinc-400">
                     Import OpenAPI 3.x or JSON Schema specifications. Schemas are normalized with strict cycle guards and deterministic path indexing.
                   </p>
                 </div>
@@ -925,7 +925,7 @@ export default function ProjectWorkspacePage() {
                     type="button"
                     onClick={() => triggerImport(false)}
                     disabled={loading}
-                    className="text-xs bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white px-3 py-1.5 rounded font-medium transition shadow-xs"
+                    className="text-xs bg-emerald-950/400 hover:bg-emerald-400 disabled:opacity-50 text-zinc-950 font-semibold px-3 py-1.5 rounded font-medium transition shadow-xs"
                   >
                     {loading ? "Parsing..." : "Parse & Compare Contracts"}
                   </button>
@@ -935,22 +935,22 @@ export default function ProjectWorkspacePage() {
               {/* Source & Target Panes */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                 {/* SOURCE SPEC PANE */}
-                <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs flex flex-col space-y-3">
+                <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-xs flex flex-col space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Source Contract</span>
+                      <span className="text-xs font-bold text-zinc-200 uppercase tracking-wider">Source Contract</span>
                       {sourceNormalized?.metadata.isInferred ? (
-                        <span className="text-[10px] font-mono bg-amber-100 text-amber-800 border border-amber-300 px-1.5 py-0.5 rounded font-medium">
+                        <span className="text-[10px] font-mono bg-amber-100 text-amber-300 border border-amber-800/60 px-1.5 py-0.5 rounded font-medium">
                           Inferred Sample JSON
                         </span>
                       ) : (
-                        <span className="text-[10px] font-mono text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
+                        <span className="text-[10px] font-mono text-zinc-400 bg-zinc-800 px-1.5 py-0.5 rounded">
                           {sourceNormalized?.metadata.format || "JSON / JSON Schema"}
                         </span>
                       )}
                     </div>
                     {sourceNormalized?.metadata.schemaHash && (
-                      <span className="text-[10px] font-mono text-slate-400" title={`SHA-256: ${sourceNormalized.metadata.schemaHash}`}>
+                      <span className="text-[10px] font-mono text-zinc-500" title={`SHA-256: ${sourceNormalized.metadata.schemaHash}`}>
                         hash:{sourceNormalized.metadata.schemaHash.slice(0, 8)}...
                       </span>
                     )}
@@ -966,17 +966,17 @@ export default function ProjectWorkspacePage() {
                     value={sourceText}
                     onChange={(e) => setSourceText(e.target.value)}
                     placeholder="Paste Source JSON Schema or OpenAPI 3.x JSON..."
-                    className="font-mono text-xs w-full p-2.5 border border-slate-300 rounded bg-slate-50 text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-500 resize-none"
+                    className="font-mono text-xs w-full p-2.5 border border-zinc-700 rounded bg-zinc-950 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500 resize-none"
                   />
 
                   {/* OpenAPI Schema Picker if multiple candidate schemas exist */}
                   {sourceAvailableSchemas.length > 1 && (
-                    <div className="p-2.5 bg-indigo-50/60 border border-indigo-200 rounded text-xs space-y-1.5">
+                    <div className="p-2.5 bg-indigo-950/40/60 border border-indigo-800/60 rounded text-xs space-y-1.5">
                       <div className="flex items-center justify-between">
                         <label htmlFor="source-schema-select" className="font-semibold text-indigo-900 text-[11px]">
                           OpenAPI Root Schema Candidate:
                         </label>
-                        <span className="text-[10px] text-indigo-700 font-mono">
+                        <span className="text-[10px] text-indigo-300 font-mono">
                           {sourceAvailableSchemas.length} components.schemas
                         </span>
                       </div>
@@ -987,7 +987,7 @@ export default function ProjectWorkspacePage() {
                           setSelectedSourceSchema(e.target.value);
                           triggerImport(true, e.target.value, selectedTargetSchema);
                         }}
-                        className="w-full text-xs font-mono p-1.5 border border-indigo-300 rounded bg-white text-indigo-950 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                        className="w-full text-xs font-mono p-1.5 border border-indigo-300 rounded bg-zinc-900/70 text-indigo-950 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
                       >
                         {sourceAvailableSchemas.map((name) => (
                           <option key={name} value={name}>
@@ -995,7 +995,7 @@ export default function ProjectWorkspacePage() {
                           </option>
                         ))}
                       </select>
-                      <p className="text-[10px] text-indigo-700 leading-tight">
+                      <p className="text-[10px] text-indigo-300 leading-tight">
                         Select which schema from components.schemas to treat as the active root contract for comparison.
                       </p>
                     </div>
@@ -1006,22 +1006,22 @@ export default function ProjectWorkspacePage() {
                 </div>
 
                 {/* TARGET SPEC PANE */}
-                <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs flex flex-col space-y-3">
+                <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-xs flex flex-col space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Target Contract</span>
+                      <span className="text-xs font-bold text-zinc-200 uppercase tracking-wider">Target Contract</span>
                       {targetNormalized?.metadata.isInferred ? (
-                        <span className="text-[10px] font-mono bg-amber-100 text-amber-800 border border-amber-300 px-1.5 py-0.5 rounded font-medium">
+                        <span className="text-[10px] font-mono bg-amber-100 text-amber-300 border border-amber-800/60 px-1.5 py-0.5 rounded font-medium">
                           Inferred Sample JSON
                         </span>
                       ) : (
-                        <span className="text-[10px] font-mono text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
+                        <span className="text-[10px] font-mono text-zinc-400 bg-zinc-800 px-1.5 py-0.5 rounded">
                           {targetNormalized?.metadata.format || "JSON / JSON Schema"}
                         </span>
                       )}
                     </div>
                     {targetNormalized?.metadata.schemaHash && (
-                      <span className="text-[10px] font-mono text-slate-400" title={`SHA-256: ${targetNormalized.metadata.schemaHash}`}>
+                      <span className="text-[10px] font-mono text-zinc-500" title={`SHA-256: ${targetNormalized.metadata.schemaHash}`}>
                         hash:{targetNormalized.metadata.schemaHash.slice(0, 8)}...
                       </span>
                     )}
@@ -1037,17 +1037,17 @@ export default function ProjectWorkspacePage() {
                     value={targetText}
                     onChange={(e) => setTargetText(e.target.value)}
                     placeholder="Paste Target JSON Schema or OpenAPI 3.x JSON..."
-                    className="font-mono text-xs w-full p-2.5 border border-slate-300 rounded bg-slate-50 text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-500 resize-none"
+                    className="font-mono text-xs w-full p-2.5 border border-zinc-700 rounded bg-zinc-950 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500 resize-none"
                   />
 
                   {/* OpenAPI Schema Picker if multiple candidate schemas exist */}
                   {targetAvailableSchemas.length > 1 && (
-                    <div className="p-2.5 bg-indigo-50/60 border border-indigo-200 rounded text-xs space-y-1.5">
+                    <div className="p-2.5 bg-indigo-950/40/60 border border-indigo-800/60 rounded text-xs space-y-1.5">
                       <div className="flex items-center justify-between">
                         <label htmlFor="target-schema-select" className="font-semibold text-indigo-900 text-[11px]">
                           OpenAPI Root Schema Candidate:
                         </label>
-                        <span className="text-[10px] text-indigo-700 font-mono">
+                        <span className="text-[10px] text-indigo-300 font-mono">
                           {targetAvailableSchemas.length} components.schemas
                         </span>
                       </div>
@@ -1058,7 +1058,7 @@ export default function ProjectWorkspacePage() {
                           setSelectedTargetSchema(e.target.value);
                           triggerImport(true, selectedSourceSchema, e.target.value);
                         }}
-                        className="w-full text-xs font-mono p-1.5 border border-indigo-300 rounded bg-white text-indigo-950 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                        className="w-full text-xs font-mono p-1.5 border border-indigo-300 rounded bg-zinc-900/70 text-indigo-950 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
                       >
                         {targetAvailableSchemas.map((name) => (
                           <option key={name} value={name}>
@@ -1066,7 +1066,7 @@ export default function ProjectWorkspacePage() {
                           </option>
                         ))}
                       </select>
-                      <p className="text-[10px] text-indigo-700 leading-tight">
+                      <p className="text-[10px] text-indigo-300 leading-tight">
                         Select which schema from components.schemas to treat as the active root contract for comparison.
                       </p>
                     </div>
@@ -1079,31 +1079,31 @@ export default function ProjectWorkspacePage() {
 
               {/* STRUCTURAL DIFF SECTION */}
               {diff && (
-                <div className="bg-white border border-slate-200 rounded-lg shadow-xs overflow-hidden space-y-0">
+                <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg shadow-xs overflow-hidden space-y-0">
                   {/* Diff Header */}
-                  <div className="px-4 py-3 border-b border-slate-200 bg-slate-50 flex flex-wrap items-center justify-between gap-3">
+                  <div className="px-4 py-3 border-b border-zinc-800 bg-zinc-950 flex flex-wrap items-center justify-between gap-3">
                     <div>
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-200">
                         Computed Structural Differences ({diff.summary.totalTargetFields} target fields)
                       </h3>
                       <div className="flex flex-wrap items-center gap-1.5 mt-1 text-[10px]">
-                        <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-medium">
+                        <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-300 font-medium">
                           {diff.summary.exactMatches} exact
                         </span>
                         <span className="px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 font-medium">
                           {diff.summary.renamedCandidates} renamed
                         </span>
-                        <span className="px-1.5 py-0.5 rounded bg-rose-100 text-rose-800 font-medium">
+                        <span className="px-1.5 py-0.5 rounded bg-rose-100 text-rose-300 font-medium">
                           {diff.summary.missingRequired} missing required
                         </span>
-                        <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-medium">
+                        <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-300 font-medium">
                           {diff.summary.typeConflicts} type conflict
                         </span>
                         <span className="px-1.5 py-0.5 rounded bg-purple-100 text-purple-800 font-medium">
                           {diff.summary.shapeMismatches} shape mismatch
                         </span>
                         {diff.summary.unsupportedWarnings > 0 && (
-                          <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 font-medium">
+                          <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-200 border border-amber-800/60 font-medium">
                             {diff.summary.unsupportedWarnings} keyword warnings
                           </span>
                         )}
@@ -1112,21 +1112,21 @@ export default function ProjectWorkspacePage() {
                     <button
                       type="button"
                       onClick={() => setActiveTab("mappings")}
-                      className="text-xs bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded font-medium transition shadow-xs"
+                      className="text-xs bg-emerald-950/400 hover:bg-emerald-400 text-zinc-950 font-semibold px-3 py-1.5 rounded font-medium transition shadow-xs"
                     >
                       Proceed to Review ({mappings.length} mappings) →
                     </button>
                   </div>
 
                   {/* Filter & Search Bar */}
-                  <div className="p-3 bg-slate-50/70 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs">
+                  <div className="p-3 bg-zinc-950/70 border-b border-zinc-800 flex flex-wrap items-center justify-between gap-2 text-xs">
                     <div className="flex flex-wrap items-center gap-2 flex-1 min-w-[240px]">
                       <input
                         type="text"
                         value={diffSearchQuery}
                         onChange={(e) => setDiffSearchQuery(e.target.value)}
                         placeholder="Search paths or diagnostics..."
-                        className="p-1.5 text-xs border border-slate-300 rounded bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-500 w-full sm:w-64"
+                        className="p-1.5 text-xs border border-zinc-700 rounded bg-zinc-900/70 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-slate-500 w-full sm:w-64"
                       />
 
                       {/* Severity Filter Pills */}
@@ -1136,8 +1136,8 @@ export default function ProjectWorkspacePage() {
                           onClick={() => setDiffSeverityFilter("all")}
                           className={`px-2 py-1 rounded text-[11px] font-medium border transition ${
                             diffSeverityFilter === "all"
-                              ? "bg-slate-800 text-white border-slate-900"
-                              : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
+                              ? "bg-zinc-800 text-white border-slate-900"
+                              : "bg-zinc-900/70 text-zinc-400 border-zinc-800 hover:bg-zinc-800"
                           }`}
                         >
                           All ({diff.items.length})
@@ -1148,7 +1148,7 @@ export default function ProjectWorkspacePage() {
                           className={`px-2 py-1 rounded text-[11px] font-medium border transition ${
                             diffSeverityFilter === "error"
                               ? "bg-rose-600 text-white border-rose-700"
-                              : "bg-white text-rose-700 border-rose-200 hover:bg-rose-50"
+                              : "bg-zinc-900/70 text-rose-400 border-rose-800/60 hover:bg-rose-950/40"
                           }`}
                         >
                           Errors ({diff.items.filter((i) => i.severity === "error").length})
@@ -1159,7 +1159,7 @@ export default function ProjectWorkspacePage() {
                           className={`px-2 py-1 rounded text-[11px] font-medium border transition ${
                             diffSeverityFilter === "warning"
                               ? "bg-amber-600 text-white border-amber-700"
-                              : "bg-white text-amber-700 border-amber-200 hover:bg-amber-50"
+                              : "bg-zinc-900/70 text-amber-700 border-amber-800/60 hover:bg-amber-950/40"
                           }`}
                         >
                           Warnings ({diff.items.filter((i) => i.severity === "warning").length})
@@ -1170,7 +1170,7 @@ export default function ProjectWorkspacePage() {
                           className={`px-2 py-1 rounded text-[11px] font-medium border transition ${
                             diffSeverityFilter === "info"
                               ? "bg-sky-600 text-white border-sky-700"
-                              : "bg-white text-sky-700 border-sky-200 hover:bg-sky-50"
+                              : "bg-zinc-900/70 text-sky-400 border-sky-800/60 hover:bg-sky-950/40"
                           }`}
                         >
                           Info ({diff.items.filter((i) => i.severity === "info").length})
@@ -1180,14 +1180,14 @@ export default function ProjectWorkspacePage() {
 
                     {/* Category Filter Dropdown */}
                     <div className="flex items-center space-x-2">
-                      <label htmlFor="diff-cat-select" className="text-[11px] font-medium text-slate-600">
+                      <label htmlFor="diff-cat-select" className="text-[11px] font-medium text-zinc-400">
                         Category:
                       </label>
                       <select
                         id="diff-cat-select"
                         value={diffCategoryFilter}
                         onChange={(e) => setDiffCategoryFilter(e.target.value)}
-                        className="text-xs p-1.5 border border-slate-300 rounded bg-white text-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                        className="text-xs p-1.5 border border-zinc-700 rounded bg-zinc-900/70 text-zinc-200 focus:outline-none focus:ring-1 focus:ring-slate-500"
                       >
                         <option value="all">All Categories</option>
                         <option value="exact_match">Exact Match</option>
@@ -1208,7 +1208,7 @@ export default function ProjectWorkspacePage() {
                             setDiffSeverityFilter("all");
                             setDiffCategoryFilter("all");
                           }}
-                          className="text-[11px] text-slate-500 hover:text-slate-800 underline"
+                          className="text-[11px] text-zinc-400 hover:text-zinc-200 underline"
                         >
                           Reset
                         </button>
@@ -1219,7 +1219,7 @@ export default function ProjectWorkspacePage() {
                   {/* Diff Items Table */}
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs">
-                      <thead className="bg-slate-100 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px]">
+                      <thead className="bg-zinc-800 text-zinc-400 font-semibold border-b border-zinc-800 uppercase tracking-wider text-[11px]">
                         <tr>
                           <th className="py-2.5 px-3">Target Path</th>
                           <th className="py-2.5 px-3">Source Match</th>
@@ -1228,10 +1228,10 @@ export default function ProjectWorkspacePage() {
                           <th className="py-2.5 px-3">Diagnostic Description</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100">
+                      <tbody className="divide-y divide-zinc-800/60">
                         {filteredDiffItems.length === 0 ? (
                           <tr>
-                            <td colSpan={5} className="py-6 text-center text-xs text-slate-400 italic">
+                            <td colSpan={5} className="py-6 text-center text-xs text-zinc-500 italic">
                               No diff items match the current search or filters.
                             </td>
                           </tr>
@@ -1244,15 +1244,15 @@ export default function ProjectWorkspacePage() {
                                 onClick={() => setSelectedDiffItem(isSelected ? null : item)}
                                 className={`cursor-pointer transition-colors ${
                                   isSelected
-                                    ? "bg-slate-100/90 ring-1 ring-inset ring-slate-400"
-                                    : "hover:bg-slate-50"
+                                    ? "bg-zinc-800/90 ring-1 ring-inset ring-slate-400"
+                                    : "hover:bg-zinc-950"
                                 }`}
                               >
-                                <td className="py-2 px-3 font-mono font-medium text-slate-800">
+                                <td className="py-2 px-3 font-mono font-medium text-zinc-200">
                                   {item.targetPath}
                                   {item.targetRequired && <span className="text-rose-500 ml-1 font-bold">*</span>}
                                 </td>
-                                <td className="py-2 px-3 font-mono text-slate-600">{item.sourcePath || "(none)"}</td>
+                                <td className="py-2 px-3 font-mono text-zinc-400">{item.sourcePath || "(none)"}</td>
                                 <td className="py-2 px-3">
                                   <StatusChip label={item.category} variant="neutral" />
                                 </td>
@@ -1262,7 +1262,7 @@ export default function ProjectWorkspacePage() {
                                     variant={item.severity === "error" ? "error" : item.severity === "warning" ? "warning" : "info"}
                                   />
                                 </td>
-                                <td className="py-2 px-3 text-slate-600">{item.message}</td>
+                                <td className="py-2 px-3 text-zinc-400">{item.message}</td>
                               </tr>
                             );
                           })
@@ -1273,10 +1273,10 @@ export default function ProjectWorkspacePage() {
 
                   {/* Selected Diff Item Inspector Card */}
                   {selectedDiffItem && (
-                    <div className="p-4 bg-slate-50 border-t border-slate-200 space-y-3">
+                    <div className="p-4 bg-zinc-950 border-t border-zinc-800 space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                          <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                          <span className="text-xs font-bold text-zinc-200 uppercase tracking-wider">
                             Diff Detail Inspector
                           </span>
                           <StatusChip label={selectedDiffItem.category} variant="neutral" />
@@ -1294,19 +1294,19 @@ export default function ProjectWorkspacePage() {
                         <button
                           type="button"
                           onClick={() => setSelectedDiffItem(null)}
-                          className="text-xs text-slate-500 hover:text-slate-800 font-bold"
+                          className="text-xs text-zinc-400 hover:text-zinc-200 font-bold"
                         >
                           Close ×
                         </button>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs bg-white p-3 rounded border border-slate-200">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs bg-zinc-900/70 p-3 rounded border border-zinc-800">
                         <div>
-                          <span className="font-semibold text-slate-700 block mb-0.5">Target Contract Field:</span>
-                          <code className="font-mono text-slate-900 bg-slate-100 px-1.5 py-0.5 rounded text-[11px] block truncate">
+                          <span className="font-semibold text-zinc-300 block mb-0.5">Target Contract Field:</span>
+                          <code className="font-mono text-zinc-100 bg-zinc-800 px-1.5 py-0.5 rounded text-[11px] block truncate">
                             {selectedDiffItem.targetPath}
                           </code>
-                          <div className="mt-1 text-[11px] text-slate-600">
+                          <div className="mt-1 text-[11px] text-zinc-400">
                             Type: <span className="font-mono font-semibold">{selectedDiffItem.targetType}</span>
                             {" • "}
                             Required: <span className="font-semibold">{selectedDiffItem.targetRequired ? "Yes" : "No"}</span>
@@ -1314,7 +1314,7 @@ export default function ProjectWorkspacePage() {
                               <span> • Nullable: {selectedDiffItem.facts.targetNullable ? "Yes" : "No"}</span>
                             )}
                             {selectedDiffItem.facts?.targetEnum && (
-                              <span className="block text-indigo-700 mt-0.5">
+                              <span className="block text-indigo-300 mt-0.5">
                                 Enum values: [{selectedDiffItem.facts.targetEnum.join(", ")}]
                               </span>
                             )}
@@ -1322,17 +1322,17 @@ export default function ProjectWorkspacePage() {
                         </div>
 
                         <div>
-                          <span className="font-semibold text-slate-700 block mb-0.5">Source Contract Field:</span>
-                          <code className="font-mono text-slate-900 bg-slate-100 px-1.5 py-0.5 rounded text-[11px] block truncate">
+                          <span className="font-semibold text-zinc-300 block mb-0.5">Source Contract Field:</span>
+                          <code className="font-mono text-zinc-100 bg-zinc-800 px-1.5 py-0.5 rounded text-[11px] block truncate">
                             {selectedDiffItem.sourcePath || "(no direct match)"}
                           </code>
-                          <div className="mt-1 text-[11px] text-slate-600">
+                          <div className="mt-1 text-[11px] text-zinc-400">
                             Type: <span className="font-mono font-semibold">{selectedDiffItem.sourceType || "N/A"}</span>
                             {selectedDiffItem.facts?.sourceNullable !== undefined && (
                               <span> • Nullable: {selectedDiffItem.facts.sourceNullable ? "Yes" : "No"}</span>
                             )}
                             {selectedDiffItem.facts?.sourceEnum && (
-                              <span className="block text-indigo-700 mt-0.5">
+                              <span className="block text-indigo-300 mt-0.5">
                                 Enum values: [{selectedDiffItem.facts.sourceEnum.join(", ")}]
                               </span>
                             )}
@@ -1340,14 +1340,14 @@ export default function ProjectWorkspacePage() {
                         </div>
                       </div>
 
-                      <div className="text-xs text-slate-700 space-y-1 bg-white p-3 rounded border border-slate-200">
+                      <div className="text-xs text-zinc-300 space-y-1 bg-zinc-900/70 p-3 rounded border border-zinc-800">
                         <div>
-                          <span className="font-semibold text-slate-800">Diagnostic Explanation:</span>{" "}
+                          <span className="font-semibold text-zinc-200">Diagnostic Explanation:</span>{" "}
                           {selectedDiffItem.message}
                         </div>
                         {selectedDiffItem.suggestedAction && (
-                          <div className="pt-1 text-slate-600">
-                            <span className="font-semibold text-slate-800">Recommended Action:</span>{" "}
+                          <div className="pt-1 text-zinc-400">
+                            <span className="font-semibold text-zinc-200">Recommended Action:</span>{" "}
                             {selectedDiffItem.suggestedAction}
                           </div>
                         )}
@@ -1363,22 +1363,22 @@ export default function ProjectWorkspacePage() {
           {activeTab === "mappings" && (
             <div className="space-y-4">
               {/* Header and Advisory Status */}
-              <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs flex flex-wrap items-center justify-between gap-3">
+              <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-xs flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <div className="flex items-center space-x-2">
-                    <h2 className="text-sm font-bold text-slate-900">Review Candidate Mappings</h2>
+                    <h2 className="text-sm font-bold text-zinc-100">Review Candidate Mappings</h2>
                     {providerConfig?.configured ? (
-                      <span className="text-[10px] font-mono bg-emerald-50 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded font-medium">
+                      <span className="text-[10px] font-mono bg-emerald-950/40 text-emerald-300 border border-emerald-300 px-2 py-0.5 rounded font-medium">
                         Groq AI Active &bull; {providerConfig.model}
                       </span>
                     ) : (
-                      <span className="text-[10px] font-mono bg-amber-50 text-amber-800 border border-amber-300 px-2 py-0.5 rounded font-medium">
+                      <span className="text-[10px] font-mono bg-amber-950/40 text-amber-300 border border-amber-800/60 px-2 py-0.5 rounded font-medium">
                         Groq Offline (Heuristic Fallback)
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    <span className="font-semibold text-slate-700">Trust Rule:</span> AI may propose; deterministic code validates; humans approve ambiguous semantics.
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    <span className="font-semibold text-zinc-300">Trust Rule:</span> AI may propose; deterministic code validates; humans approve ambiguous semantics.
                   </p>
                 </div>
 
@@ -1397,7 +1397,7 @@ export default function ProjectWorkspacePage() {
                     type="button"
                     onClick={() => generateProposals(true)}
                     disabled={proposeLoading || !sourceText || !targetText}
-                    className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-2.5 py-1.5 rounded font-medium transition"
+                    className="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 px-2.5 py-1.5 rounded font-medium transition"
                     title="Generate candidate mappings using deterministic structural heuristics without calling AI"
                   >
                     Heuristic Baseline
@@ -1406,7 +1406,7 @@ export default function ProjectWorkspacePage() {
                   <button
                     type="button"
                     onClick={openManualModal}
-                    className="text-xs bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 px-2.5 py-1.5 rounded font-medium transition"
+                    className="text-xs bg-zinc-900/70 hover:bg-zinc-950 text-zinc-200 border border-zinc-700 px-2.5 py-1.5 rounded font-medium transition"
                   >
                     + Manual Mapping
                   </button>
@@ -1415,7 +1415,7 @@ export default function ProjectWorkspacePage() {
                     type="button"
                     onClick={acceptAllMappings}
                     disabled={loading || mappings.length === 0}
-                    className="text-xs bg-slate-100 hover:bg-slate-200 disabled:opacity-50 text-slate-700 border border-slate-300 px-3 py-1.5 rounded font-medium transition"
+                    className="text-xs bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-zinc-300 border border-zinc-700 px-3 py-1.5 rounded font-medium transition"
                   >
                     Approve All Verified
                   </button>
@@ -1424,7 +1424,7 @@ export default function ProjectWorkspacePage() {
                     type="button"
                     onClick={compilePlan}
                     disabled={loading || mappings.filter((m) => m.status === "accepted" || m.status === "edited").length === 0}
-                    className="text-xs bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white px-3.5 py-1.5 rounded font-medium transition shadow-xs"
+                    className="text-xs bg-emerald-950/400 hover:bg-emerald-400 disabled:opacity-50 text-zinc-950 font-semibold px-3.5 py-1.5 rounded font-medium transition shadow-xs"
                   >
                     Compile Plan →
                   </button>
@@ -1433,14 +1433,14 @@ export default function ProjectWorkspacePage() {
 
               {/* Filters & Search Toolbar */}
               {mappings.length > 0 && (
-                <div className="p-3 bg-white border border-slate-200 rounded-lg shadow-xs flex flex-wrap items-center justify-between gap-2 text-xs">
+                <div className="p-3 bg-zinc-900/70 border border-zinc-800 rounded-lg shadow-xs flex flex-wrap items-center justify-between gap-2 text-xs">
                   <div className="flex flex-wrap items-center gap-2 flex-1 min-w-[240px]">
                     <input
                       type="text"
                       value={mappingSearchQuery}
                       onChange={(e) => setMappingSearchQuery(e.target.value)}
                       placeholder="Search mapped paths, rationale, or operation..."
-                      className="p-1.5 text-xs border border-slate-300 rounded bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-500 w-full sm:w-64"
+                      className="p-1.5 text-xs border border-zinc-700 rounded bg-zinc-900/70 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-slate-500 w-full sm:w-64"
                     />
 
                     {/* Status filter pills */}
@@ -1455,8 +1455,8 @@ export default function ProjectWorkspacePage() {
                             onClick={() => setMappingFilterStatus(st)}
                             className={`px-2 py-0.5 rounded text-[11px] font-medium border transition ${
                               mappingFilterStatus === st
-                                ? "bg-slate-800 text-white border-slate-900"
-                                : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
+                                ? "bg-zinc-800 text-white border-slate-900"
+                                : "bg-zinc-900/70 text-zinc-400 border-zinc-800 hover:bg-zinc-800"
                             }`}
                           >
                             {st === "needs_confirmation" ? "Needs Review" : st} ({count})
@@ -1468,14 +1468,14 @@ export default function ProjectWorkspacePage() {
 
                   {/* Uncertainty filter */}
                   <div className="flex items-center space-x-2">
-                    <label htmlFor="uncertainty-select" className="text-[11px] font-medium text-slate-600">
+                    <label htmlFor="uncertainty-select" className="text-[11px] font-medium text-zinc-400">
                       Uncertainty:
                     </label>
                     <select
                       id="uncertainty-select"
                       value={mappingFilterUncertainty}
                       onChange={(e) => setMappingFilterUncertainty(e.target.value)}
-                      className="text-xs p-1.5 border border-slate-300 rounded bg-white text-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                      className="text-xs p-1.5 border border-zinc-700 rounded bg-zinc-900/70 text-zinc-200 focus:outline-none focus:ring-1 focus:ring-slate-500"
                     >
                       <option value="all">All Levels</option>
                       <option value="LOW">Low</option>
@@ -1491,7 +1491,7 @@ export default function ProjectWorkspacePage() {
                           setMappingFilterStatus("all");
                           setMappingFilterUncertainty("all");
                         }}
-                        className="text-[11px] text-slate-500 hover:text-slate-800 underline"
+                        className="text-[11px] text-zinc-400 hover:text-zinc-200 underline"
                       >
                         Reset
                       </button>
@@ -1511,7 +1511,7 @@ export default function ProjectWorkspacePage() {
                   }}
                 />
               ) : filteredMappings.length === 0 ? (
-                <div className="bg-white border border-slate-200 rounded-lg p-8 text-center text-xs text-slate-400">
+                <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-8 text-center text-xs text-zinc-500">
                   No candidate mappings match the current filters or search query.
                 </div>
               ) : (
@@ -1525,33 +1525,33 @@ export default function ProjectWorkspacePage() {
                     return (
                       <div
                         key={m.id}
-                        className={`bg-white border rounded-lg p-4 shadow-xs transition ${
+                        className={`bg-zinc-900/70 border rounded-lg p-4 shadow-xs transition ${
                           isAccepted
-                            ? "border-emerald-300 bg-emerald-50/15"
+                            ? "border-emerald-300 bg-emerald-950/40/15"
                             : isRejected
-                            ? "border-rose-300 bg-rose-50/15 opacity-60"
+                            ? "border-rose-300 bg-rose-950/40/15 opacity-60"
                             : isEdited
-                            ? "border-indigo-300 bg-indigo-50/15"
+                            ? "border-indigo-300 bg-indigo-950/40/15"
                             : isNeedsReview
-                            ? "border-amber-300 bg-amber-50/15"
-                            : "border-slate-300"
+                            ? "border-amber-800/60 bg-amber-950/40/15"
+                            : "border-zinc-700"
                         }`}
                       >
                         {/* Header: Paths & Status Badges */}
-                        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2 mb-2.5">
+                        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800/70 pb-2 mb-2.5">
                           <div className="flex items-center space-x-2 font-mono text-xs">
-                            <span className="font-bold text-slate-900 bg-slate-100 px-1.5 py-0.5 rounded">
+                            <span className="font-bold text-zinc-100 bg-zinc-800 px-1.5 py-0.5 rounded">
                               {m.targetPath}
                             </span>
-                            <span className="text-slate-400">&larr;</span>
-                            <span className="text-slate-700 bg-slate-50 border border-slate-200 px-1.5 py-0.5 rounded">
+                            <span className="text-zinc-500">&larr;</span>
+                            <span className="text-zinc-300 bg-zinc-950 border border-zinc-800 px-1.5 py-0.5 rounded">
                               {m.sourcePath || "(default value)"}
                             </span>
                           </div>
 
                           <div className="flex flex-wrap items-center gap-1.5">
                             {/* Provider chip */}
-                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
+                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-800">
                               {m.provider === "groq"
                                 ? "Groq AI"
                                 : m.provider === "manual"
@@ -1571,10 +1571,10 @@ export default function ProjectWorkspacePage() {
                         </div>
 
                         {/* Operation Details and Facts */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-slate-600">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-zinc-400">
                           <div>
-                            <span className="font-semibold text-slate-700">Operation:</span>{" "}
-                            <code className="font-mono bg-slate-100 px-1.5 py-0.5 rounded text-blue-800 font-medium">
+                            <span className="font-semibold text-zinc-300">Operation:</span>{" "}
+                            <code className="font-mono bg-zinc-800 px-1.5 py-0.5 rounded text-blue-800 font-medium">
                               {m.transformation.operation}
                             </code>
                             {m.transformation.conversionType && (
@@ -1583,27 +1583,27 @@ export default function ProjectWorkspacePage() {
                               </span>
                             )}
                             {m.transformation.defaultValue !== undefined && (
-                              <span className="block mt-1 text-[11px] font-mono text-slate-600">
+                              <span className="block mt-1 text-[11px] font-mono text-zinc-400">
                                 Default: {JSON.stringify(m.transformation.defaultValue)}
                               </span>
                             )}
                             {m.transformation.lookupTable && (
-                              <span className="block mt-1 text-[11px] font-mono text-indigo-700">
+                              <span className="block mt-1 text-[11px] font-mono text-indigo-300">
                                 Lookup: {Object.keys(m.transformation.lookupTable).length} dictionary pairs
                               </span>
                             )}
                           </div>
 
                           <div className="md:col-span-2">
-                            <span className="font-semibold text-slate-700">Rationale:</span>{" "}
-                            <span className="text-slate-800">{m.rationale}</span>
+                            <span className="font-semibold text-zinc-300">Rationale:</span>{" "}
+                            <span className="text-zinc-200">{m.rationale}</span>
                           </div>
                         </div>
 
                         {/* Unresolved Questions if flagged by AI */}
                         {m.unresolvedQuestions && m.unresolvedQuestions.length > 0 && (
-                          <div className="mt-2.5 p-2 bg-amber-50/80 border border-amber-200 rounded text-xs text-amber-900 space-y-1">
-                            <div className="font-semibold text-[11px] uppercase tracking-wider text-amber-800">
+                          <div className="mt-2.5 p-2 bg-amber-950/30 border border-amber-800/60 rounded text-xs text-amber-200 space-y-1">
+                            <div className="font-semibold text-[11px] uppercase tracking-wider text-amber-300">
                               Unresolved Semantic Questions:
                             </div>
                             {m.unresolvedQuestions.map((q, idx) => (
@@ -1629,7 +1629,7 @@ export default function ProjectWorkspacePage() {
 
                         {/* Explicit Human Confirmation Warning */}
                         {m.semanticStatus === "needs_confirmation" && m.status !== "accepted" && (
-                          <div className="mt-2.5 text-xs bg-amber-50 text-amber-900 border border-amber-200 rounded p-2 flex items-center justify-between">
+                          <div className="mt-2.5 text-xs bg-amber-950/40 text-amber-200 border border-amber-800/60 rounded p-2 flex items-center justify-between">
                             <span>
                               &warning; Semantic ambiguity or constraint differences detected. Explicit human review and approval is required before compilation.
                             </span>
@@ -1637,12 +1637,12 @@ export default function ProjectWorkspacePage() {
                         )}
 
                         {/* Actions Row */}
-                        <div className="mt-3 pt-2.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+                        <div className="mt-3 pt-2.5 border-t border-zinc-800/70 flex flex-wrap items-center justify-between gap-2">
                           <div>
                             <button
                               type="button"
                               onClick={() => setExpandedAuditId(expandedAuditId === m.id ? null : m.id)}
-                              className="text-[11px] text-slate-500 hover:text-slate-800 underline font-medium"
+                              className="text-[11px] text-zinc-400 hover:text-zinc-200 underline font-medium"
                             >
                               {expandedAuditId === m.id ? "Hide Audit Trail &uarr;" : `Audit Trail (${m.decisionHistory?.length || 1}) &darr;`}
                             </button>
@@ -1652,7 +1652,7 @@ export default function ProjectWorkspacePage() {
                             <button
                               type="button"
                               onClick={() => openEditModal(m)}
-                              className="text-xs px-2.5 py-1 rounded font-medium border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 transition"
+                              className="text-xs px-2.5 py-1 rounded font-medium border border-zinc-700 text-zinc-300 bg-zinc-900/70 hover:bg-zinc-950 transition"
                             >
                               Edit
                             </button>
@@ -1662,7 +1662,7 @@ export default function ProjectWorkspacePage() {
                               className={`text-xs px-2.5 py-1 rounded font-medium border transition ${
                                 m.status === "rejected"
                                   ? "bg-rose-600 text-white border-rose-700"
-                                  : "bg-white text-slate-700 border-slate-300 hover:bg-rose-50 hover:text-rose-700"
+                                  : "bg-zinc-900/70 text-zinc-300 border-zinc-700 hover:bg-rose-950/40 hover:text-rose-400"
                               }`}
                             >
                               Reject
@@ -1673,7 +1673,7 @@ export default function ProjectWorkspacePage() {
                               className={`text-xs px-3 py-1 rounded font-medium transition ${
                                 m.status === "accepted"
                                   ? "bg-emerald-600 text-white"
-                                  : "bg-slate-900 text-white hover:bg-emerald-600"
+                                  : "bg-emerald-950/400 text-zinc-950 font-semibold hover:bg-emerald-600"
                               }`}
                             >
                               {m.status === "accepted" ? "Approved &check;" : "Approve Mapping"}
@@ -1683,19 +1683,19 @@ export default function ProjectWorkspacePage() {
 
                         {/* Decision History Audit Trail Drawer */}
                         {expandedAuditId === m.id && (
-                          <div className="mt-3 p-2.5 bg-slate-50 border border-slate-200 rounded text-xs space-y-1.5 font-mono text-[11px]">
-                            <div className="font-semibold font-sans text-[11px] text-slate-700">
+                          <div className="mt-3 p-2.5 bg-zinc-950 border border-zinc-800 rounded text-xs space-y-1.5 font-mono text-[11px]">
+                            <div className="font-semibold font-sans text-[11px] text-zinc-300">
                               Mapping Provenance & Decision History:
                             </div>
                             {m.decisionHistory?.map((entry, idx) => (
-                              <div key={idx} className="flex items-center justify-between text-slate-600 border-b border-slate-100 last:border-0 pb-1 last:pb-0">
+                              <div key={idx} className="flex items-center justify-between text-zinc-400 border-b border-zinc-800/70 last:border-0 pb-1 last:pb-0">
                                 <div>
-                                  <span className="font-bold text-slate-800 uppercase">{entry.action}</span>
+                                  <span className="font-bold text-zinc-200 uppercase">{entry.action}</span>
                                   {" by "}
-                                  <span className="text-slate-700">{entry.actor}</span>
-                                  {entry.note && <span className="text-slate-500"> &bull; {entry.note}</span>}
+                                  <span className="text-zinc-300">{entry.actor}</span>
+                                  {entry.note && <span className="text-zinc-400"> &bull; {entry.note}</span>}
                                 </div>
-                                <span className="text-slate-400 text-[10px]">
+                                <span className="text-zinc-500 text-[10px]">
                                   {new Date(entry.timestamp).toLocaleTimeString()}
                                 </span>
                               </div>
@@ -1713,10 +1713,10 @@ export default function ProjectWorkspacePage() {
           {/* TAB: TEST & ADAPTER */}
           {activeTab === "execute" && (
             <div className="space-y-4">
-              <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs flex items-center justify-between">
+              <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-xs flex items-center justify-between">
                 <div>
-                  <h2 className="text-sm font-semibold text-slate-900">Transformation IR Compiler & Interpreter</h2>
-                  <p className="text-xs text-slate-500">
+                  <h2 className="text-sm font-semibold text-zinc-100">Transformation IR Compiler & Interpreter</h2>
+                  <p className="text-xs text-zinc-400">
                     Executes approved TransformationPlan steps through trusted code. No eval; strict target schema validation.
                   </p>
                 </div>
@@ -1725,7 +1725,7 @@ export default function ProjectWorkspacePage() {
                     type="button"
                     onClick={compilePlan}
                     disabled={loading}
-                    className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 px-3 py-1.5 rounded font-medium transition"
+                    className="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 px-3 py-1.5 rounded font-medium transition"
                   >
                     Recompile Plan
                   </button>
@@ -1733,7 +1733,7 @@ export default function ProjectWorkspacePage() {
                     type="button"
                     onClick={executePlan}
                     disabled={loading || !plan}
-                    className="text-xs bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white px-3.5 py-1.5 rounded font-medium shadow-xs transition"
+                    className="text-xs bg-emerald-950/400 hover:bg-emerald-400 disabled:opacity-50 text-zinc-950 font-semibold px-3.5 py-1.5 rounded font-medium shadow-xs transition"
                   >
                     Run Interpreter & Validate
                   </button>
@@ -1741,19 +1741,19 @@ export default function ProjectWorkspacePage() {
               </div>
 
               {plan && (
-                <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs">
-                  <div className="flex items-center justify-between text-xs border-b border-slate-200 pb-2 mb-3">
-                    <span className="font-semibold text-slate-800">
+                <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-xs">
+                  <div className="flex items-center justify-between text-xs border-b border-zinc-800 pb-2 mb-3">
+                    <span className="font-semibold text-zinc-200">
                       Plan ID: <code className="font-mono">{plan.planId}</code>
                     </span>
-                    <span className="text-slate-500">
+                    <span className="text-zinc-400">
                       Compiled Steps: {plan.steps.length} | Version: {plan.version}
                     </span>
                   </div>
 
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs font-mono">
-                      <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px] font-sans">
+                      <thead className="bg-zinc-950 text-zinc-400 font-semibold border-b border-zinc-800 uppercase tracking-wider text-[11px] font-sans">
                         <tr>
                           <th className="py-2 px-2.5">Step</th>
                           <th className="py-2 px-2.5">Operation</th>
@@ -1762,14 +1762,14 @@ export default function ProjectWorkspacePage() {
                           <th className="py-2 px-2.5">Details</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100 text-[11px]">
+                      <tbody className="divide-y divide-zinc-800/60 text-[11px]">
                         {plan.steps.map((s, idx) => (
-                          <tr key={s.stepId} className="hover:bg-slate-50">
-                            <td className="py-1.5 px-2.5 text-slate-400">#{idx + 1}</td>
+                          <tr key={s.stepId} className="hover:bg-zinc-950">
+                            <td className="py-1.5 px-2.5 text-zinc-500">#{idx + 1}</td>
                             <td className="py-1.5 px-2.5 text-blue-700 font-bold">{s.operation}</td>
-                            <td className="py-1.5 px-2.5 text-slate-600">{s.sourcePath || "(none)"}</td>
-                            <td className="py-1.5 px-2.5 text-slate-900 font-semibold">{s.targetPath}</td>
-                            <td className="py-1.5 px-2.5 text-slate-500">
+                            <td className="py-1.5 px-2.5 text-zinc-400">{s.sourcePath || "(none)"}</td>
+                            <td className="py-1.5 px-2.5 text-zinc-100 font-semibold">{s.targetPath}</td>
+                            <td className="py-1.5 px-2.5 text-zinc-400">
                               {s.conversionType || (s.defaultValue !== undefined ? JSON.stringify(s.defaultValue) : "-")}
                             </td>
                           </tr>
@@ -1782,12 +1782,12 @@ export default function ProjectWorkspacePage() {
 
               {/* Phase 5: Interactive Test Runner & Fixture Selector */}
               {plan && (
-                <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs space-y-3">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                    <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-xs space-y-3">
+                  <div className="flex items-center justify-between border-b border-zinc-800/70 pb-2">
+                    <span className="text-xs font-bold text-zinc-200 uppercase tracking-wider">
                       Interactive Fixture Test Runner
                     </span>
-                    <span className="text-[11px] text-slate-500">
+                    <span className="text-[11px] text-zinc-400">
                       Choose a canonical test case or paste custom payload
                     </span>
                   </div>
@@ -1804,11 +1804,11 @@ export default function ProjectWorkspacePage() {
                         className={`p-2 rounded border text-left transition ${
                           selectedFixtureIdx === idx
                             ? "border-blue-500 bg-blue-50/50 text-blue-900 font-medium"
-                            : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                            : "border-zinc-800 bg-zinc-950 text-zinc-300 hover:bg-zinc-800"
                         }`}
                       >
                         <div className="font-semibold text-[11px]">Fixture #{idx + 1}</div>
-                        <div className="text-[10px] text-slate-500 truncate">{fix.description}</div>
+                        <div className="text-[10px] text-zinc-400 truncate">{fix.description}</div>
                       </button>
                     ))}
                     <button
@@ -1817,16 +1817,16 @@ export default function ProjectWorkspacePage() {
                       className={`p-2 rounded border text-left transition ${
                         selectedFixtureIdx === -1
                           ? "border-purple-500 bg-purple-50/50 text-purple-900 font-medium"
-                          : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                          : "border-zinc-800 bg-zinc-950 text-zinc-300 hover:bg-zinc-800"
                       }`}
                     >
                       <div className="font-semibold text-[11px]">Custom Payload</div>
-                      <div className="text-[10px] text-slate-500">Edit JSON input directly</div>
+                      <div className="text-[10px] text-zinc-400">Edit JSON input directly</div>
                     </button>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-[11px] font-semibold text-slate-700 flex items-center justify-between">
+                    <label className="text-[11px] font-semibold text-zinc-300 flex items-center justify-between">
                       <span>Source Payload Input (JSON):</span>
                       <button
                         type="button"
@@ -1844,7 +1844,7 @@ export default function ProjectWorkspacePage() {
                         setCustomPayloadText(e.target.value);
                         setSelectedFixtureIdx(-1);
                       }}
-                      className="font-mono text-xs w-full p-2.5 border border-slate-300 rounded bg-slate-50 text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-500 resize-none"
+                      className="font-mono text-xs w-full p-2.5 border border-zinc-700 rounded bg-zinc-950 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500 resize-none"
                     />
                   </div>
                 </div>
@@ -1852,24 +1852,24 @@ export default function ProjectWorkspacePage() {
 
               {executionResult && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs">
+                  <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-xs">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Transformed Payload</span>
+                      <span className="text-xs font-semibold text-zinc-300 uppercase tracking-wider">Transformed Payload</span>
                       <StatusChip
                         label={executionResult.success ? "Execution: Passed" : "Execution: Failed"}
                         variant={executionResult.success ? "executed" : "invalid"}
                       />
                     </div>
-                    <pre className="font-mono text-xs bg-slate-50 p-3 rounded border border-slate-200 overflow-auto max-h-72">
+                    <pre className="font-mono text-xs bg-zinc-950 p-3 rounded border border-zinc-800 overflow-auto max-h-72">
                       {JSON.stringify(executionResult.outputPayload, null, 2)}
                     </pre>
 
                     {executionResult.stepResults && executionResult.stepResults.length > 0 && (
-                      <div className="mt-3 pt-2 border-t border-slate-100">
+                      <div className="mt-3 pt-2 border-t border-zinc-800/70">
                         <button
                           type="button"
                           onClick={() => setShowStepInspector(!showStepInspector)}
-                          className="text-[11px] text-slate-500 hover:text-slate-800 underline font-medium"
+                          className="text-[11px] text-zinc-400 hover:text-zinc-200 underline font-medium"
                         >
                           {showStepInspector
                             ? "Hide Step Execution Details ▲"
@@ -1877,9 +1877,9 @@ export default function ProjectWorkspacePage() {
                         </button>
 
                         {showStepInspector && (
-                          <div className="mt-2 overflow-x-auto border border-slate-200 rounded">
+                          <div className="mt-2 overflow-x-auto border border-zinc-800 rounded">
                             <table className="w-full text-left font-mono text-[10px]">
-                              <thead className="bg-slate-100 text-slate-700">
+                              <thead className="bg-zinc-800 text-zinc-300">
                                 <tr>
                                   <th className="py-1 px-2">Path</th>
                                   <th className="py-1 px-2">Op</th>
@@ -1887,15 +1887,15 @@ export default function ProjectWorkspacePage() {
                                   <th className="py-1 px-2">Out</th>
                                 </tr>
                               </thead>
-                              <tbody className="divide-y divide-slate-100">
+                              <tbody className="divide-y divide-zinc-800/60">
                                 {executionResult.stepResults.map((st) => (
-                                  <tr key={st.stepId} className={st.success ? "" : "bg-rose-50"}>
-                                    <td className="py-1 px-2 text-slate-900 font-bold">{st.targetPath}</td>
+                                  <tr key={st.stepId} className={st.success ? "" : "bg-rose-950/40"}>
+                                    <td className="py-1 px-2 text-zinc-100 font-bold">{st.targetPath}</td>
                                     <td className="py-1 px-2 text-blue-700">{st.operation}</td>
-                                    <td className="py-1 px-2 text-slate-500 truncate max-w-[80px]">
+                                    <td className="py-1 px-2 text-zinc-400 truncate max-w-[80px]">
                                       {st.inputValue !== undefined ? JSON.stringify(st.inputValue) : "undefined"}
                                     </td>
-                                    <td className="py-1 px-2 text-slate-900 truncate max-w-[80px]">
+                                    <td className="py-1 px-2 text-zinc-100 truncate max-w-[80px]">
                                       {st.outputValue !== undefined ? JSON.stringify(st.outputValue) : "-"}
                                     </td>
                                   </tr>
@@ -1908,9 +1908,9 @@ export default function ProjectWorkspacePage() {
                     )}
                   </div>
 
-                  <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs">
+                  <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-xs">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Target Contract Validation</span>
+                      <span className="text-xs font-semibold text-zinc-300 uppercase tracking-wider">Target Contract Validation</span>
                       <StatusChip
                         label={validationResult?.valid ? "Target Contract: 100% Valid" : "Target Contract: Violations"}
                         variant={validationResult?.valid ? "accepted" : "error"}
@@ -1919,15 +1919,15 @@ export default function ProjectWorkspacePage() {
 
                     {validationResult && (
                       <div className="space-y-2 text-xs">
-                        <div className="text-slate-600">Checked fields: {validationResult.checkedFieldCount}</div>
+                        <div className="text-zinc-400">Checked fields: {validationResult.checkedFieldCount}</div>
                         {validationResult.valid ? (
-                          <div className="p-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded">
+                          <div className="p-3 bg-emerald-950/40 text-emerald-300 border border-emerald-800/60 rounded">
                             Target contract satisfied. All types, required fields, and enums conform.
                           </div>
                         ) : (
                           <div className="space-y-1">
                             {validationResult.errors.map((e, i) => (
-                              <div key={i} className="p-2 bg-rose-50 text-rose-800 border border-rose-200 rounded font-mono text-[11px]">
+                              <div key={i} className="p-2 bg-rose-950/40 text-rose-300 border border-rose-800/60 rounded font-mono text-[11px]">
                                 {e.message}
                               </div>
                             ))}
@@ -1935,11 +1935,11 @@ export default function ProjectWorkspacePage() {
                         )}
 
                         {testSuite && (
-                          <div className="mt-3 pt-3 border-t border-slate-200">
-                            <span className="font-semibold text-slate-700 block mb-1">Equivalence Test Suite:</span>
-                            <div className="text-xs text-slate-600">
+                          <div className="mt-3 pt-3 border-t border-zinc-800">
+                            <span className="font-semibold text-zinc-300 block mb-1">Equivalence Test Suite:</span>
+                            <div className="text-xs text-zinc-400">
                               Passed {testSuite.passedCases} of {testSuite.totalCases} fixtures. Interpreter vs Adapter Equivalence:{" "}
-                              <span className={testSuite.allEqual ? "text-emerald-700 font-bold" : "text-rose-600 font-bold"}>
+                              <span className={testSuite.allEqual ? "text-emerald-400 font-bold" : "text-rose-400 font-bold"}>
                                 {testSuite.allEqual ? "VERIFIED" : "MISMATCH"}
                               </span>
                             </div>
@@ -1952,15 +1952,15 @@ export default function ProjectWorkspacePage() {
               )}
 
               {adapterCode && (
-                <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs">
+                <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-xs">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-wider">
+                    <h3 className="text-xs font-semibold text-zinc-100 uppercase tracking-wider">
                       Generated Standalone TypeScript Adapter
                     </h3>
                     <button
                       type="button"
                       onClick={downloadAdapterCode}
-                      className="text-xs bg-slate-900 hover:bg-slate-800 text-white px-3 py-1 rounded font-medium shadow-xs transition"
+                      className="text-xs bg-emerald-950/400 hover:bg-emerald-400 text-zinc-950 font-semibold px-3 py-1 rounded font-medium shadow-xs transition"
                     >
                       Download .ts Adapter
                     </button>
@@ -1976,8 +1976,8 @@ export default function ProjectWorkspacePage() {
             <div className="space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <h2 className="text-sm font-semibold text-slate-900">Evidence-Backed Compatibility Report</h2>
-                  <p className="text-xs text-slate-500">
+                  <h2 className="text-sm font-semibold text-zinc-100">Evidence-Backed Compatibility Report</h2>
+                  <p className="text-xs text-zinc-400">
                     Cryptographic audit trail including spec checksums, diff matrix, approved mappings, test results, and Azure cloud certification.
                   </p>
                 </div>
@@ -1986,7 +1986,7 @@ export default function ProjectWorkspacePage() {
                     type="button"
                     onClick={generateReport}
                     disabled={loading || persistingToCloud}
-                    className="text-xs bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white px-3 py-1.5 rounded font-medium shadow-xs transition"
+                    className="text-xs bg-emerald-950/400 hover:bg-emerald-400 disabled:opacity-50 text-zinc-950 font-semibold px-3 py-1.5 rounded font-medium shadow-xs transition"
                   >
                     Assemble Report
                   </button>
@@ -1995,14 +1995,14 @@ export default function ProjectWorkspacePage() {
                       <button
                         type="button"
                         onClick={() => downloadReport("md")}
-                        className="text-xs bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-3 py-1.5 rounded font-medium transition"
+                        className="text-xs bg-zinc-900/70 hover:bg-zinc-950 text-zinc-300 border border-zinc-700 px-3 py-1.5 rounded font-medium transition"
                       >
                         Export .MD
                       </button>
                       <button
                         type="button"
                         onClick={() => downloadReport("json")}
-                        className="text-xs bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-3 py-1.5 rounded font-medium transition"
+                        className="text-xs bg-zinc-900/70 hover:bg-zinc-950 text-zinc-300 border border-zinc-700 px-3 py-1.5 rounded font-medium transition"
                       >
                         Export .JSON
                       </button>
@@ -2015,8 +2015,8 @@ export default function ProjectWorkspacePage() {
                 <>
                   {/* Executive Header & Cloud Certification Card */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs">
-                      <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block mb-1">
+                    <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-xs">
+                      <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
                         Compatibility Status
                       </span>
                       <div className="flex items-center space-x-2">
@@ -2030,22 +2030,22 @@ export default function ProjectWorkspacePage() {
                           }
                           label={reportData.status}
                         />
-                        <span className="text-xs font-mono font-bold text-slate-800">
+                        <span className="text-xs font-mono font-bold text-zinc-200">
                           {reportData.summary.compatibilityScore}%
                         </span>
                       </div>
-                      <p className="text-[11px] text-slate-500 mt-2">
+                      <p className="text-[11px] text-zinc-400 mt-2">
                         {reportData.summary.approvedMappingsCount} approved mappings across {reportData.summary.totalTargetFields} target fields.
                       </p>
                     </div>
 
-                    <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs">
-                      <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block mb-1">
+                    <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-xs">
+                      <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
                         Equivalence Verification
                       </span>
-                      <div className="text-xs text-slate-800 font-medium">
+                      <div className="text-xs text-zinc-200 font-medium">
                         {reportData.testResults.equivalenceVerified ? (
-                          <span className="text-emerald-700 font-bold flex items-center gap-1">
+                          <span className="text-emerald-400 font-bold flex items-center gap-1">
                             ✓ Deterministic Equality Verified
                           </span>
                         ) : (
@@ -2054,22 +2054,22 @@ export default function ProjectWorkspacePage() {
                           </span>
                         )}
                       </div>
-                      <p className="text-[11px] text-slate-500 mt-2">
+                      <p className="text-[11px] text-zinc-400 mt-2">
                         Passed {reportData.testResults.passedCasesCount} of {reportData.testResults.testCasesCount} deterministic test fixtures.
                       </p>
                     </div>
 
-                    <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs">
-                      <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block mb-1">
+                    <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-xs">
+                      <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
                         Azure Cloud Evidence
                       </span>
                       <div className="text-xs font-mono truncate">
                         {reportData.cloudEvidence?.azureSqlRunId ? (
-                          <span className="text-teal-700 font-medium" title={reportData.cloudEvidence.azureSqlRunId}>
+                          <span className="text-teal-400 font-medium" title={reportData.cloudEvidence.azureSqlRunId}>
                             SQL Run: {reportData.cloudEvidence.azureSqlRunId.slice(0, 16)}...
                           </span>
                         ) : (
-                          <span className="text-slate-500">Uncertified (Not persisted)</span>
+                          <span className="text-zinc-400">Uncertified (Not persisted)</span>
                         )}
                       </div>
                       <div className="mt-2 flex items-center space-x-1.5">
@@ -2085,7 +2085,7 @@ export default function ProjectWorkspacePage() {
                           type="button"
                           onClick={() => persistEvidence("azure_sql")}
                           disabled={persistingToCloud}
-                          className="text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-2 py-1 rounded font-medium transition"
+                          className="text-[11px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 px-2 py-1 rounded font-medium transition"
                         >
                           SQL Only
                         </button>
@@ -2093,7 +2093,7 @@ export default function ProjectWorkspacePage() {
                           type="button"
                           onClick={() => persistEvidence("azure_blob")}
                           disabled={persistingToCloud}
-                          className="text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-2 py-1 rounded font-medium transition"
+                          className="text-[11px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 px-2 py-1 rounded font-medium transition"
                         >
                           Blob Only
                         </button>
@@ -2102,32 +2102,32 @@ export default function ProjectWorkspacePage() {
                   </div>
 
                   {/* Cryptographic Digest Ledger */}
-                  <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs">
-                    <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-2">
+                  <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-xs">
+                    <h3 className="text-xs font-semibold text-zinc-100 uppercase tracking-wider mb-2">
                       Cryptographic SHA-256 Digest Ledger
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
-                      <div className="p-2.5 bg-slate-50 border border-slate-200 rounded">
-                        <span className="text-slate-500 block text-[10px] uppercase">Source Spec Checksum:</span>
-                        <span className="text-slate-800 break-all select-all font-semibold">
+                      <div className="p-2.5 bg-zinc-950 border border-zinc-800 rounded">
+                        <span className="text-zinc-400 block text-[10px] uppercase">Source Spec Checksum:</span>
+                        <span className="text-zinc-200 break-all select-all font-semibold">
                           {reportData.checksums.sourceSchemaHash}
                         </span>
                       </div>
-                      <div className="p-2.5 bg-slate-50 border border-slate-200 rounded">
-                        <span className="text-slate-500 block text-[10px] uppercase">Target Spec Checksum:</span>
-                        <span className="text-slate-800 break-all select-all font-semibold">
+                      <div className="p-2.5 bg-zinc-950 border border-zinc-800 rounded">
+                        <span className="text-zinc-400 block text-[10px] uppercase">Target Spec Checksum:</span>
+                        <span className="text-zinc-200 break-all select-all font-semibold">
                           {reportData.checksums.targetSchemaHash}
                         </span>
                       </div>
-                      <div className="p-2.5 bg-slate-50 border border-slate-200 rounded">
-                        <span className="text-slate-500 block text-[10px] uppercase">Plan IR Checksum:</span>
-                        <span className="text-slate-800 break-all select-all">
+                      <div className="p-2.5 bg-zinc-950 border border-zinc-800 rounded">
+                        <span className="text-zinc-400 block text-[10px] uppercase">Plan IR Checksum:</span>
+                        <span className="text-zinc-200 break-all select-all">
                           {reportData.checksums.planHash || "No compiled plan"}
                         </span>
                       </div>
-                      <div className="p-2.5 bg-slate-50 border border-slate-200 rounded">
-                        <span className="text-slate-500 block text-[10px] uppercase">Adapter Code Checksum:</span>
-                        <span className="text-slate-800 break-all select-all">
+                      <div className="p-2.5 bg-zinc-950 border border-zinc-800 rounded">
+                        <span className="text-zinc-400 block text-[10px] uppercase">Adapter Code Checksum:</span>
+                        <span className="text-zinc-200 break-all select-all">
                           {reportData.checksums.adapterHash || "No adapter generated"}
                         </span>
                       </div>
@@ -2138,16 +2138,16 @@ export default function ProjectWorkspacePage() {
 
               {/* View Format Selector & Content */}
               {reportMarkdown ? (
-                <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-xs space-y-3">
-                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-5 shadow-xs space-y-3">
+                  <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
                     <div className="flex items-center space-x-2">
                       <button
                         type="button"
                         onClick={() => setReportFormatView("markdown")}
                         className={`text-xs px-2.5 py-1 rounded font-medium transition ${
                           reportFormatView === "markdown"
-                            ? "bg-slate-900 text-white"
-                            : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                            ? "bg-emerald-950/400 text-zinc-950 font-semibold"
+                            : "bg-zinc-800 hover:bg-zinc-700 text-zinc-300"
                         }`}
                       >
                         Markdown View
@@ -2157,20 +2157,20 @@ export default function ProjectWorkspacePage() {
                         onClick={() => setReportFormatView("json")}
                         className={`text-xs px-2.5 py-1 rounded font-medium transition ${
                           reportFormatView === "json"
-                            ? "bg-slate-900 text-white"
-                            : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                            ? "bg-emerald-950/400 text-zinc-950 font-semibold"
+                            : "bg-zinc-800 hover:bg-zinc-700 text-zinc-300"
                         }`}
                       >
                         Structured JSON View
                       </button>
                     </div>
-                    <span className="text-[11px] font-mono text-slate-400">
+                    <span className="text-[11px] font-mono text-zinc-500">
                       Report ID: {reportData?.reportId || "N/A"}
                     </span>
                   </div>
 
                   {reportFormatView === "markdown" ? (
-                    <pre className="whitespace-pre-wrap font-mono text-xs bg-slate-50 p-4 rounded border border-slate-200 text-slate-800 overflow-auto max-h-[500px]">
+                    <pre className="whitespace-pre-wrap font-mono text-xs bg-zinc-950 p-4 rounded border border-zinc-800 text-zinc-200 overflow-auto max-h-[500px]">
                       {reportMarkdown}
                     </pre>
                   ) : (
@@ -2211,12 +2211,12 @@ export default function ProjectWorkspacePage() {
       {/* Manual Mapping Modal Dialog */}
       {isManualModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-lg shadow-xl border border-slate-200 max-w-lg w-full p-6 text-slate-900 space-y-4 animate-in fade-in duration-150">
-            <div className="border-b border-slate-200 pb-3">
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+          <div className="bg-zinc-900/70 rounded-lg shadow-xl border border-zinc-800 max-w-lg w-full p-6 text-zinc-100 space-y-4 animate-in fade-in duration-150">
+            <div className="border-b border-zinc-800 pb-3">
+              <h3 className="text-sm font-bold text-zinc-100 uppercase tracking-wider">
                 Create Deterministic Manual Mapping
               </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-zinc-400 mt-0.5">
                 Define an exact field mapping manually. Manual mappings bypass AI proposals and are immediately approved and recorded into the review ledger.
               </p>
             </div>
@@ -2224,7 +2224,7 @@ export default function ProjectWorkspacePage() {
             <form onSubmit={submitManualMapping} className="space-y-3.5 text-xs">
               {/* Target Path */}
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
+                <label className="block font-semibold text-zinc-300 mb-1">
                   Target Field Path <span className="text-rose-500">*</span>
                 </label>
                 {targetNormalized ? (
@@ -2232,7 +2232,7 @@ export default function ProjectWorkspacePage() {
                     value={formTargetPath}
                     onChange={(e) => setFormTargetPath(e.target.value)}
                     required
-                    className="w-full font-mono text-xs p-2 border border-slate-300 rounded bg-white text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                    className="w-full font-mono text-xs p-2 border border-zinc-700 rounded bg-zinc-900/70 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500"
                   >
                     {Object.keys(targetNormalized.flatFields)
                       .filter((p) => p !== "$")
@@ -2250,21 +2250,21 @@ export default function ProjectWorkspacePage() {
                     onChange={(e) => setFormTargetPath(e.target.value)}
                     placeholder="$.invoice.id"
                     required
-                    className="w-full font-mono text-xs p-2 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500"
+                    className="w-full font-mono text-xs p-2 border border-zinc-700 rounded focus:outline-none focus:ring-1 focus:ring-slate-500"
                   />
                 )}
               </div>
 
               {/* Source Path */}
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
+                <label className="block font-semibold text-zinc-300 mb-1">
                   Source Field Path (or empty for default/constructed)
                 </label>
                 {sourceNormalized ? (
                   <select
                     value={formSourcePath}
                     onChange={(e) => setFormSourcePath(e.target.value)}
-                    className="w-full font-mono text-xs p-2 border border-slate-300 rounded bg-white text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                    className="w-full font-mono text-xs p-2 border border-zinc-700 rounded bg-zinc-900/70 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500"
                   >
                     <option value="">(None - use default value or object constructor)</option>
                     {Object.keys(sourceNormalized.flatFields)
@@ -2281,20 +2281,20 @@ export default function ProjectWorkspacePage() {
                     value={formSourcePath}
                     onChange={(e) => setFormSourcePath(e.target.value)}
                     placeholder="$.billing.order_id"
-                    className="w-full font-mono text-xs p-2 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500"
+                    className="w-full font-mono text-xs p-2 border border-zinc-700 rounded focus:outline-none focus:ring-1 focus:ring-slate-500"
                   />
                 )}
               </div>
 
               {/* Operation */}
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
+                <label className="block font-semibold text-zinc-300 mb-1">
                   Transformation Operation <span className="text-rose-500">*</span>
                 </label>
                 <select
                   value={formOperation}
                   onChange={(e) => setFormOperation(e.target.value as AllowedOperation)}
-                  className="w-full font-mono text-xs p-2 border border-slate-300 rounded bg-white text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                  className="w-full font-mono text-xs p-2 border border-zinc-700 rounded bg-zinc-900/70 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500"
                 >
                   {ALLOWED_OPERATIONS.map((op) => (
                     <option key={op} value={op}>
@@ -2313,7 +2313,7 @@ export default function ProjectWorkspacePage() {
                   <select
                     value={formConversionType}
                     onChange={(e) => setFormConversionType(e.target.value)}
-                    className="w-full font-mono text-xs p-1.5 border border-purple-300 rounded bg-white text-purple-950 focus:outline-none"
+                    className="w-full font-mono text-xs p-1.5 border border-purple-300 rounded bg-zinc-900/70 text-purple-950 focus:outline-none"
                   >
                     {SUPPORTED_CONVERSIONS.map((c) => (
                       <option key={c} value={c}>
@@ -2325,8 +2325,8 @@ export default function ProjectWorkspacePage() {
               )}
 
               {formOperation === "default" && (
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded space-y-1">
-                  <label className="block font-semibold text-slate-800 mb-1">
+                <div className="p-3 bg-zinc-950 border border-zinc-800 rounded space-y-1">
+                  <label className="block font-semibold text-zinc-200 mb-1">
                     Default Value (literal string, number, or JSON) <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -2335,13 +2335,13 @@ export default function ProjectWorkspacePage() {
                     onChange={(e) => setFormDefaultValue(e.target.value)}
                     placeholder='"standard" or 0 or false'
                     required
-                    className="w-full font-mono text-xs p-1.5 border border-slate-300 rounded bg-white focus:outline-none"
+                    className="w-full font-mono text-xs p-1.5 border border-zinc-700 rounded bg-zinc-900/70 focus:outline-none"
                   />
                 </div>
               )}
 
               {formOperation === "lookup" && (
-                <div className="p-3 bg-indigo-50/70 border border-indigo-200 rounded space-y-1">
+                <div className="p-3 bg-indigo-950/40/70 border border-indigo-800/60 rounded space-y-1">
                   <label className="block font-semibold text-indigo-900 mb-1">
                     Lookup Table JSON (Dictionary mapping) <span className="text-rose-500">*</span>
                   </label>
@@ -2351,14 +2351,14 @@ export default function ProjectWorkspacePage() {
                     onChange={(e) => setFormLookupTable(e.target.value)}
                     placeholder={'{\n  "pending": "OPEN",\n  "paid": "SETTLED"\n}'}
                     required
-                    className="w-full font-mono text-xs p-1.5 border border-indigo-300 rounded bg-white focus:outline-none resize-none"
+                    className="w-full font-mono text-xs p-1.5 border border-indigo-300 rounded bg-zinc-900/70 focus:outline-none resize-none"
                   />
                 </div>
               )}
 
               {/* Rationale */}
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
+                <label className="block font-semibold text-zinc-300 mb-1">
                   Human Rationale / Mapping Notes
                 </label>
                 <input
@@ -2366,24 +2366,24 @@ export default function ProjectWorkspacePage() {
                   value={formRationale}
                   onChange={(e) => setFormRationale(e.target.value)}
                   placeholder="e.g., Target requires invoice currency code, defaulting to USD."
-                  className="w-full text-xs p-2 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500"
+                  className="w-full text-xs p-2 border border-zinc-700 rounded focus:outline-none focus:ring-1 focus:ring-slate-500"
                 />
               </div>
 
               {/* Buttons */}
-              <div className="pt-2 flex items-center justify-end space-x-2 border-t border-slate-200">
+              <div className="pt-2 flex items-center justify-end space-x-2 border-t border-zinc-800">
                 <button
                   type="button"
                   onClick={() => setIsManualModalOpen(false)}
                   disabled={loading}
-                  className="px-3 py-1.5 border border-slate-300 rounded text-slate-700 hover:bg-slate-100 transition"
+                  className="px-3 py-1.5 border border-zinc-700 rounded text-zinc-300 hover:bg-zinc-800 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading || !formTargetPath.trim()}
-                  className="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white rounded font-medium shadow-xs transition"
+                  className="px-4 py-1.5 bg-emerald-950/400 hover:bg-emerald-400 disabled:opacity-50 text-zinc-950 font-semibold rounded font-medium shadow-xs transition"
                 >
                   {loading ? "Saving..." : "Save & Approve Manual Mapping"}
                 </button>
@@ -2396,12 +2396,12 @@ export default function ProjectWorkspacePage() {
       {/* Edit Candidate Mapping Modal Dialog */}
       {activeMappingForEdit && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-lg shadow-xl border border-slate-200 max-w-lg w-full p-6 text-slate-900 space-y-4 animate-in fade-in duration-150">
-            <div className="border-b border-slate-200 pb-3">
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+          <div className="bg-zinc-900/70 rounded-lg shadow-xl border border-zinc-800 max-w-lg w-full p-6 text-zinc-100 space-y-4 animate-in fade-in duration-150">
+            <div className="border-b border-zinc-800 pb-3">
+              <h3 className="text-sm font-bold text-zinc-100 uppercase tracking-wider">
                 Edit Mapping: {activeMappingForEdit.targetPath}
               </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-zinc-400 mt-0.5">
                 Adjust source path, operation type, conversion rules, or default parameters. Saved changes update this proposal with status &apos;edited&apos;.
               </p>
             </div>
@@ -2409,25 +2409,25 @@ export default function ProjectWorkspacePage() {
             <form onSubmit={submitEditMapping} className="space-y-3.5 text-xs">
               {/* Target Path (read-only) */}
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Target Field Path</label>
+                <label className="block font-semibold text-zinc-300 mb-1">Target Field Path</label>
                 <input
                   type="text"
                   value={activeMappingForEdit.targetPath}
                   disabled
-                  className="w-full font-mono text-xs p-2 border border-slate-200 bg-slate-100 text-slate-600 rounded cursor-not-allowed"
+                  className="w-full font-mono text-xs p-2 border border-zinc-800 bg-zinc-800 text-zinc-400 rounded cursor-not-allowed"
                 />
               </div>
 
               {/* Source Path */}
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
+                <label className="block font-semibold text-zinc-300 mb-1">
                   Source Field Path (or empty for default/constructed)
                 </label>
                 {sourceNormalized ? (
                   <select
                     value={formSourcePath}
                     onChange={(e) => setFormSourcePath(e.target.value)}
-                    className="w-full font-mono text-xs p-2 border border-slate-300 rounded bg-white text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                    className="w-full font-mono text-xs p-2 border border-zinc-700 rounded bg-zinc-900/70 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500"
                   >
                     <option value="">(None - use default value or object constructor)</option>
                     {Object.keys(sourceNormalized.flatFields)
@@ -2444,20 +2444,20 @@ export default function ProjectWorkspacePage() {
                     value={formSourcePath}
                     onChange={(e) => setFormSourcePath(e.target.value)}
                     placeholder="$.billing.order_id"
-                    className="w-full font-mono text-xs p-2 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500"
+                    className="w-full font-mono text-xs p-2 border border-zinc-700 rounded focus:outline-none focus:ring-1 focus:ring-slate-500"
                   />
                 )}
               </div>
 
               {/* Operation */}
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
+                <label className="block font-semibold text-zinc-300 mb-1">
                   Transformation Operation <span className="text-rose-500">*</span>
                 </label>
                 <select
                   value={formOperation}
                   onChange={(e) => setFormOperation(e.target.value as AllowedOperation)}
-                  className="w-full font-mono text-xs p-2 border border-slate-300 rounded bg-white text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                  className="w-full font-mono text-xs p-2 border border-zinc-700 rounded bg-zinc-900/70 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500"
                 >
                   {ALLOWED_OPERATIONS.map((op) => (
                     <option key={op} value={op}>
@@ -2476,7 +2476,7 @@ export default function ProjectWorkspacePage() {
                   <select
                     value={formConversionType}
                     onChange={(e) => setFormConversionType(e.target.value)}
-                    className="w-full font-mono text-xs p-1.5 border border-purple-300 rounded bg-white text-purple-950 focus:outline-none"
+                    className="w-full font-mono text-xs p-1.5 border border-purple-300 rounded bg-zinc-900/70 text-purple-950 focus:outline-none"
                   >
                     {SUPPORTED_CONVERSIONS.map((c) => (
                       <option key={c} value={c}>
@@ -2488,8 +2488,8 @@ export default function ProjectWorkspacePage() {
               )}
 
               {formOperation === "default" && (
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded space-y-1">
-                  <label className="block font-semibold text-slate-800 mb-1">
+                <div className="p-3 bg-zinc-950 border border-zinc-800 rounded space-y-1">
+                  <label className="block font-semibold text-zinc-200 mb-1">
                     Default Value (literal string, number, or JSON) <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -2498,13 +2498,13 @@ export default function ProjectWorkspacePage() {
                     onChange={(e) => setFormDefaultValue(e.target.value)}
                     placeholder='"standard" or 0 or false'
                     required
-                    className="w-full font-mono text-xs p-1.5 border border-slate-300 rounded bg-white focus:outline-none"
+                    className="w-full font-mono text-xs p-1.5 border border-zinc-700 rounded bg-zinc-900/70 focus:outline-none"
                   />
                 </div>
               )}
 
               {formOperation === "lookup" && (
-                <div className="p-3 bg-indigo-50/70 border border-indigo-200 rounded space-y-1">
+                <div className="p-3 bg-indigo-950/40/70 border border-indigo-800/60 rounded space-y-1">
                   <label className="block font-semibold text-indigo-900 mb-1">
                     Lookup Table JSON (Dictionary mapping) <span className="text-rose-500">*</span>
                   </label>
@@ -2514,32 +2514,32 @@ export default function ProjectWorkspacePage() {
                     onChange={(e) => setFormLookupTable(e.target.value)}
                     placeholder={'{\n  "pending": "OPEN",\n  "paid": "SETTLED"\n}'}
                     required
-                    className="w-full font-mono text-xs p-1.5 border border-indigo-300 rounded bg-white focus:outline-none resize-none"
+                    className="w-full font-mono text-xs p-1.5 border border-indigo-300 rounded bg-zinc-900/70 focus:outline-none resize-none"
                   />
                 </div>
               )}
 
               {/* Warning on high-risk / lossy conversion */}
               {(formOperation === "typeConversion" || formOperation === "default" || formOperation === "lookup") && (
-                <div className="p-2 bg-amber-50 border border-amber-200 rounded text-amber-900 text-[11px]">
+                <div className="p-2 bg-amber-950/40 border border-amber-800/60 rounded text-amber-200 text-[11px]">
                   &warning; Note: Modifying this mapping to {formOperation} requires human verification. An audit record will be attached to the mapping.
                 </div>
               )}
 
               {/* Buttons */}
-              <div className="pt-2 flex items-center justify-end space-x-2 border-t border-slate-200">
+              <div className="pt-2 flex items-center justify-end space-x-2 border-t border-zinc-800">
                 <button
                   type="button"
                   onClick={() => setActiveMappingForEdit(null)}
                   disabled={loading}
-                  className="px-3 py-1.5 border border-slate-300 rounded text-slate-700 hover:bg-slate-100 transition"
+                  className="px-3 py-1.5 border border-zinc-700 rounded text-zinc-300 hover:bg-zinc-800 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white rounded font-medium shadow-xs transition"
+                  className="px-4 py-1.5 bg-emerald-950/400 hover:bg-emerald-400 disabled:opacity-50 text-zinc-950 font-semibold rounded font-medium shadow-xs transition"
                 >
                   {loading ? "Saving..." : "Save Mapping Edits"}
                 </button>
@@ -2549,7 +2549,7 @@ export default function ProjectWorkspacePage() {
         </div>
       )}
 
-      <footer className="border-t border-slate-200 bg-white py-3 text-center text-xs text-slate-400">
+      <footer className="border-t border-zinc-800 bg-zinc-900/70 py-3 text-center text-xs text-zinc-500">
         UNIFLOW ∞ — API Compatibility Compiler • Cloud Security • System Design • DBMS • PBL / DP-900 Azure
       </footer>
     </div>
