@@ -1,13 +1,23 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--font-serif",
+});
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+});
 
 export const metadata: Metadata = {
-  title: "UNIFLOW ∞ — API Compatibility Compiler",
+  title: "UNIFLOW — Deterministic API Compatibility Compiler",
   description:
-    "Deterministic API contract compatibility, validation, and adapter generation across OpenAPI 3.x and JSON Schema.",
+    "Compile breaking API migrations into verified TypeScript adapters across OpenAPI 3.x and JSON Schema.",
 };
 
 export default function RootLayout({
@@ -17,7 +27,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.variable} font-sans antialiased bg-[#0b0f17] text-slate-100 min-h-screen`}>
+      <body
+        className={`${inter.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} font-sans antialiased bg-[#0b0a09] text-[#f5f2eb] min-h-screen`}
+      >
         {children}
       </body>
     </html>
