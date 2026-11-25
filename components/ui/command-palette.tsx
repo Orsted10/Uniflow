@@ -19,67 +19,97 @@ export function CommandPalette({
 }: CommandPaletteProps) {
   const router = useRouter();
   const [query, setQuery] = React.useState("");
+  const [selectedIndex, setSelectedIndex] = React.useState(0);
 
   React.useEffect(() => {
-    if (!isOpen) setQuery("");
+    if (!isOpen) {
+      setQuery("");
+      setSelectedIndex(0);
+    }
   }, [isOpen]);
+
+  const commands = React.useMemo(
+    () => [
+      {
+        id: "launch-canonical",
+        label: "Create & Open Canonical Billing v1 → Invoice v2 Project",
+        hint: "Quick Start",
+        run: () => {
+          onClose();
+          if (onLaunchCanonical) onLaunchCanonical();
+          else router.push("/projects/new");
+        },
+      },
+      {
+        id: "new-project",
+        label: "Create New Compatibility Workspace",
+        hint: "/projects/new",
+        run: () => {
+          onClose();
+          router.push("/projects/new");
+        },
+      },
+      {
+        id: "browse-projects",
+        label: "Browse All Workspaces",
+        hint: "/projects",
+        run: () => {
+          onClose();
+          router.push("/projects");
+        },
+      },
+      {
+        id: "login",
+        label: "Authentication & Developer Session",
+        hint: "/login",
+        run: () => {
+          onClose();
+          router.push("/login");
+        },
+      },
+      ...projects.map((p) => ({
+        id: `proj-${p.id}`,
+        label: `Open Workspace: ${p.name}`,
+        hint: p.id,
+        run: () => {
+          onClose();
+          router.push(`/projects/${p.id}`);
+        },
+      })),
+    ],
+    [onClose, onLaunchCanonical, projects, router]
+  );
+
+  const filtered = React.useMemo(
+    () =>
+      commands.filter(
+        (c) =>
+          c.label.toLowerCase().includes(query.toLowerCase()) ||
+          c.hint.toLowerCase().includes(query.toLowerCase())
+      ),
+    [commands, query]
+  );
+
+  React.useEffect(() => {
+    setSelectedIndex(0);
+  }, [query]);
 
   if (!isOpen) return null;
 
-  const commands = [
-    {
-      id: "launch-canonical",
-      label: "Launch Canonical Billing v1 → Invoice v2 Workbench",
-      hint: "Action",
-      run: () => {
-        onClose();
-        if (onLaunchCanonical) onLaunchCanonical();
-        else router.push("/projects/new");
-      },
-    },
-    {
-      id: "new-project",
-      label: "Create New Compatibility Workspace",
-      hint: "/projects/new",
-      run: () => {
-        onClose();
-        router.push("/projects/new");
-      },
-    },
-    {
-      id: "browse-projects",
-      label: "Browse All Workspaces",
-      hint: "/projects",
-      run: () => {
-        onClose();
-        router.push("/projects");
-      },
-    },
-    {
-      id: "login",
-      label: "Developer Session & Auth",
-      hint: "/login",
-      run: () => {
-        onClose();
-        router.push("/login");
-      },
-    },
-    ...projects.map((p) => ({
-      id: `proj-${p.id}`,
-      label: `Open Workspace: ${p.name}`,
-      hint: p.id,
-      run: () => {
-        onClose();
-        router.push(`/projects/${p.id}`);
-      },
-    })),
-  ];
-
-  const filtered = commands.filter(
-    (c) =>
-      c.label.toLowerCase().includes(query.toLowerCase()) ||
-      c.hint.toLowerCase().includes(query.toLowerCase())
-  );
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setSelectedIndex((prev) => (filtered.length > 0 ? (prev + 1) % filtered.length : 0));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSelectedIndex((prev) =>
+        filtered.length > 0 ? (prev - 1 + filtered.length) % filtered.length : 0
+      );
+    } else if (e.key === "Enter" && filtered[selectedIndex]) {
+      e.preventDefault();
+      filtered[selectedIndex].run();
+    }
+  }
 
   return (
     <div
@@ -87,7 +117,7 @@ export function CommandPalette({
       aria-modal="true"
       aria-label="Command palette"
       onClick={onClose}
-      className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-md flex items-start justify-center pt-[16vh] px-4"
+      className="fixed inset-0 z-[100] bg-black/75 backdrop-blur-md flex items-start justify-center pt-[16vh] px-4"
     >
       <div
         onClick={(e) => e.stopPropagation()}
@@ -110,29 +140,33 @@ export function CommandPalette({
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="Jump to workspace, compile, or navigate..."
             className="w-full bg-transparent text-xs text-white placeholder-zinc-500 focus:outline-none"
           />
-          <kbd className="text-[10px] font-mono text-zinc-500 bg-white/[0.05] border border-white/[0.08] px-1.5 py-0.5 rounded">
+          <kbd className="text-[10px] font-mono text-zinc-400 bg-white/[0.06] border border-white/[0.08] px-1.5 py-0.5 rounded">
             ESC
           </kbd>
         </div>
 
-        <div className="max-h-72 overflow-y-auto p-2 divide-y divide-white/[0.04]">
+        <div className="max-h-72 overflow-y-auto p-2 space-y-0.5">
           {filtered.length === 0 ? (
             <div className="py-8 text-center text-xs text-zinc-500">No matching commands.</div>
           ) : (
-            filtered.map((cmd) => (
+            filtered.map((cmd, idx) => (
               <button
                 key={cmd.id}
                 type="button"
+                onMouseEnter={() => setSelectedIndex(idx)}
                 onClick={cmd.run}
-                className="w-full px-3 py-2.5 rounded-xl flex items-center justify-between text-left hover:bg-white/[0.06] transition text-xs group"
+                className={`w-full px-3 py-2.5 rounded-xl flex items-center justify-between text-left transition text-xs ${
+                  idx === selectedIndex
+                    ? "bg-[#f3e7d3]/15 text-white border border-[#f3e7d3]/25"
+                    : "text-zinc-300 hover:bg-white/[0.05] border border-transparent"
+                }`}
               >
-                <span className="text-zinc-200 group-hover:text-white font-medium truncate pr-3">
-                  {cmd.label}
-                </span>
-                <span className="font-mono text-[10px] text-zinc-500 shrink-0">{cmd.hint}</span>
+                <span className="font-medium truncate pr-3">{cmd.label}</span>
+                <span className="font-mono text-[10px] text-zinc-400 shrink-0">{cmd.hint}</span>
               </button>
             ))
           )}
