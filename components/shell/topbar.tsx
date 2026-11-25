@@ -19,7 +19,6 @@ export function TopBar() {
   const [cloudStatus, setCloudStatus] = React.useState<CloudServices | null>(null);
 
   React.useEffect(() => {
-    // 1. Always fetch live multi-cloud health (no early return!)
     fetch("/api/cloud/status")
       .then((r) => r.json())
       .then((data) => {
@@ -27,7 +26,6 @@ export function TopBar() {
       })
       .catch(() => {});
 
-    // 2. Check Supabase browser auth session
     const supabase = createSupabaseBrowserClient();
     if (supabase) {
       supabase.auth.getUser().then(({ data: { user } }) => {
@@ -56,60 +54,55 @@ export function TopBar() {
   }
 
   return (
-    <header className="border-b border-zinc-800/80 bg-[#09090b]/90 backdrop-blur-md sticky top-0 z-50 text-zinc-100">
+    <header className="border-b border-white/[0.07] bg-[#050507]/75 backdrop-blur-2xl sticky top-0 z-50 text-zinc-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-4">
-        {/* Brand & Primary Nav */}
+        {/* Brand & Segmented Nav */}
         <div className="flex items-center gap-6">
           <Link
             href="/"
-            className="flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-500 rounded px-1 transition"
+            className="flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/40 rounded-lg px-1 transition"
           >
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="text-emerald-400 shrink-0"
-              aria-hidden="true"
-            >
-              <rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" strokeWidth="1.75" />
-              <path
-                d="M7.5 12C7.5 10.3431 8.84315 9 10.5 9C12.1569 9 13.5 10.3431 13.5 12C13.5 13.6569 14.8431 15 16.5 15C18.1569 15 19.5 13.6569 19.5 12"
-                stroke="currentColor"
-                strokeWidth="1.75"
-                strokeLinecap="round"
-              />
-              <circle cx="7.5" cy="12" r="1.25" fill="currentColor" />
-            </svg>
-            <span className="font-semibold tracking-tight text-sm text-white">UNIFLOW</span>
+            <div className="w-7 h-7 rounded-lg bg-white/[0.08] border border-white/[0.12] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)] flex items-center justify-center text-white">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M5 12C5 9.79086 6.79086 8 9 8C11.2091 8 12.5 10 14.5 12C16.5 14 17.7909 16 20 16C21.1046 16 22 15.1046 22 14"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <circle cx="5" cy="12" r="2" fill="currentColor" />
+              </svg>
+            </div>
+            <span className="font-semibold tracking-[-0.02em] text-sm text-white">UNIFLOW</span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-1 text-xs font-medium">
+          <nav className="hidden md:flex items-center gap-1 p-1 rounded-full bg-white/[0.04] border border-white/[0.06] text-xs font-medium">
             <Link
               href="/"
-              className={`px-2.5 py-1.5 rounded-md transition-colors ${
-                pathname === "/" ? "text-white bg-zinc-800/80" : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900"
+              className={`px-3 py-1 rounded-full transition-all duration-150 ${
+                pathname === "/"
+                  ? "bg-white/[0.12] text-white shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)]"
+                  : "text-zinc-400 hover:text-zinc-100"
               }`}
             >
               Overview
             </Link>
             <Link
               href="/projects"
-              className={`px-2.5 py-1.5 rounded-md transition-colors ${
+              className={`px-3 py-1 rounded-full transition-all duration-150 ${
                 pathname === "/projects"
-                  ? "text-white bg-zinc-800/80"
-                  : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900"
+                  ? "bg-white/[0.12] text-white shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)]"
+                  : "text-zinc-400 hover:text-zinc-100"
               }`}
             >
               Workspaces
             </Link>
             <Link
               href="/projects/new"
-              className={`px-2.5 py-1.5 rounded-md transition-colors ${
+              className={`px-3 py-1 rounded-full transition-all duration-150 ${
                 pathname === "/projects/new"
-                  ? "text-white bg-zinc-800/80"
-                  : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900"
+                  ? "bg-white/[0.12] text-white shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)]"
+                  : "text-zinc-400 hover:text-zinc-100"
               }`}
             >
               New Project
@@ -117,27 +110,27 @@ export function TopBar() {
           </nav>
         </div>
 
-        {/* Live Cloud Telemetry Strip + Session */}
+        {/* Translucent Telemetry Capsule & Auth */}
         <div className="flex items-center gap-3 text-xs">
-          <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-900/90 border border-zinc-800 font-mono text-[11px]">
+          <div className="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.03] border border-white/[0.07] font-mono text-[11px]">
             <StatusDot
               label="Supabase"
               active={Boolean(cloudStatus?.supabase.configured)}
               tooltip={cloudStatus?.supabase.configured ? "Supabase PostgreSQL Connected" : "Local Store Fallback"}
             />
-            <span className="text-zinc-700">/</span>
+            <span className="text-white/15">&bull;</span>
             <StatusDot
               label="Groq"
               active={Boolean(cloudStatus?.groq.configured)}
               tooltip={cloudStatus?.groq.configured ? `Groq ${cloudStatus.groq.model}` : "Groq Offline"}
             />
-            <span className="text-zinc-700">/</span>
+            <span className="text-white/15">&bull;</span>
             <StatusDot
               label="Azure SQL"
               active={Boolean(cloudStatus?.azureSql.configured)}
               tooltip={cloudStatus?.azureSql.configured ? "Azure SQL Evidence Store Ready" : "Simulated Ledger"}
             />
-            <span className="text-zinc-700">/</span>
+            <span className="text-white/15">&bull;</span>
             <StatusDot
               label="Azure Blob"
               active={Boolean(cloudStatus?.azureBlob.configured)}
@@ -147,13 +140,13 @@ export function TopBar() {
 
           {userEmail ? (
             <div className="flex items-center gap-2">
-              <span className="font-mono text-[11px] text-zinc-300 bg-zinc-900 px-2.5 py-1 rounded-md border border-zinc-800 max-w-[160px] truncate">
+              <span className="font-mono text-[11px] text-zinc-300 bg-white/[0.05] px-3 py-1 rounded-full border border-white/[0.08] max-w-[160px] truncate">
                 {userEmail}
               </span>
               <button
                 type="button"
                 onClick={handleSignOut}
-                className="text-xs text-zinc-400 hover:text-rose-400 font-medium px-2 py-1 transition"
+                className="text-xs text-zinc-400 hover:text-white font-medium px-2 py-1 transition"
               >
                 Sign out
               </button>
@@ -161,7 +154,7 @@ export function TopBar() {
           ) : (
             <Link
               href="/login"
-              className="inline-flex items-center gap-1.5 text-xs text-zinc-200 hover:text-white border border-zinc-800 hover:border-zinc-700 bg-zinc-900 px-3 py-1.5 rounded-md transition font-medium"
+              className="inline-flex items-center text-xs text-zinc-100 hover:text-white border border-white/[0.1] hover:border-white/[0.2] bg-white/[0.05] hover:bg-white/[0.09] px-3.5 py-1.5 rounded-full transition font-medium"
             >
               Sign in
             </Link>
@@ -174,8 +167,12 @@ export function TopBar() {
 
 function StatusDot({ label, active, tooltip }: { label: string; active: boolean; tooltip: string }) {
   return (
-    <span title={tooltip} className="inline-flex items-center gap-1.5 text-zinc-300 px-1 cursor-default">
-      <span className={`w-1.5 h-1.5 rounded-full ${active ? "bg-emerald-400" : "bg-zinc-600"}`} />
+    <span title={tooltip} className="inline-flex items-center gap-1.5 px-0.5 cursor-default">
+      <span
+        className={`w-1.5 h-1.5 rounded-full ${
+          active ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" : "bg-zinc-600"
+        }`}
+      />
       <span className={active ? "text-zinc-200" : "text-zinc-500"}>{label}</span>
     </span>
   );

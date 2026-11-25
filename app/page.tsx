@@ -36,7 +36,6 @@ export default function LandingDashboardPage() {
   const [loadingProjects, setLoadingProjects] = React.useState(true);
   const [launchingSandbox, setLaunchingSandbox] = React.useState(false);
 
-  // Real Live Interactive Compiler State
   const [sandboxTab, setSandboxTab] = React.useState<SandboxTab>("execute");
   const [fixtureIdx, setFixtureIdx] = React.useState<number>(0);
   const [payloadText, setPayloadText] = React.useState<string>(
@@ -65,7 +64,6 @@ export default function LandingDashboardPage() {
       .catch(() => {});
   }, []);
 
-  // Compile real canonical specs & plan once deterministically
   const liveCompiled = React.useMemo(() => {
     const sourceNorm = normalizeSpecification(parseSpecificationText(CANONICAL_SOURCE_SPEC), "source");
     const targetNorm = normalizeSpecification(parseSpecificationText(CANONICAL_TARGET_SPEC), "target");
@@ -91,7 +89,6 @@ export default function LandingDashboardPage() {
     return { sourceNorm, targetNorm, diff, plan, adapterCode };
   }, []);
 
-  // Execute real interpreter + target validator on user's live JSON input
   const liveRun = React.useMemo(() => {
     if (!liveCompiled.plan) return null;
     try {
@@ -168,24 +165,24 @@ export default function LandingDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#050507] text-[#f5f5f7] flex flex-col font-sans">
       <TopBar />
 
       <main className="flex-1">
-        {/* Hero + Live Interactive Compiler Split */}
-        <section className="border-b border-zinc-800/80 bg-dot-grid">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
-              {/* Left: Authoritative Value Prop & Real Actions */}
-              <div className="lg:col-span-5 space-y-6 pt-2">
-                <h1 className="text-3xl sm:text-4xl lg:text-[42px] font-semibold tracking-[-0.03em] text-white leading-[1.1]">
+        {/* Hero + macOS-Grade Live Compiler Window */}
+        <section className="border-b border-white/[0.07] apple-ambient">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 items-center">
+              {/* Left: Crisp Apple Editorial Typography */}
+              <div className="lg:col-span-5 space-y-7">
+                <h1 className="text-4xl sm:text-5xl font-semibold tracking-[-0.035em] text-white leading-[1.06]">
                   Compile breaking API migrations into verified adapters.
                 </h1>
 
-                <p className="text-sm sm:text-[15px] text-zinc-400 leading-relaxed max-w-lg">
-                  Ingest OpenAPI 3.x and JSON Schemas, inspect deterministic 9-facet diffs, review
-                  Groq AI mapping proposals with mandatory human gates, and emit zero-eval TypeScript
-                  adapters backed by Azure SQL &amp; Blob evidence.
+                <p className="text-[15px] text-zinc-400 leading-[1.6] max-w-md">
+                  Compare OpenAPI 3.x and JSON Schemas with deterministic 9-facet diffs, review Groq
+                  AI proposals behind human gates, and ship zero-eval TypeScript adapters backed by
+                  Azure SQL &amp; Blob evidence.
                 </p>
 
                 <div className="flex flex-wrap items-center gap-3 pt-1">
@@ -193,103 +190,105 @@ export default function LandingDashboardPage() {
                     type="button"
                     onClick={launchCanonicalWorkspace}
                     disabled={launchingSandbox}
-                    className="inline-flex items-center justify-center text-xs font-semibold px-4 py-2.5 rounded-md bg-emerald-500 text-zinc-950 hover:bg-emerald-400 disabled:opacity-60 transition shadow-sm"
+                    className="inline-flex items-center justify-center text-xs font-semibold px-5 py-2.5 rounded-full bg-white text-black hover:bg-zinc-200 disabled:opacity-60 transition-all duration-150 shadow-[0_1px_20px_rgba(255,255,255,0.16)]"
                   >
-                    {launchingSandbox ? "Initializing Workspace..." : "Launch Live Workbench →"}
+                    {launchingSandbox ? "Initializing..." : "Launch Live Workbench"}
                   </button>
                   <Link
                     href="/projects/new"
-                    className="inline-flex items-center justify-center text-xs font-medium px-4 py-2.5 rounded-md border border-zinc-800 bg-zinc-900/90 text-zinc-200 hover:bg-zinc-800 hover:text-white transition"
+                    className="inline-flex items-center justify-center text-xs font-medium px-5 py-2.5 rounded-full border border-white/[0.12] bg-white/[0.05] text-zinc-100 hover:bg-white/[0.1] hover:border-white/[0.2] transition-all duration-150 backdrop-blur-md"
                   >
                     New Custom Project
                   </Link>
                 </div>
 
-                {/* Live Infrastructure Ledger Strip (Not a 4-card grid!) */}
-                <div className="pt-4 border-t border-zinc-800/80 space-y-2.5">
-                  <div className="text-[11px] font-medium text-zinc-500">
-                    Connected Infrastructure
+                {/* Tactile Hardware-Style Spec Strip */}
+                <div className="pt-6 border-t border-white/[0.08] grid grid-cols-2 gap-x-6 gap-y-3 text-xs">
+                  <div>
+                    <span className="text-zinc-500 block text-[11px]">System of Record</span>
+                    <span className="font-mono text-[11px] text-zinc-200">
+                      {cloudStatus?.supabase.configured ? "Supabase PostgreSQL (RLS)" : "Local In-Memory"}
+                    </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-xs font-mono">
-                    <div className="flex items-center justify-between py-1 border-b border-zinc-800/60">
-                      <span className="text-zinc-400">PostgreSQL</span>
-                      <span className={cloudStatus?.supabase.configured ? "text-emerald-400" : "text-zinc-500"}>
-                        {cloudStatus?.supabase.configured ? "Supabase RLS" : "Local Store"}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between py-1 border-b border-zinc-800/60">
-                      <span className="text-zinc-400">Advisory AI</span>
-                      <span className={cloudStatus?.groq.configured ? "text-emerald-400" : "text-zinc-500"}>
-                        {cloudStatus?.groq.configured ? "gpt-oss-120b" : "Offline"}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between py-1 border-b border-zinc-800/60">
-                      <span className="text-zinc-400">Evidence SQL</span>
-                      <span className={cloudStatus?.azureSql.configured ? "text-emerald-400" : "text-zinc-500"}>
-                        {cloudStatus?.azureSql.configured ? "Azure SQL" : "Simulated"}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between py-1 border-b border-zinc-800/60">
-                      <span className="text-zinc-400">Artifacts</span>
-                      <span className={cloudStatus?.azureBlob.configured ? "text-emerald-400" : "text-zinc-500"}>
-                        {cloudStatus?.azureBlob.configured ? "Azure Blob" : "In-Memory"}
-                      </span>
-                    </div>
+                  <div>
+                    <span className="text-zinc-500 block text-[11px]">Advisory Engine</span>
+                    <span className="font-mono text-[11px] text-zinc-200">
+                      {cloudStatus?.groq.configured ? "Groq openai/gpt-oss-120b" : "Deterministic Fallback"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-zinc-500 block text-[11px]">Evidence Ledger</span>
+                    <span className="font-mono text-[11px] text-zinc-200">
+                      {cloudStatus?.azureSql.configured ? "Azure SQL Serverless" : "Simulated Ledger"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-zinc-500 block text-[11px]">Artifact Store</span>
+                    <span className="font-mono text-[11px] text-zinc-200">
+                      {cloudStatus?.azureBlob.configured ? "Azure Blob (uniflow-specs)" : "In-Memory Store"}
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {/* Right: Live Interactive Compiler Sandbox (Real Engine Running Live) */}
-              <div className="lg:col-span-7 bg-[#0c0c0f] border border-zinc-800 rounded-xl overflow-hidden shadow-2xl">
-                {/* Sandbox Header Bar */}
-                <div className="px-4 py-2.5 bg-zinc-950 border-b border-zinc-800 flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-1.5 text-xs">
+              {/* Right: Frosted Glass macOS Studio Window */}
+              <div className="lg:col-span-7 apple-glass rounded-2xl overflow-hidden">
+                {/* Window Chrome + Segmented Control */}
+                <div className="px-4 py-3 bg-white/[0.025] border-b border-white/[0.07] flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-white/[0.14]" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-white/[0.14]" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-white/[0.14]" />
+                  </div>
+
+                  {/* macOS Segmented Control */}
+                  <div className="flex items-center p-0.5 rounded-full bg-black/40 border border-white/[0.07] text-[11px] font-medium">
                     <button
                       type="button"
                       onClick={() => setSandboxTab("execute")}
-                      className={`px-2.5 py-1 rounded-md font-medium transition ${
+                      className={`px-3 py-1 rounded-full transition-all duration-150 ${
                         sandboxTab === "execute"
-                          ? "bg-zinc-800 text-white"
+                          ? "bg-white/[0.14] text-white shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]"
                           : "text-zinc-400 hover:text-zinc-200"
                       }`}
                     >
-                      Live Execution
+                      Execution
                     </button>
                     <button
                       type="button"
                       onClick={() => setSandboxTab("diff")}
-                      className={`px-2.5 py-1 rounded-md font-medium transition ${
+                      className={`px-3 py-1 rounded-full transition-all duration-150 ${
                         sandboxTab === "diff"
-                          ? "bg-zinc-800 text-white"
+                          ? "bg-white/[0.14] text-white shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]"
                           : "text-zinc-400 hover:text-zinc-200"
                       }`}
                     >
-                      Structural Diff ({liveCompiled.diff.items.length})
+                      Diff ({liveCompiled.diff.items.length})
                     </button>
                     <button
                       type="button"
                       onClick={() => setSandboxTab("adapter")}
-                      className={`px-2.5 py-1 rounded-md font-medium transition ${
+                      className={`px-3 py-1 rounded-full transition-all duration-150 ${
                         sandboxTab === "adapter"
-                          ? "bg-zinc-800 text-white"
+                          ? "bg-white/[0.14] text-white shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]"
                           : "text-zinc-400 hover:text-zinc-200"
                       }`}
                     >
-                      Generated Adapter (.ts)
+                      Adapter.ts
                     </button>
                   </div>
 
-                  <span className="font-mono text-[10px] text-zinc-500">
-                    BillingOrder v1.2 → InvoiceFulfillment v2.0
+                  <span className="hidden sm:inline font-mono text-[10px] text-zinc-500">
+                    v1.2 → v2.0
                   </span>
                 </div>
 
-                {/* Tab 1: Real-Time Interpreter & Validator */}
+                {/* Tab 1: Live Execution */}
                 {sandboxTab === "execute" && (
-                  <div className="p-4 space-y-4">
+                  <div className="p-5 space-y-4">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="text-[11px] font-medium text-zinc-400">
-                        Source Payload (Editable JSON)
+                      <span className="text-xs font-medium text-zinc-300">
+                        Source JSON Input
                       </span>
                       <div className="flex items-center gap-1.5">
                         {CANONICAL_TEST_FIXTURES.map((f, idx) => (
@@ -297,47 +296,45 @@ export default function LandingDashboardPage() {
                             key={idx}
                             type="button"
                             onClick={() => handleSelectFixture(idx)}
-                            className={`text-[10px] font-mono px-2 py-0.5 rounded border transition ${
+                            className={`text-[10px] font-mono px-2.5 py-1 rounded-full border transition ${
                               fixtureIdx === idx
-                                ? "bg-zinc-800 text-zinc-100 border-zinc-700"
-                                : "bg-zinc-950 text-zinc-400 border-zinc-800 hover:text-zinc-200"
+                                ? "bg-white/[0.12] text-white border-white/[0.2]"
+                                : "bg-black/30 text-zinc-400 border-white/[0.06] hover:text-zinc-200"
                             }`}
                           >
-                            {f.expectValid ? `Fixture ${idx + 1} (Valid)` : `Fixture ${idx + 1} (Invalid)`}
+                            {f.expectValid ? `Fixture ${idx + 1}` : `Invalid ${idx + 1}`}
                           </button>
                         ))}
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div>
-                        <textarea
-                          value={payloadText}
-                          onChange={(e) => setPayloadText(e.target.value)}
-                          spellCheck={false}
-                          rows={9}
-                          aria-label="Source JSON payload"
-                          className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 font-mono text-[11px] text-zinc-200 focus:outline-none focus:ring-1 focus:ring-emerald-500 resize-none leading-relaxed"
-                        />
-                      </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                      <textarea
+                        value={payloadText}
+                        onChange={(e) => setPayloadText(e.target.value)}
+                        spellCheck={false}
+                        rows={9}
+                        aria-label="Source JSON payload"
+                        className="w-full bg-black/50 border border-white/[0.08] rounded-xl p-3.5 font-mono text-[11px] text-zinc-200 focus:outline-none focus:ring-1 focus:ring-white/30 resize-none leading-relaxed"
+                      />
 
-                      <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-3 flex flex-col justify-between min-h-[192px]">
+                      <div className="bg-black/50 border border-white/[0.08] rounded-xl p-3.5 flex flex-col justify-between min-h-[202px]">
                         <div>
-                          <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-800/80">
-                            <span className="text-[10px] font-mono text-zinc-400 uppercase">
-                              Target Output &amp; Conformance
+                          <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-white/[0.06]">
+                            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">
+                              Compiled Output
                             </span>
                             {liveRun?.parseError ? (
-                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-rose-950/70 text-rose-300 border border-rose-800/60">
-                                JSON SYNTAX ERROR
+                              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-300 border border-rose-500/25">
+                                Syntax Error
                               </span>
                             ) : liveRun?.exec?.success && liveRun.validation?.valid ? (
-                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-950/70 text-emerald-300 border border-emerald-800/60">
-                                TARGET VALID
+                              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/25">
+                                Validated
                               </span>
                             ) : (
-                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-rose-950/70 text-rose-300 border border-rose-800/60">
-                                CONTRACT VIOLATION
+                              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-300 border border-rose-500/25">
+                                Rejected
                               </span>
                             )}
                           </div>
@@ -356,7 +353,7 @@ export default function LandingDashboardPage() {
                         </div>
 
                         {liveRun?.validation && !liveRun.validation.valid && (
-                          <div className="mt-2 pt-2 border-t border-zinc-800/80 text-[10px] font-mono text-rose-300 space-y-1">
+                          <div className="mt-2 pt-2 border-t border-white/[0.06] text-[10px] font-mono text-rose-300 space-y-1">
                             {liveRun.validation.errors.map((e, i) => (
                               <div key={i}>{e.message}</div>
                             ))}
@@ -367,12 +364,12 @@ export default function LandingDashboardPage() {
                   </div>
                 )}
 
-                {/* Tab 2: Live Computed Structural Diff */}
+                {/* Tab 2: Structural Diff */}
                 {sandboxTab === "diff" && (
-                  <div className="p-4">
-                    <div className="max-h-[260px] overflow-y-auto divide-y divide-zinc-800/70 border border-zinc-800 rounded-lg bg-zinc-950">
+                  <div className="p-5">
+                    <div className="max-h-[268px] overflow-y-auto divide-y divide-white/[0.06] border border-white/[0.08] rounded-xl bg-black/50">
                       {liveCompiled.diff.items.map((item) => (
-                        <div key={item.id} className="p-3 flex items-start justify-between gap-3 text-xs">
+                        <div key={item.id} className="p-3.5 flex items-start justify-between gap-3 text-xs">
                           <div className="space-y-1 min-w-0">
                             <div className="flex items-center gap-2 font-mono text-[11px]">
                               <span className="text-zinc-400 truncate">
@@ -384,12 +381,12 @@ export default function LandingDashboardPage() {
                             <p className="text-[11px] text-zinc-400">{item.message}</p>
                           </div>
                           <span
-                            className={`shrink-0 font-mono text-[10px] px-2 py-0.5 rounded border ${
+                            className={`shrink-0 font-mono text-[10px] px-2.5 py-0.5 rounded-full border ${
                               item.severity === "error"
-                                ? "bg-rose-950/60 text-rose-300 border-rose-800/60"
+                                ? "bg-rose-500/15 text-rose-300 border-rose-500/25"
                                 : item.severity === "warning"
-                                ? "bg-amber-950/60 text-amber-300 border-amber-800/60"
-                                : "bg-zinc-900 text-zinc-300 border-zinc-800"
+                                ? "bg-amber-500/15 text-amber-300 border-amber-500/25"
+                                : "bg-white/[0.06] text-zinc-300 border-white/[0.1]"
                             }`}
                           >
                             {item.category}
@@ -400,22 +397,22 @@ export default function LandingDashboardPage() {
                   </div>
                 )}
 
-                {/* Tab 3: Live Generated TypeScript Adapter */}
+                {/* Tab 3: Adapter.ts */}
                 {sandboxTab === "adapter" && (
-                  <div className="p-4 space-y-2">
+                  <div className="p-5 space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] font-mono text-zinc-400">
-                        Zero-dependency standalone adapter (compiled without eval)
+                        Standalone TypeScript output (zero eval)
                       </span>
                       <button
                         type="button"
                         onClick={handleCopyAdapter}
-                        className="text-[11px] font-mono px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 transition"
+                        className="text-[11px] font-medium px-3 py-1 rounded-full bg-white/[0.08] hover:bg-white/[0.14] text-zinc-100 border border-white/[0.1] transition"
                       >
-                        {copiedAdapter ? "Copied ✓" : "Copy .ts"}
+                        {copiedAdapter ? "Copied" : "Copy code"}
                       </button>
                     </div>
-                    <pre className="max-h-[240px] overflow-auto bg-zinc-950 border border-zinc-800 rounded-lg p-3 font-mono text-[11px] text-zinc-300 leading-relaxed">
+                    <pre className="max-h-[234px] overflow-auto bg-black/50 border border-white/[0.08] rounded-xl p-3.5 font-mono text-[11px] text-zinc-300 leading-relaxed">
                       {liveCompiled.adapterCode}
                     </pre>
                   </div>
@@ -425,44 +422,44 @@ export default function LandingDashboardPage() {
           </div>
         </section>
 
-        {/* Active Workspaces Table (Dense Linear-style List) */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-5">
+        {/* Active Workspaces */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 space-y-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 className="text-base font-semibold text-white tracking-tight">Workspaces</h2>
+              <h2 className="text-lg font-semibold text-white tracking-[-0.02em]">Workspaces</h2>
               <p className="text-xs text-zinc-400 mt-0.5">
-                Open an existing compatibility project or initialize a new contract pair.
+                Resume a compatibility project or initialize a fresh contract pair.
               </p>
             </div>
             <div className="flex items-center gap-2">
               <Link
                 href="/projects"
-                className="text-xs font-medium text-zinc-300 hover:text-white px-3 py-1.5 rounded-md border border-zinc-800 bg-zinc-900/70 hover:bg-zinc-800 transition"
+                className="text-xs font-medium text-zinc-300 hover:text-white px-3.5 py-1.5 rounded-full border border-white/[0.1] bg-white/[0.04] hover:bg-white/[0.08] transition"
               >
                 View all
               </Link>
               <Link
                 href="/projects/new"
-                className="text-xs font-semibold text-zinc-950 bg-emerald-500 hover:bg-emerald-400 px-3 py-1.5 rounded-md transition"
+                className="text-xs font-semibold text-black bg-white hover:bg-zinc-200 px-3.5 py-1.5 rounded-full transition"
               >
-                + New Workspace
+                New Workspace
               </Link>
             </div>
           </div>
 
-          <div className="border border-zinc-800 rounded-xl bg-zinc-900/40 overflow-hidden divide-y divide-zinc-800/70">
+          <div className="apple-glass rounded-2xl overflow-hidden divide-y divide-white/[0.06]">
             {loadingProjects ? (
               <div className="p-6 space-y-3">
-                <div className="h-10 bg-zinc-800/50 rounded animate-pulse" />
-                <div className="h-10 bg-zinc-800/50 rounded animate-pulse" />
+                <div className="h-10 bg-white/[0.04] rounded-lg animate-pulse" />
+                <div className="h-10 bg-white/[0.04] rounded-lg animate-pulse" />
               </div>
             ) : projects.length === 0 ? (
-              <div className="p-8 text-center text-xs text-zinc-400">
+              <div className="p-10 text-center text-xs text-zinc-400">
                 No workspaces yet.{" "}
                 <button
                   type="button"
                   onClick={launchCanonicalWorkspace}
-                  className="text-emerald-400 hover:underline font-medium"
+                  className="text-white hover:underline font-medium"
                 >
                   Launch the canonical e-commerce workspace →
                 </button>
@@ -472,14 +469,14 @@ export default function LandingDashboardPage() {
                 <Link
                   key={p.id}
                   href={`/projects/${p.id}`}
-                  className="px-4 sm:px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-zinc-800/40 transition group"
+                  className="px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-white/[0.03] transition group"
                 >
                   <div className="space-y-0.5 min-w-0">
                     <div className="flex items-center gap-2.5">
-                      <span className="text-sm font-medium text-zinc-100 group-hover:text-emerald-400 transition truncate">
+                      <span className="text-sm font-medium text-zinc-100 group-hover:text-white transition truncate">
                         {p.name}
                       </span>
-                      <span className="font-mono text-[10px] text-zinc-500 bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded">
+                      <span className="font-mono text-[10px] text-zinc-500 bg-white/[0.04] border border-white/[0.07] px-2 py-0.5 rounded-full">
                         {p.id}
                       </span>
                     </div>
@@ -502,12 +499,12 @@ export default function LandingDashboardPage() {
           </div>
         </section>
 
-        {/* System Guarantees & Architecture Boundaries (Clean 2-Column Technical Spec) */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-          <div className="border-t border-zinc-800/80 pt-10 grid grid-cols-1 md:grid-cols-2 gap-8 text-xs">
+        {/* Architectural Commitments */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+          <div className="border-t border-white/[0.07] pt-12 grid grid-cols-1 md:grid-cols-2 gap-10 text-xs">
             <div className="space-y-2">
-              <h3 className="text-sm font-semibold text-white">Deterministic Security Boundaries</h3>
-              <p className="text-zinc-400 leading-relaxed">
+              <h3 className="text-sm font-semibold text-white tracking-tight">Deterministic Security Boundaries</h3>
+              <p className="text-zinc-400 leading-relaxed max-w-prose">
                 External <code className="text-zinc-200 font-mono">$ref</code> URLs are rejected at ingestion to
                 eliminate SSRF. Schema descriptions are fenced as untrusted data before reaching Groq’s{" "}
                 <code className="text-zinc-200 font-mono">openai/gpt-oss-120b</code>, and ambiguous mappings
@@ -515,8 +512,8 @@ export default function LandingDashboardPage() {
               </p>
             </div>
             <div className="space-y-2">
-              <h3 className="text-sm font-semibold text-white">Zero-Eval Multi-Cloud Evidence</h3>
-              <p className="text-zinc-400 leading-relaxed">
+              <h3 className="text-sm font-semibold text-white tracking-tight">Zero-Eval Multi-Cloud Evidence</h3>
+              <p className="text-zinc-400 leading-relaxed max-w-prose">
                 Compiled Transformation IR executes strictly over 7 allowlisted primitives without dynamic{" "}
                 <code className="text-zinc-200 font-mono">eval()</code>. Every test run and generated TypeScript
                 adapter is equivalence-verified and certified with SHA-256 digests across Supabase PostgreSQL,

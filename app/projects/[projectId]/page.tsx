@@ -694,11 +694,11 @@ export default function ProjectWorkspacePage() {
   }, [mappings, mappingFilterStatus, mappingFilterUncertainty, mappingSearchQuery]);
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-slate-100 flex flex-col font-sans selection:bg-teal-950/400 selection:text-white">
+    <div className="min-h-screen bg-[#050507] text-slate-100 flex flex-col font-sans selection:bg-teal-950/400 selection:text-white">
       <TopBar />
 
       {/* Project Subheader */}
-      <div className="bg-zinc-900/60 border-b border-zinc-800 px-4 sm:px-6 lg:px-8 py-3">
+      <div className="bg-white/[0.03] backdrop-blur-xl border-b border-white/[0.08] px-4 sm:px-6 lg:px-8 py-3">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
           <div>
             <Breadcrumb
@@ -722,7 +722,7 @@ export default function ProjectWorkspacePage() {
                     className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono border ${
                       cloudStatus.supabase.configured
                         ? "bg-emerald-950/80 text-emerald-400 border-emerald-800/60"
-                        : "bg-zinc-800 text-zinc-500 border-zinc-700"
+                        : "bg-zinc-800 text-zinc-500 border-white/[0.12]"
                     }`}
                   >
                     Postgres: {cloudStatus.supabase.configured ? "Ready" : "Local"}
@@ -732,7 +732,7 @@ export default function ProjectWorkspacePage() {
                     className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono border ${
                       cloudStatus.groq.configured
                         ? "bg-blue-950/80 text-blue-400 border-blue-800/60"
-                        : "bg-zinc-800 text-zinc-500 border-zinc-700"
+                        : "bg-zinc-800 text-zinc-500 border-white/[0.12]"
                     }`}
                   >
                     Groq: {cloudStatus.groq.configured ? "Online" : "Mock"}
@@ -752,7 +752,7 @@ export default function ProjectWorkspacePage() {
                     className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono border ${
                       cloudStatus.azureBlob.configured
                         ? "bg-cyan-950/80 text-cyan-400 border-cyan-800/60"
-                        : "bg-zinc-800 text-zinc-500 border-zinc-700"
+                        : "bg-zinc-800 text-zinc-500 border-white/[0.12]"
                     }`}
                   >
                     Azure Blob: {cloudStatus.azureBlob.configured ? "Connected" : "Simulated"}
@@ -766,7 +766,7 @@ export default function ProjectWorkspacePage() {
             <button
               type="button"
               onClick={loadCanonicalFixtures}
-              className="text-xs bg-zinc-800 hover:bg-slate-700 text-slate-200 border border-zinc-700 px-2.5 py-1 rounded font-medium transition"
+              className="text-xs bg-zinc-800 hover:bg-slate-700 text-slate-200 border border-white/[0.12] px-2.5 py-1 rounded font-medium transition"
             >
               Load Canonical Pair
             </button>
@@ -817,13 +817,13 @@ export default function ProjectWorkspacePage() {
           {/* TAB: OVERVIEW */}
           {activeTab === "overview" && (
             <div className="space-y-4">
-              <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-5 shadow-xs">
+              <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg p-5 shadow-xs">
                 <h2 className="text-sm font-semibold text-zinc-100 mb-1">Project Summary</h2>
                 <p className="text-xs text-zinc-400 leading-relaxed mb-4">
                   {project?.description || "This workspace manages the comparison, mapping review, and adapter compilation between source and target API contracts."}
                 </p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 border-t border-zinc-800/70 pt-4 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 border-t border-white/[0.06] pt-4 text-xs">
                   <div>
                     <span className="text-zinc-400 block text-[11px]">Owner Tenant:</span>
                     <span className="font-mono text-zinc-200">developer@uniflow.internal</span>
@@ -842,13 +842,13 @@ export default function ProjectWorkspacePage() {
               </div>
 
               {/* Workflow Stepper Card */}
-              <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-5 shadow-xs">
+              <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg p-5 shadow-xs">
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-3">
                   Compiler Pipeline Stages
                 </h3>
 
                 <div className="space-y-2.5 text-xs">
-                  <div className="flex items-center justify-between p-2 rounded bg-zinc-950 border border-zinc-800">
+                  <div className="flex items-center justify-between p-2 rounded bg-black/50 border border-white/[0.08]">
                     <span className="font-medium text-zinc-200">1. Ingest Contracts & Schema Trees</span>
                     {sourceText && targetText ? (
                       <StatusChip label="Contracts Loaded" variant="accepted" />
@@ -863,7 +863,7 @@ export default function ProjectWorkspacePage() {
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between p-2 rounded bg-zinc-950 border border-zinc-800">
+                  <div className="flex items-center justify-between p-2 rounded bg-black/50 border border-white/[0.08]">
                     <span className="font-medium text-zinc-200">2. Deterministic Structural Diff</span>
                     {diff ? (
                       <StatusChip label={`${diff.summary.totalTargetFields} fields diffed`} variant="info" />
@@ -872,7 +872,7 @@ export default function ProjectWorkspacePage() {
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between p-2 rounded bg-zinc-950 border border-zinc-800">
+                  <div className="flex items-center justify-between p-2 rounded bg-black/50 border border-white/[0.08]">
                     <span className="font-medium text-zinc-200">3. Human Review Gate</span>
                     {mappings.length > 0 ? (
                       <button
@@ -887,7 +887,7 @@ export default function ProjectWorkspacePage() {
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between p-2 rounded bg-zinc-950 border border-zinc-800">
+                  <div className="flex items-center justify-between p-2 rounded bg-black/50 border border-white/[0.08]">
                     <span className="font-medium text-zinc-200">4. Compile Plan & Execute Test Fixtures</span>
                     {plan ? (
                       <StatusChip label="Plan Compiled" variant="compiled" />
@@ -896,7 +896,7 @@ export default function ProjectWorkspacePage() {
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between p-2 rounded bg-zinc-950 border border-zinc-800">
+                  <div className="flex items-center justify-between p-2 rounded bg-black/50 border border-white/[0.08]">
                     <span className="font-medium text-zinc-200">5. Generated Adapter & Compatibility Report</span>
                     {adapterCode ? (
                       <StatusChip label="Adapter Ready" variant="executed" />
@@ -913,7 +913,7 @@ export default function ProjectWorkspacePage() {
           {activeTab === "specs" && (
             <div className="space-y-5">
               {/* Top Summary Banner */}
-              <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-xs flex flex-wrap items-center justify-between gap-3">
+              <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg p-4 shadow-xs flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <h2 className="text-sm font-semibold text-zinc-100">Contract Specifications & Schema Trees</h2>
                   <p className="text-xs text-zinc-400">
@@ -935,7 +935,7 @@ export default function ProjectWorkspacePage() {
               {/* Source & Target Panes */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                 {/* SOURCE SPEC PANE */}
-                <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-xs flex flex-col space-y-3">
+                <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg p-4 shadow-xs flex flex-col space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <span className="text-xs font-bold text-zinc-200 uppercase tracking-wider">Source Contract</span>
@@ -966,7 +966,7 @@ export default function ProjectWorkspacePage() {
                     value={sourceText}
                     onChange={(e) => setSourceText(e.target.value)}
                     placeholder="Paste Source JSON Schema or OpenAPI 3.x JSON..."
-                    className="font-mono text-xs w-full p-2.5 border border-zinc-700 rounded bg-zinc-950 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500 resize-none"
+                    className="font-mono text-xs w-full p-2.5 border border-white/[0.12] rounded bg-black/50 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500 resize-none"
                   />
 
                   {/* OpenAPI Schema Picker if multiple candidate schemas exist */}
@@ -987,7 +987,7 @@ export default function ProjectWorkspacePage() {
                           setSelectedSourceSchema(e.target.value);
                           triggerImport(true, e.target.value, selectedTargetSchema);
                         }}
-                        className="w-full text-xs font-mono p-1.5 border border-indigo-300 rounded bg-zinc-900/70 text-indigo-950 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                        className="w-full text-xs font-mono p-1.5 border border-indigo-300 rounded bg-white/[0.03] backdrop-blur-xl text-indigo-950 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
                       >
                         {sourceAvailableSchemas.map((name) => (
                           <option key={name} value={name}>
@@ -1006,7 +1006,7 @@ export default function ProjectWorkspacePage() {
                 </div>
 
                 {/* TARGET SPEC PANE */}
-                <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-xs flex flex-col space-y-3">
+                <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg p-4 shadow-xs flex flex-col space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <span className="text-xs font-bold text-zinc-200 uppercase tracking-wider">Target Contract</span>
@@ -1037,7 +1037,7 @@ export default function ProjectWorkspacePage() {
                     value={targetText}
                     onChange={(e) => setTargetText(e.target.value)}
                     placeholder="Paste Target JSON Schema or OpenAPI 3.x JSON..."
-                    className="font-mono text-xs w-full p-2.5 border border-zinc-700 rounded bg-zinc-950 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500 resize-none"
+                    className="font-mono text-xs w-full p-2.5 border border-white/[0.12] rounded bg-black/50 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500 resize-none"
                   />
 
                   {/* OpenAPI Schema Picker if multiple candidate schemas exist */}
@@ -1058,7 +1058,7 @@ export default function ProjectWorkspacePage() {
                           setSelectedTargetSchema(e.target.value);
                           triggerImport(true, selectedSourceSchema, e.target.value);
                         }}
-                        className="w-full text-xs font-mono p-1.5 border border-indigo-300 rounded bg-zinc-900/70 text-indigo-950 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                        className="w-full text-xs font-mono p-1.5 border border-indigo-300 rounded bg-white/[0.03] backdrop-blur-xl text-indigo-950 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
                       >
                         {targetAvailableSchemas.map((name) => (
                           <option key={name} value={name}>
@@ -1079,9 +1079,9 @@ export default function ProjectWorkspacePage() {
 
               {/* STRUCTURAL DIFF SECTION */}
               {diff && (
-                <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg shadow-xs overflow-hidden space-y-0">
+                <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg shadow-xs overflow-hidden space-y-0">
                   {/* Diff Header */}
-                  <div className="px-4 py-3 border-b border-zinc-800 bg-zinc-950 flex flex-wrap items-center justify-between gap-3">
+                  <div className="px-4 py-3 border-b border-white/[0.08] bg-black/50 flex flex-wrap items-center justify-between gap-3">
                     <div>
                       <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-200">
                         Computed Structural Differences ({diff.summary.totalTargetFields} target fields)
@@ -1119,14 +1119,14 @@ export default function ProjectWorkspacePage() {
                   </div>
 
                   {/* Filter & Search Bar */}
-                  <div className="p-3 bg-zinc-950/70 border-b border-zinc-800 flex flex-wrap items-center justify-between gap-2 text-xs">
+                  <div className="p-3 bg-black/50/70 border-b border-white/[0.08] flex flex-wrap items-center justify-between gap-2 text-xs">
                     <div className="flex flex-wrap items-center gap-2 flex-1 min-w-[240px]">
                       <input
                         type="text"
                         value={diffSearchQuery}
                         onChange={(e) => setDiffSearchQuery(e.target.value)}
                         placeholder="Search paths or diagnostics..."
-                        className="p-1.5 text-xs border border-zinc-700 rounded bg-zinc-900/70 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-slate-500 w-full sm:w-64"
+                        className="p-1.5 text-xs border border-white/[0.12] rounded bg-white/[0.03] backdrop-blur-xl text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-slate-500 w-full sm:w-64"
                       />
 
                       {/* Severity Filter Pills */}
@@ -1137,7 +1137,7 @@ export default function ProjectWorkspacePage() {
                           className={`px-2 py-1 rounded text-[11px] font-medium border transition ${
                             diffSeverityFilter === "all"
                               ? "bg-zinc-800 text-white border-slate-900"
-                              : "bg-zinc-900/70 text-zinc-400 border-zinc-800 hover:bg-zinc-800"
+                              : "bg-white/[0.03] backdrop-blur-xl text-zinc-400 border-white/[0.08] hover:bg-zinc-800"
                           }`}
                         >
                           All ({diff.items.length})
@@ -1148,7 +1148,7 @@ export default function ProjectWorkspacePage() {
                           className={`px-2 py-1 rounded text-[11px] font-medium border transition ${
                             diffSeverityFilter === "error"
                               ? "bg-rose-600 text-white border-rose-700"
-                              : "bg-zinc-900/70 text-rose-400 border-rose-800/60 hover:bg-rose-950/40"
+                              : "bg-white/[0.03] backdrop-blur-xl text-rose-400 border-rose-800/60 hover:bg-rose-950/40"
                           }`}
                         >
                           Errors ({diff.items.filter((i) => i.severity === "error").length})
@@ -1159,7 +1159,7 @@ export default function ProjectWorkspacePage() {
                           className={`px-2 py-1 rounded text-[11px] font-medium border transition ${
                             diffSeverityFilter === "warning"
                               ? "bg-amber-600 text-white border-amber-700"
-                              : "bg-zinc-900/70 text-amber-700 border-amber-800/60 hover:bg-amber-950/40"
+                              : "bg-white/[0.03] backdrop-blur-xl text-amber-700 border-amber-800/60 hover:bg-amber-950/40"
                           }`}
                         >
                           Warnings ({diff.items.filter((i) => i.severity === "warning").length})
@@ -1170,7 +1170,7 @@ export default function ProjectWorkspacePage() {
                           className={`px-2 py-1 rounded text-[11px] font-medium border transition ${
                             diffSeverityFilter === "info"
                               ? "bg-sky-600 text-white border-sky-700"
-                              : "bg-zinc-900/70 text-sky-400 border-sky-800/60 hover:bg-sky-950/40"
+                              : "bg-white/[0.03] backdrop-blur-xl text-sky-400 border-sky-800/60 hover:bg-sky-950/40"
                           }`}
                         >
                           Info ({diff.items.filter((i) => i.severity === "info").length})
@@ -1187,7 +1187,7 @@ export default function ProjectWorkspacePage() {
                         id="diff-cat-select"
                         value={diffCategoryFilter}
                         onChange={(e) => setDiffCategoryFilter(e.target.value)}
-                        className="text-xs p-1.5 border border-zinc-700 rounded bg-zinc-900/70 text-zinc-200 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                        className="text-xs p-1.5 border border-white/[0.12] rounded bg-white/[0.03] backdrop-blur-xl text-zinc-200 focus:outline-none focus:ring-1 focus:ring-slate-500"
                       >
                         <option value="all">All Categories</option>
                         <option value="exact_match">Exact Match</option>
@@ -1219,7 +1219,7 @@ export default function ProjectWorkspacePage() {
                   {/* Diff Items Table */}
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs">
-                      <thead className="bg-zinc-800 text-zinc-400 font-semibold border-b border-zinc-800 uppercase tracking-wider text-[11px]">
+                      <thead className="bg-zinc-800 text-zinc-400 font-semibold border-b border-white/[0.08] uppercase tracking-wider text-[11px]">
                         <tr>
                           <th className="py-2.5 px-3">Target Path</th>
                           <th className="py-2.5 px-3">Source Match</th>
@@ -1228,7 +1228,7 @@ export default function ProjectWorkspacePage() {
                           <th className="py-2.5 px-3">Diagnostic Description</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-zinc-800/60">
+                      <tbody className="divide-y divide-white/[0.06]">
                         {filteredDiffItems.length === 0 ? (
                           <tr>
                             <td colSpan={5} className="py-6 text-center text-xs text-zinc-500 italic">
@@ -1245,7 +1245,7 @@ export default function ProjectWorkspacePage() {
                                 className={`cursor-pointer transition-colors ${
                                   isSelected
                                     ? "bg-zinc-800/90 ring-1 ring-inset ring-slate-400"
-                                    : "hover:bg-zinc-950"
+                                    : "hover:bg-black/50"
                                 }`}
                               >
                                 <td className="py-2 px-3 font-mono font-medium text-zinc-200">
@@ -1273,7 +1273,7 @@ export default function ProjectWorkspacePage() {
 
                   {/* Selected Diff Item Inspector Card */}
                   {selectedDiffItem && (
-                    <div className="p-4 bg-zinc-950 border-t border-zinc-800 space-y-3">
+                    <div className="p-4 bg-black/50 border-t border-white/[0.08] space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <span className="text-xs font-bold text-zinc-200 uppercase tracking-wider">
@@ -1300,7 +1300,7 @@ export default function ProjectWorkspacePage() {
                         </button>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs bg-zinc-900/70 p-3 rounded border border-zinc-800">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs bg-white/[0.03] backdrop-blur-xl p-3 rounded border border-white/[0.08]">
                         <div>
                           <span className="font-semibold text-zinc-300 block mb-0.5">Target Contract Field:</span>
                           <code className="font-mono text-zinc-100 bg-zinc-800 px-1.5 py-0.5 rounded text-[11px] block truncate">
@@ -1340,7 +1340,7 @@ export default function ProjectWorkspacePage() {
                         </div>
                       </div>
 
-                      <div className="text-xs text-zinc-300 space-y-1 bg-zinc-900/70 p-3 rounded border border-zinc-800">
+                      <div className="text-xs text-zinc-300 space-y-1 bg-white/[0.03] backdrop-blur-xl p-3 rounded border border-white/[0.08]">
                         <div>
                           <span className="font-semibold text-zinc-200">Diagnostic Explanation:</span>{" "}
                           {selectedDiffItem.message}
@@ -1363,7 +1363,7 @@ export default function ProjectWorkspacePage() {
           {activeTab === "mappings" && (
             <div className="space-y-4">
               {/* Header and Advisory Status */}
-              <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-xs flex flex-wrap items-center justify-between gap-3">
+              <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg p-4 shadow-xs flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <div className="flex items-center space-x-2">
                     <h2 className="text-sm font-bold text-zinc-100">Review Candidate Mappings</h2>
@@ -1397,7 +1397,7 @@ export default function ProjectWorkspacePage() {
                     type="button"
                     onClick={() => generateProposals(true)}
                     disabled={proposeLoading || !sourceText || !targetText}
-                    className="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 px-2.5 py-1.5 rounded font-medium transition"
+                    className="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-white/[0.12] px-2.5 py-1.5 rounded font-medium transition"
                     title="Generate candidate mappings using deterministic structural heuristics without calling AI"
                   >
                     Heuristic Baseline
@@ -1406,7 +1406,7 @@ export default function ProjectWorkspacePage() {
                   <button
                     type="button"
                     onClick={openManualModal}
-                    className="text-xs bg-zinc-900/70 hover:bg-zinc-950 text-zinc-200 border border-zinc-700 px-2.5 py-1.5 rounded font-medium transition"
+                    className="text-xs bg-white/[0.03] backdrop-blur-xl hover:bg-black/50 text-zinc-200 border border-white/[0.12] px-2.5 py-1.5 rounded font-medium transition"
                   >
                     + Manual Mapping
                   </button>
@@ -1415,7 +1415,7 @@ export default function ProjectWorkspacePage() {
                     type="button"
                     onClick={acceptAllMappings}
                     disabled={loading || mappings.length === 0}
-                    className="text-xs bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-zinc-300 border border-zinc-700 px-3 py-1.5 rounded font-medium transition"
+                    className="text-xs bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-zinc-300 border border-white/[0.12] px-3 py-1.5 rounded font-medium transition"
                   >
                     Approve All Verified
                   </button>
@@ -1433,14 +1433,14 @@ export default function ProjectWorkspacePage() {
 
               {/* Filters & Search Toolbar */}
               {mappings.length > 0 && (
-                <div className="p-3 bg-zinc-900/70 border border-zinc-800 rounded-lg shadow-xs flex flex-wrap items-center justify-between gap-2 text-xs">
+                <div className="p-3 bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg shadow-xs flex flex-wrap items-center justify-between gap-2 text-xs">
                   <div className="flex flex-wrap items-center gap-2 flex-1 min-w-[240px]">
                     <input
                       type="text"
                       value={mappingSearchQuery}
                       onChange={(e) => setMappingSearchQuery(e.target.value)}
                       placeholder="Search mapped paths, rationale, or operation..."
-                      className="p-1.5 text-xs border border-zinc-700 rounded bg-zinc-900/70 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-slate-500 w-full sm:w-64"
+                      className="p-1.5 text-xs border border-white/[0.12] rounded bg-white/[0.03] backdrop-blur-xl text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-slate-500 w-full sm:w-64"
                     />
 
                     {/* Status filter pills */}
@@ -1456,7 +1456,7 @@ export default function ProjectWorkspacePage() {
                             className={`px-2 py-0.5 rounded text-[11px] font-medium border transition ${
                               mappingFilterStatus === st
                                 ? "bg-zinc-800 text-white border-slate-900"
-                                : "bg-zinc-900/70 text-zinc-400 border-zinc-800 hover:bg-zinc-800"
+                                : "bg-white/[0.03] backdrop-blur-xl text-zinc-400 border-white/[0.08] hover:bg-zinc-800"
                             }`}
                           >
                             {st === "needs_confirmation" ? "Needs Review" : st} ({count})
@@ -1475,7 +1475,7 @@ export default function ProjectWorkspacePage() {
                       id="uncertainty-select"
                       value={mappingFilterUncertainty}
                       onChange={(e) => setMappingFilterUncertainty(e.target.value)}
-                      className="text-xs p-1.5 border border-zinc-700 rounded bg-zinc-900/70 text-zinc-200 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                      className="text-xs p-1.5 border border-white/[0.12] rounded bg-white/[0.03] backdrop-blur-xl text-zinc-200 focus:outline-none focus:ring-1 focus:ring-slate-500"
                     >
                       <option value="all">All Levels</option>
                       <option value="LOW">Low</option>
@@ -1511,7 +1511,7 @@ export default function ProjectWorkspacePage() {
                   }}
                 />
               ) : filteredMappings.length === 0 ? (
-                <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-8 text-center text-xs text-zinc-500">
+                <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg p-8 text-center text-xs text-zinc-500">
                   No candidate mappings match the current filters or search query.
                 </div>
               ) : (
@@ -1525,7 +1525,7 @@ export default function ProjectWorkspacePage() {
                     return (
                       <div
                         key={m.id}
-                        className={`bg-zinc-900/70 border rounded-lg p-4 shadow-xs transition ${
+                        className={`bg-white/[0.03] backdrop-blur-xl border rounded-lg p-4 shadow-xs transition ${
                           isAccepted
                             ? "border-emerald-300 bg-emerald-950/40/15"
                             : isRejected
@@ -1534,24 +1534,24 @@ export default function ProjectWorkspacePage() {
                             ? "border-indigo-300 bg-indigo-950/40/15"
                             : isNeedsReview
                             ? "border-amber-800/60 bg-amber-950/40/15"
-                            : "border-zinc-700"
+                            : "border-white/[0.12]"
                         }`}
                       >
                         {/* Header: Paths & Status Badges */}
-                        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800/70 pb-2 mb-2.5">
+                        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.06] pb-2 mb-2.5">
                           <div className="flex items-center space-x-2 font-mono text-xs">
                             <span className="font-bold text-zinc-100 bg-zinc-800 px-1.5 py-0.5 rounded">
                               {m.targetPath}
                             </span>
                             <span className="text-zinc-500">&larr;</span>
-                            <span className="text-zinc-300 bg-zinc-950 border border-zinc-800 px-1.5 py-0.5 rounded">
+                            <span className="text-zinc-300 bg-black/50 border border-white/[0.08] px-1.5 py-0.5 rounded">
                               {m.sourcePath || "(default value)"}
                             </span>
                           </div>
 
                           <div className="flex flex-wrap items-center gap-1.5">
                             {/* Provider chip */}
-                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-800">
+                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-white/[0.08]">
                               {m.provider === "groq"
                                 ? "Groq AI"
                                 : m.provider === "manual"
@@ -1637,7 +1637,7 @@ export default function ProjectWorkspacePage() {
                         )}
 
                         {/* Actions Row */}
-                        <div className="mt-3 pt-2.5 border-t border-zinc-800/70 flex flex-wrap items-center justify-between gap-2">
+                        <div className="mt-3 pt-2.5 border-t border-white/[0.06] flex flex-wrap items-center justify-between gap-2">
                           <div>
                             <button
                               type="button"
@@ -1652,7 +1652,7 @@ export default function ProjectWorkspacePage() {
                             <button
                               type="button"
                               onClick={() => openEditModal(m)}
-                              className="text-xs px-2.5 py-1 rounded font-medium border border-zinc-700 text-zinc-300 bg-zinc-900/70 hover:bg-zinc-950 transition"
+                              className="text-xs px-2.5 py-1 rounded font-medium border border-white/[0.12] text-zinc-300 bg-white/[0.03] backdrop-blur-xl hover:bg-black/50 transition"
                             >
                               Edit
                             </button>
@@ -1662,7 +1662,7 @@ export default function ProjectWorkspacePage() {
                               className={`text-xs px-2.5 py-1 rounded font-medium border transition ${
                                 m.status === "rejected"
                                   ? "bg-rose-600 text-white border-rose-700"
-                                  : "bg-zinc-900/70 text-zinc-300 border-zinc-700 hover:bg-rose-950/40 hover:text-rose-400"
+                                  : "bg-white/[0.03] backdrop-blur-xl text-zinc-300 border-white/[0.12] hover:bg-rose-950/40 hover:text-rose-400"
                               }`}
                             >
                               Reject
@@ -1683,12 +1683,12 @@ export default function ProjectWorkspacePage() {
 
                         {/* Decision History Audit Trail Drawer */}
                         {expandedAuditId === m.id && (
-                          <div className="mt-3 p-2.5 bg-zinc-950 border border-zinc-800 rounded text-xs space-y-1.5 font-mono text-[11px]">
+                          <div className="mt-3 p-2.5 bg-black/50 border border-white/[0.08] rounded text-xs space-y-1.5 font-mono text-[11px]">
                             <div className="font-semibold font-sans text-[11px] text-zinc-300">
                               Mapping Provenance & Decision History:
                             </div>
                             {m.decisionHistory?.map((entry, idx) => (
-                              <div key={idx} className="flex items-center justify-between text-zinc-400 border-b border-zinc-800/70 last:border-0 pb-1 last:pb-0">
+                              <div key={idx} className="flex items-center justify-between text-zinc-400 border-b border-white/[0.06] last:border-0 pb-1 last:pb-0">
                                 <div>
                                   <span className="font-bold text-zinc-200 uppercase">{entry.action}</span>
                                   {" by "}
@@ -1713,7 +1713,7 @@ export default function ProjectWorkspacePage() {
           {/* TAB: TEST & ADAPTER */}
           {activeTab === "execute" && (
             <div className="space-y-4">
-              <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-xs flex items-center justify-between">
+              <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg p-4 shadow-xs flex items-center justify-between">
                 <div>
                   <h2 className="text-sm font-semibold text-zinc-100">Transformation IR Compiler & Interpreter</h2>
                   <p className="text-xs text-zinc-400">
@@ -1725,7 +1725,7 @@ export default function ProjectWorkspacePage() {
                     type="button"
                     onClick={compilePlan}
                     disabled={loading}
-                    className="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 px-3 py-1.5 rounded font-medium transition"
+                    className="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-white/[0.12] px-3 py-1.5 rounded font-medium transition"
                   >
                     Recompile Plan
                   </button>
@@ -1741,8 +1741,8 @@ export default function ProjectWorkspacePage() {
               </div>
 
               {plan && (
-                <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-xs">
-                  <div className="flex items-center justify-between text-xs border-b border-zinc-800 pb-2 mb-3">
+                <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg p-4 shadow-xs">
+                  <div className="flex items-center justify-between text-xs border-b border-white/[0.08] pb-2 mb-3">
                     <span className="font-semibold text-zinc-200">
                       Plan ID: <code className="font-mono">{plan.planId}</code>
                     </span>
@@ -1753,7 +1753,7 @@ export default function ProjectWorkspacePage() {
 
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs font-mono">
-                      <thead className="bg-zinc-950 text-zinc-400 font-semibold border-b border-zinc-800 uppercase tracking-wider text-[11px] font-sans">
+                      <thead className="bg-black/50 text-zinc-400 font-semibold border-b border-white/[0.08] uppercase tracking-wider text-[11px] font-sans">
                         <tr>
                           <th className="py-2 px-2.5">Step</th>
                           <th className="py-2 px-2.5">Operation</th>
@@ -1762,9 +1762,9 @@ export default function ProjectWorkspacePage() {
                           <th className="py-2 px-2.5">Details</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-zinc-800/60 text-[11px]">
+                      <tbody className="divide-y divide-white/[0.06] text-[11px]">
                         {plan.steps.map((s, idx) => (
-                          <tr key={s.stepId} className="hover:bg-zinc-950">
+                          <tr key={s.stepId} className="hover:bg-black/50">
                             <td className="py-1.5 px-2.5 text-zinc-500">#{idx + 1}</td>
                             <td className="py-1.5 px-2.5 text-blue-700 font-bold">{s.operation}</td>
                             <td className="py-1.5 px-2.5 text-zinc-400">{s.sourcePath || "(none)"}</td>
@@ -1782,8 +1782,8 @@ export default function ProjectWorkspacePage() {
 
               {/* Phase 5: Interactive Test Runner & Fixture Selector */}
               {plan && (
-                <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-xs space-y-3">
-                  <div className="flex items-center justify-between border-b border-zinc-800/70 pb-2">
+                <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg p-4 shadow-xs space-y-3">
+                  <div className="flex items-center justify-between border-b border-white/[0.06] pb-2">
                     <span className="text-xs font-bold text-zinc-200 uppercase tracking-wider">
                       Interactive Fixture Test Runner
                     </span>
@@ -1804,7 +1804,7 @@ export default function ProjectWorkspacePage() {
                         className={`p-2 rounded border text-left transition ${
                           selectedFixtureIdx === idx
                             ? "border-blue-500 bg-blue-50/50 text-blue-900 font-medium"
-                            : "border-zinc-800 bg-zinc-950 text-zinc-300 hover:bg-zinc-800"
+                            : "border-white/[0.08] bg-black/50 text-zinc-300 hover:bg-zinc-800"
                         }`}
                       >
                         <div className="font-semibold text-[11px]">Fixture #{idx + 1}</div>
@@ -1817,7 +1817,7 @@ export default function ProjectWorkspacePage() {
                       className={`p-2 rounded border text-left transition ${
                         selectedFixtureIdx === -1
                           ? "border-purple-500 bg-purple-50/50 text-purple-900 font-medium"
-                          : "border-zinc-800 bg-zinc-950 text-zinc-300 hover:bg-zinc-800"
+                          : "border-white/[0.08] bg-black/50 text-zinc-300 hover:bg-zinc-800"
                       }`}
                     >
                       <div className="font-semibold text-[11px]">Custom Payload</div>
@@ -1844,7 +1844,7 @@ export default function ProjectWorkspacePage() {
                         setCustomPayloadText(e.target.value);
                         setSelectedFixtureIdx(-1);
                       }}
-                      className="font-mono text-xs w-full p-2.5 border border-zinc-700 rounded bg-zinc-950 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500 resize-none"
+                      className="font-mono text-xs w-full p-2.5 border border-white/[0.12] rounded bg-black/50 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500 resize-none"
                     />
                   </div>
                 </div>
@@ -1852,7 +1852,7 @@ export default function ProjectWorkspacePage() {
 
               {executionResult && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-xs">
+                  <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg p-4 shadow-xs">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs font-semibold text-zinc-300 uppercase tracking-wider">Transformed Payload</span>
                       <StatusChip
@@ -1860,12 +1860,12 @@ export default function ProjectWorkspacePage() {
                         variant={executionResult.success ? "executed" : "invalid"}
                       />
                     </div>
-                    <pre className="font-mono text-xs bg-zinc-950 p-3 rounded border border-zinc-800 overflow-auto max-h-72">
+                    <pre className="font-mono text-xs bg-black/50 p-3 rounded border border-white/[0.08] overflow-auto max-h-72">
                       {JSON.stringify(executionResult.outputPayload, null, 2)}
                     </pre>
 
                     {executionResult.stepResults && executionResult.stepResults.length > 0 && (
-                      <div className="mt-3 pt-2 border-t border-zinc-800/70">
+                      <div className="mt-3 pt-2 border-t border-white/[0.06]">
                         <button
                           type="button"
                           onClick={() => setShowStepInspector(!showStepInspector)}
@@ -1877,7 +1877,7 @@ export default function ProjectWorkspacePage() {
                         </button>
 
                         {showStepInspector && (
-                          <div className="mt-2 overflow-x-auto border border-zinc-800 rounded">
+                          <div className="mt-2 overflow-x-auto border border-white/[0.08] rounded">
                             <table className="w-full text-left font-mono text-[10px]">
                               <thead className="bg-zinc-800 text-zinc-300">
                                 <tr>
@@ -1887,7 +1887,7 @@ export default function ProjectWorkspacePage() {
                                   <th className="py-1 px-2">Out</th>
                                 </tr>
                               </thead>
-                              <tbody className="divide-y divide-zinc-800/60">
+                              <tbody className="divide-y divide-white/[0.06]">
                                 {executionResult.stepResults.map((st) => (
                                   <tr key={st.stepId} className={st.success ? "" : "bg-rose-950/40"}>
                                     <td className="py-1 px-2 text-zinc-100 font-bold">{st.targetPath}</td>
@@ -1908,7 +1908,7 @@ export default function ProjectWorkspacePage() {
                     )}
                   </div>
 
-                  <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-xs">
+                  <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg p-4 shadow-xs">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs font-semibold text-zinc-300 uppercase tracking-wider">Target Contract Validation</span>
                       <StatusChip
@@ -1935,7 +1935,7 @@ export default function ProjectWorkspacePage() {
                         )}
 
                         {testSuite && (
-                          <div className="mt-3 pt-3 border-t border-zinc-800">
+                          <div className="mt-3 pt-3 border-t border-white/[0.08]">
                             <span className="font-semibold text-zinc-300 block mb-1">Equivalence Test Suite:</span>
                             <div className="text-xs text-zinc-400">
                               Passed {testSuite.passedCases} of {testSuite.totalCases} fixtures. Interpreter vs Adapter Equivalence:{" "}
@@ -1952,7 +1952,7 @@ export default function ProjectWorkspacePage() {
               )}
 
               {adapterCode && (
-                <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-xs">
+                <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg p-4 shadow-xs">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-xs font-semibold text-zinc-100 uppercase tracking-wider">
                       Generated Standalone TypeScript Adapter
@@ -1995,14 +1995,14 @@ export default function ProjectWorkspacePage() {
                       <button
                         type="button"
                         onClick={() => downloadReport("md")}
-                        className="text-xs bg-zinc-900/70 hover:bg-zinc-950 text-zinc-300 border border-zinc-700 px-3 py-1.5 rounded font-medium transition"
+                        className="text-xs bg-white/[0.03] backdrop-blur-xl hover:bg-black/50 text-zinc-300 border border-white/[0.12] px-3 py-1.5 rounded font-medium transition"
                       >
                         Export .MD
                       </button>
                       <button
                         type="button"
                         onClick={() => downloadReport("json")}
-                        className="text-xs bg-zinc-900/70 hover:bg-zinc-950 text-zinc-300 border border-zinc-700 px-3 py-1.5 rounded font-medium transition"
+                        className="text-xs bg-white/[0.03] backdrop-blur-xl hover:bg-black/50 text-zinc-300 border border-white/[0.12] px-3 py-1.5 rounded font-medium transition"
                       >
                         Export .JSON
                       </button>
@@ -2015,7 +2015,7 @@ export default function ProjectWorkspacePage() {
                 <>
                   {/* Executive Header & Cloud Certification Card */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-xs">
+                    <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg p-4 shadow-xs">
                       <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
                         Compatibility Status
                       </span>
@@ -2039,7 +2039,7 @@ export default function ProjectWorkspacePage() {
                       </p>
                     </div>
 
-                    <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-xs">
+                    <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg p-4 shadow-xs">
                       <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
                         Equivalence Verification
                       </span>
@@ -2059,7 +2059,7 @@ export default function ProjectWorkspacePage() {
                       </p>
                     </div>
 
-                    <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-xs">
+                    <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg p-4 shadow-xs">
                       <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
                         Azure Cloud Evidence
                       </span>
@@ -2085,7 +2085,7 @@ export default function ProjectWorkspacePage() {
                           type="button"
                           onClick={() => persistEvidence("azure_sql")}
                           disabled={persistingToCloud}
-                          className="text-[11px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 px-2 py-1 rounded font-medium transition"
+                          className="text-[11px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-white/[0.12] px-2 py-1 rounded font-medium transition"
                         >
                           SQL Only
                         </button>
@@ -2093,7 +2093,7 @@ export default function ProjectWorkspacePage() {
                           type="button"
                           onClick={() => persistEvidence("azure_blob")}
                           disabled={persistingToCloud}
-                          className="text-[11px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 px-2 py-1 rounded font-medium transition"
+                          className="text-[11px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-white/[0.12] px-2 py-1 rounded font-medium transition"
                         >
                           Blob Only
                         </button>
@@ -2102,30 +2102,30 @@ export default function ProjectWorkspacePage() {
                   </div>
 
                   {/* Cryptographic Digest Ledger */}
-                  <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-xs">
+                  <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg p-4 shadow-xs">
                     <h3 className="text-xs font-semibold text-zinc-100 uppercase tracking-wider mb-2">
                       Cryptographic SHA-256 Digest Ledger
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
-                      <div className="p-2.5 bg-zinc-950 border border-zinc-800 rounded">
+                      <div className="p-2.5 bg-black/50 border border-white/[0.08] rounded">
                         <span className="text-zinc-400 block text-[10px] uppercase">Source Spec Checksum:</span>
                         <span className="text-zinc-200 break-all select-all font-semibold">
                           {reportData.checksums.sourceSchemaHash}
                         </span>
                       </div>
-                      <div className="p-2.5 bg-zinc-950 border border-zinc-800 rounded">
+                      <div className="p-2.5 bg-black/50 border border-white/[0.08] rounded">
                         <span className="text-zinc-400 block text-[10px] uppercase">Target Spec Checksum:</span>
                         <span className="text-zinc-200 break-all select-all font-semibold">
                           {reportData.checksums.targetSchemaHash}
                         </span>
                       </div>
-                      <div className="p-2.5 bg-zinc-950 border border-zinc-800 rounded">
+                      <div className="p-2.5 bg-black/50 border border-white/[0.08] rounded">
                         <span className="text-zinc-400 block text-[10px] uppercase">Plan IR Checksum:</span>
                         <span className="text-zinc-200 break-all select-all">
                           {reportData.checksums.planHash || "No compiled plan"}
                         </span>
                       </div>
-                      <div className="p-2.5 bg-zinc-950 border border-zinc-800 rounded">
+                      <div className="p-2.5 bg-black/50 border border-white/[0.08] rounded">
                         <span className="text-zinc-400 block text-[10px] uppercase">Adapter Code Checksum:</span>
                         <span className="text-zinc-200 break-all select-all">
                           {reportData.checksums.adapterHash || "No adapter generated"}
@@ -2138,8 +2138,8 @@ export default function ProjectWorkspacePage() {
 
               {/* View Format Selector & Content */}
               {reportMarkdown ? (
-                <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-5 shadow-xs space-y-3">
-                  <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
+                <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg p-5 shadow-xs space-y-3">
+                  <div className="flex items-center justify-between border-b border-white/[0.08] pb-2">
                     <div className="flex items-center space-x-2">
                       <button
                         type="button"
@@ -2170,7 +2170,7 @@ export default function ProjectWorkspacePage() {
                   </div>
 
                   {reportFormatView === "markdown" ? (
-                    <pre className="whitespace-pre-wrap font-mono text-xs bg-zinc-950 p-4 rounded border border-zinc-800 text-zinc-200 overflow-auto max-h-[500px]">
+                    <pre className="whitespace-pre-wrap font-mono text-xs bg-black/50 p-4 rounded border border-white/[0.08] text-zinc-200 overflow-auto max-h-[500px]">
                       {reportMarkdown}
                     </pre>
                   ) : (
@@ -2211,8 +2211,8 @@ export default function ProjectWorkspacePage() {
       {/* Manual Mapping Modal Dialog */}
       {isManualModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-zinc-900/70 rounded-lg shadow-xl border border-zinc-800 max-w-lg w-full p-6 text-zinc-100 space-y-4 animate-in fade-in duration-150">
-            <div className="border-b border-zinc-800 pb-3">
+          <div className="bg-white/[0.03] backdrop-blur-xl rounded-lg shadow-xl border border-white/[0.08] max-w-lg w-full p-6 text-zinc-100 space-y-4 animate-in fade-in duration-150">
+            <div className="border-b border-white/[0.08] pb-3">
               <h3 className="text-sm font-bold text-zinc-100 uppercase tracking-wider">
                 Create Deterministic Manual Mapping
               </h3>
@@ -2232,7 +2232,7 @@ export default function ProjectWorkspacePage() {
                     value={formTargetPath}
                     onChange={(e) => setFormTargetPath(e.target.value)}
                     required
-                    className="w-full font-mono text-xs p-2 border border-zinc-700 rounded bg-zinc-900/70 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                    className="w-full font-mono text-xs p-2 border border-white/[0.12] rounded bg-white/[0.03] backdrop-blur-xl text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500"
                   >
                     {Object.keys(targetNormalized.flatFields)
                       .filter((p) => p !== "$")
@@ -2250,7 +2250,7 @@ export default function ProjectWorkspacePage() {
                     onChange={(e) => setFormTargetPath(e.target.value)}
                     placeholder="$.invoice.id"
                     required
-                    className="w-full font-mono text-xs p-2 border border-zinc-700 rounded focus:outline-none focus:ring-1 focus:ring-slate-500"
+                    className="w-full font-mono text-xs p-2 border border-white/[0.12] rounded focus:outline-none focus:ring-1 focus:ring-slate-500"
                   />
                 )}
               </div>
@@ -2264,7 +2264,7 @@ export default function ProjectWorkspacePage() {
                   <select
                     value={formSourcePath}
                     onChange={(e) => setFormSourcePath(e.target.value)}
-                    className="w-full font-mono text-xs p-2 border border-zinc-700 rounded bg-zinc-900/70 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                    className="w-full font-mono text-xs p-2 border border-white/[0.12] rounded bg-white/[0.03] backdrop-blur-xl text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500"
                   >
                     <option value="">(None - use default value or object constructor)</option>
                     {Object.keys(sourceNormalized.flatFields)
@@ -2281,7 +2281,7 @@ export default function ProjectWorkspacePage() {
                     value={formSourcePath}
                     onChange={(e) => setFormSourcePath(e.target.value)}
                     placeholder="$.billing.order_id"
-                    className="w-full font-mono text-xs p-2 border border-zinc-700 rounded focus:outline-none focus:ring-1 focus:ring-slate-500"
+                    className="w-full font-mono text-xs p-2 border border-white/[0.12] rounded focus:outline-none focus:ring-1 focus:ring-slate-500"
                   />
                 )}
               </div>
@@ -2294,7 +2294,7 @@ export default function ProjectWorkspacePage() {
                 <select
                   value={formOperation}
                   onChange={(e) => setFormOperation(e.target.value as AllowedOperation)}
-                  className="w-full font-mono text-xs p-2 border border-zinc-700 rounded bg-zinc-900/70 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                  className="w-full font-mono text-xs p-2 border border-white/[0.12] rounded bg-white/[0.03] backdrop-blur-xl text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500"
                 >
                   {ALLOWED_OPERATIONS.map((op) => (
                     <option key={op} value={op}>
@@ -2313,7 +2313,7 @@ export default function ProjectWorkspacePage() {
                   <select
                     value={formConversionType}
                     onChange={(e) => setFormConversionType(e.target.value)}
-                    className="w-full font-mono text-xs p-1.5 border border-purple-300 rounded bg-zinc-900/70 text-purple-950 focus:outline-none"
+                    className="w-full font-mono text-xs p-1.5 border border-purple-300 rounded bg-white/[0.03] backdrop-blur-xl text-purple-950 focus:outline-none"
                   >
                     {SUPPORTED_CONVERSIONS.map((c) => (
                       <option key={c} value={c}>
@@ -2325,7 +2325,7 @@ export default function ProjectWorkspacePage() {
               )}
 
               {formOperation === "default" && (
-                <div className="p-3 bg-zinc-950 border border-zinc-800 rounded space-y-1">
+                <div className="p-3 bg-black/50 border border-white/[0.08] rounded space-y-1">
                   <label className="block font-semibold text-zinc-200 mb-1">
                     Default Value (literal string, number, or JSON) <span className="text-rose-500">*</span>
                   </label>
@@ -2335,7 +2335,7 @@ export default function ProjectWorkspacePage() {
                     onChange={(e) => setFormDefaultValue(e.target.value)}
                     placeholder='"standard" or 0 or false'
                     required
-                    className="w-full font-mono text-xs p-1.5 border border-zinc-700 rounded bg-zinc-900/70 focus:outline-none"
+                    className="w-full font-mono text-xs p-1.5 border border-white/[0.12] rounded bg-white/[0.03] backdrop-blur-xl focus:outline-none"
                   />
                 </div>
               )}
@@ -2351,7 +2351,7 @@ export default function ProjectWorkspacePage() {
                     onChange={(e) => setFormLookupTable(e.target.value)}
                     placeholder={'{\n  "pending": "OPEN",\n  "paid": "SETTLED"\n}'}
                     required
-                    className="w-full font-mono text-xs p-1.5 border border-indigo-300 rounded bg-zinc-900/70 focus:outline-none resize-none"
+                    className="w-full font-mono text-xs p-1.5 border border-indigo-300 rounded bg-white/[0.03] backdrop-blur-xl focus:outline-none resize-none"
                   />
                 </div>
               )}
@@ -2366,17 +2366,17 @@ export default function ProjectWorkspacePage() {
                   value={formRationale}
                   onChange={(e) => setFormRationale(e.target.value)}
                   placeholder="e.g., Target requires invoice currency code, defaulting to USD."
-                  className="w-full text-xs p-2 border border-zinc-700 rounded focus:outline-none focus:ring-1 focus:ring-slate-500"
+                  className="w-full text-xs p-2 border border-white/[0.12] rounded focus:outline-none focus:ring-1 focus:ring-slate-500"
                 />
               </div>
 
               {/* Buttons */}
-              <div className="pt-2 flex items-center justify-end space-x-2 border-t border-zinc-800">
+              <div className="pt-2 flex items-center justify-end space-x-2 border-t border-white/[0.08]">
                 <button
                   type="button"
                   onClick={() => setIsManualModalOpen(false)}
                   disabled={loading}
-                  className="px-3 py-1.5 border border-zinc-700 rounded text-zinc-300 hover:bg-zinc-800 transition"
+                  className="px-3 py-1.5 border border-white/[0.12] rounded text-zinc-300 hover:bg-zinc-800 transition"
                 >
                   Cancel
                 </button>
@@ -2396,8 +2396,8 @@ export default function ProjectWorkspacePage() {
       {/* Edit Candidate Mapping Modal Dialog */}
       {activeMappingForEdit && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-zinc-900/70 rounded-lg shadow-xl border border-zinc-800 max-w-lg w-full p-6 text-zinc-100 space-y-4 animate-in fade-in duration-150">
-            <div className="border-b border-zinc-800 pb-3">
+          <div className="bg-white/[0.03] backdrop-blur-xl rounded-lg shadow-xl border border-white/[0.08] max-w-lg w-full p-6 text-zinc-100 space-y-4 animate-in fade-in duration-150">
+            <div className="border-b border-white/[0.08] pb-3">
               <h3 className="text-sm font-bold text-zinc-100 uppercase tracking-wider">
                 Edit Mapping: {activeMappingForEdit.targetPath}
               </h3>
@@ -2414,7 +2414,7 @@ export default function ProjectWorkspacePage() {
                   type="text"
                   value={activeMappingForEdit.targetPath}
                   disabled
-                  className="w-full font-mono text-xs p-2 border border-zinc-800 bg-zinc-800 text-zinc-400 rounded cursor-not-allowed"
+                  className="w-full font-mono text-xs p-2 border border-white/[0.08] bg-zinc-800 text-zinc-400 rounded cursor-not-allowed"
                 />
               </div>
 
@@ -2427,7 +2427,7 @@ export default function ProjectWorkspacePage() {
                   <select
                     value={formSourcePath}
                     onChange={(e) => setFormSourcePath(e.target.value)}
-                    className="w-full font-mono text-xs p-2 border border-zinc-700 rounded bg-zinc-900/70 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                    className="w-full font-mono text-xs p-2 border border-white/[0.12] rounded bg-white/[0.03] backdrop-blur-xl text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500"
                   >
                     <option value="">(None - use default value or object constructor)</option>
                     {Object.keys(sourceNormalized.flatFields)
@@ -2444,7 +2444,7 @@ export default function ProjectWorkspacePage() {
                     value={formSourcePath}
                     onChange={(e) => setFormSourcePath(e.target.value)}
                     placeholder="$.billing.order_id"
-                    className="w-full font-mono text-xs p-2 border border-zinc-700 rounded focus:outline-none focus:ring-1 focus:ring-slate-500"
+                    className="w-full font-mono text-xs p-2 border border-white/[0.12] rounded focus:outline-none focus:ring-1 focus:ring-slate-500"
                   />
                 )}
               </div>
@@ -2457,7 +2457,7 @@ export default function ProjectWorkspacePage() {
                 <select
                   value={formOperation}
                   onChange={(e) => setFormOperation(e.target.value as AllowedOperation)}
-                  className="w-full font-mono text-xs p-2 border border-zinc-700 rounded bg-zinc-900/70 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                  className="w-full font-mono text-xs p-2 border border-white/[0.12] rounded bg-white/[0.03] backdrop-blur-xl text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500"
                 >
                   {ALLOWED_OPERATIONS.map((op) => (
                     <option key={op} value={op}>
@@ -2476,7 +2476,7 @@ export default function ProjectWorkspacePage() {
                   <select
                     value={formConversionType}
                     onChange={(e) => setFormConversionType(e.target.value)}
-                    className="w-full font-mono text-xs p-1.5 border border-purple-300 rounded bg-zinc-900/70 text-purple-950 focus:outline-none"
+                    className="w-full font-mono text-xs p-1.5 border border-purple-300 rounded bg-white/[0.03] backdrop-blur-xl text-purple-950 focus:outline-none"
                   >
                     {SUPPORTED_CONVERSIONS.map((c) => (
                       <option key={c} value={c}>
@@ -2488,7 +2488,7 @@ export default function ProjectWorkspacePage() {
               )}
 
               {formOperation === "default" && (
-                <div className="p-3 bg-zinc-950 border border-zinc-800 rounded space-y-1">
+                <div className="p-3 bg-black/50 border border-white/[0.08] rounded space-y-1">
                   <label className="block font-semibold text-zinc-200 mb-1">
                     Default Value (literal string, number, or JSON) <span className="text-rose-500">*</span>
                   </label>
@@ -2498,7 +2498,7 @@ export default function ProjectWorkspacePage() {
                     onChange={(e) => setFormDefaultValue(e.target.value)}
                     placeholder='"standard" or 0 or false'
                     required
-                    className="w-full font-mono text-xs p-1.5 border border-zinc-700 rounded bg-zinc-900/70 focus:outline-none"
+                    className="w-full font-mono text-xs p-1.5 border border-white/[0.12] rounded bg-white/[0.03] backdrop-blur-xl focus:outline-none"
                   />
                 </div>
               )}
@@ -2514,7 +2514,7 @@ export default function ProjectWorkspacePage() {
                     onChange={(e) => setFormLookupTable(e.target.value)}
                     placeholder={'{\n  "pending": "OPEN",\n  "paid": "SETTLED"\n}'}
                     required
-                    className="w-full font-mono text-xs p-1.5 border border-indigo-300 rounded bg-zinc-900/70 focus:outline-none resize-none"
+                    className="w-full font-mono text-xs p-1.5 border border-indigo-300 rounded bg-white/[0.03] backdrop-blur-xl focus:outline-none resize-none"
                   />
                 </div>
               )}
@@ -2527,12 +2527,12 @@ export default function ProjectWorkspacePage() {
               )}
 
               {/* Buttons */}
-              <div className="pt-2 flex items-center justify-end space-x-2 border-t border-zinc-800">
+              <div className="pt-2 flex items-center justify-end space-x-2 border-t border-white/[0.08]">
                 <button
                   type="button"
                   onClick={() => setActiveMappingForEdit(null)}
                   disabled={loading}
-                  className="px-3 py-1.5 border border-zinc-700 rounded text-zinc-300 hover:bg-zinc-800 transition"
+                  className="px-3 py-1.5 border border-white/[0.12] rounded text-zinc-300 hover:bg-zinc-800 transition"
                 >
                   Cancel
                 </button>
@@ -2549,7 +2549,7 @@ export default function ProjectWorkspacePage() {
         </div>
       )}
 
-      <footer className="border-t border-zinc-800 bg-zinc-900/70 py-3 text-center text-xs text-zinc-500">
+      <footer className="border-t border-white/[0.08] bg-white/[0.03] backdrop-blur-xl py-3 text-center text-xs text-zinc-500">
         UNIFLOW ∞ — API Compatibility Compiler • Cloud Security • System Design • DBMS • PBL / DP-900 Azure
       </footer>
     </div>

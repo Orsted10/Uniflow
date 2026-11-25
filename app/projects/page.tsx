@@ -16,11 +16,9 @@ export default function ProjectsListPage() {
   const [loading, setLoading] = React.useState(true);
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
 
-  // Rename state
   const [renamingId, setRenamingId] = React.useState<string | null>(null);
   const [renameValue, setRenameValue] = React.useState("");
 
-  // Delete dialog state
   const [projectToDelete, setProjectToDelete] = React.useState<Project | null>(null);
   const [isDeleting, setIsDeleting] = React.useState(false);
 
@@ -107,64 +105,64 @@ export default function ProjectsListPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#0b0f17] text-slate-100 flex flex-col font-sans selection:bg-teal-500 selection:text-white">
+    <div className="min-h-screen bg-[#050507] text-[#f5f5f7] flex flex-col font-sans">
       <TopBar />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1">
-        <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Projects", current: true }]} className="mb-4 text-slate-400" />
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full flex-1">
+        <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Workspaces", current: true }]} className="mb-5" />
 
         {errorMsg && (
-          <ErrorPanel message={errorMsg} onDismiss={() => setErrorMsg(null)} className="mb-4" />
+          <ErrorPanel message={errorMsg} onDismiss={() => setErrorMsg(null)} className="mb-5" />
         )}
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-800">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-7 pb-5 border-b border-white/[0.07]">
           <div>
-            <h1 className="text-xl font-bold text-white tracking-tight">API Compatibility Workspaces</h1>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <h1 className="text-2xl font-semibold text-white tracking-[-0.025em]">Workspaces</h1>
+            <p className="text-xs text-zinc-400 mt-1">
               PostgreSQL system of record with tenant isolation and cryptographic verification.
             </p>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-3">
             <input
               type="text"
               placeholder="Search workspaces..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="text-xs border border-slate-700 rounded px-3 py-1.5 w-48 sm:w-60 bg-slate-900/80 text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-sm"
+              className="text-xs border border-white/[0.1] rounded-full px-4 py-1.5 w-48 sm:w-64 bg-white/[0.04] text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-white/30"
             />
             <Link
               href="/projects/new"
-              className="inline-flex items-center text-xs font-semibold font-mono px-3.5 py-1.5 rounded bg-teal-500 text-slate-950 hover:bg-teal-400 transition shadow-sm"
+              className="inline-flex items-center text-xs font-semibold px-4 py-2 rounded-full bg-white text-black hover:bg-zinc-200 transition"
             >
-              + Create Workspace
+              New Workspace
             </Link>
           </div>
         </div>
 
         {loading ? (
-          <div className="border border-slate-800 rounded-md p-8 text-center text-xs text-slate-400 bg-slate-900/40">
-            Loading workspace projects...
+          <div className="apple-glass rounded-2xl p-10 text-center text-xs text-zinc-400">
+            Loading workspaces...
           </div>
         ) : filtered.length === 0 ? (
           <EmptyState
-            title="No projects found"
+            title="No workspaces found"
             description={
               search
-                ? `No projects matching "${search}". Try adjusting your search query.`
-                : "No API compatibility projects created yet. Start by creating a project or importing a contract pair."
+                ? `No workspaces matching "${search}". Try adjusting your search query.`
+                : "No API compatibility workspaces created yet. Start by creating a workspace."
             }
             action={{
-              label: "+ Create First Workspace",
+              label: "Create First Workspace",
               href: "/projects/new",
             }}
           />
         ) : (
-          <div className="bg-slate-900/40 border border-slate-800 rounded-xl overflow-hidden divide-y divide-slate-800/80">
+          <div className="apple-glass rounded-2xl overflow-hidden divide-y divide-white/[0.06]">
             {filtered.map((proj) => (
               <div
                 key={proj.id}
-                className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-800/30 transition"
+                className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-white/[0.025] transition"
               >
                 <div className="space-y-1 max-w-xl">
                   {renamingId === proj.id ? (
@@ -173,45 +171,45 @@ export default function ProjectsListPage() {
                         type="text"
                         value={renameValue}
                         onChange={(e) => setRenameValue(e.target.value)}
-                        className="text-xs border border-teal-500 rounded px-2 py-1 bg-slate-900 text-white font-medium focus:outline-none"
+                        className="text-xs border border-white/30 rounded-lg px-2.5 py-1 bg-black/50 text-white font-medium focus:outline-none"
                         autoFocus
                       />
                       <button
                         type="button"
                         onClick={() => handleRename(proj.id)}
-                        className="text-xs bg-teal-500 text-slate-950 px-2.5 py-1 rounded font-medium hover:bg-teal-400"
+                        className="text-xs bg-white text-black px-3 py-1 rounded-full font-semibold hover:bg-zinc-200"
                       >
                         Save
                       </button>
                       <button
                         type="button"
                         onClick={() => setRenamingId(null)}
-                        className="text-xs text-slate-400 hover:text-slate-200 px-2 py-1"
+                        className="text-xs text-zinc-400 hover:text-zinc-200 px-2 py-1"
                       >
                         Cancel
                       </button>
                     </div>
                   ) : (
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2.5">
                       <Link
                         href={`/projects/${proj.id}`}
-                        className="text-sm font-semibold text-white hover:text-teal-400 transition tracking-tight"
+                        className="text-sm font-medium text-white hover:text-zinc-300 transition tracking-tight"
                       >
                         {proj.name}
                       </Link>
-                      <span className="font-mono text-[10px] text-slate-500 bg-slate-800 px-1.5 py-0.2 rounded border border-slate-700/60">
+                      <span className="font-mono text-[10px] text-zinc-500 bg-white/[0.04] px-2 py-0.5 rounded-full border border-white/[0.07]">
                         {proj.id}
                       </span>
                     </div>
                   )}
 
-                  <p className="text-xs text-slate-400 line-clamp-1">
+                  <p className="text-xs text-zinc-400 line-clamp-1">
                     {proj.description || "API Compatibility Verification Workspace"}
                   </p>
                 </div>
 
                 <div className="flex items-center space-x-3 text-xs shrink-0">
-                  <span className="font-mono text-[11px] text-slate-500">
+                  <span className="font-mono text-[11px] text-zinc-500">
                     {new Date(proj.updated_at).toLocaleDateString()}
                   </span>
 
@@ -221,7 +219,7 @@ export default function ProjectsListPage() {
                       setRenamingId(proj.id);
                       setRenameValue(proj.name);
                     }}
-                    className="text-xs text-slate-400 hover:text-slate-200 px-2 py-1 rounded transition"
+                    className="text-xs text-zinc-400 hover:text-zinc-200 px-2 py-1 rounded transition"
                   >
                     Rename
                   </button>
@@ -236,9 +234,9 @@ export default function ProjectsListPage() {
 
                   <Link
                     href={`/projects/${proj.id}`}
-                    className="inline-flex items-center text-xs font-mono font-medium text-teal-400 hover:text-teal-300 border border-teal-500/30 bg-teal-500/10 px-3 py-1.5 rounded transition"
+                    className="inline-flex items-center text-xs font-medium text-zinc-100 hover:text-white border border-white/[0.12] bg-white/[0.06] hover:bg-white/[0.12] px-3.5 py-1.5 rounded-full transition"
                   >
-                    Open Workbench →
+                    Open →
                   </Link>
                 </div>
               </div>
@@ -247,7 +245,6 @@ export default function ProjectsListPage() {
         )}
       </main>
 
-      {/* Delete Confirmation Dialog */}
       <ConfirmationDialog
         isOpen={Boolean(projectToDelete)}
         title={`Delete "${projectToDelete?.name}"?`}
