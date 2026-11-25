@@ -24,6 +24,44 @@ import { generateTypeScriptAdapter } from "@/lib/transformation/generator";
 type SandboxTab = "execute" | "diff" | "adapter";
 type OutputSubTab = "output" | "steps" | "details";
 
+/**
+ * Lightweight zero-dependency JSON syntax highlighter for Apple/Stripe-grade code panes.
+ */
+function HighlightedJson({ value }: { value: unknown }) {
+  const json = JSON.stringify(value, null, 2);
+  const lines = json.split("\n");
+
+  return (
+    <div className="font-mono text-xs leading-relaxed">
+      {lines.map((line, i) => {
+        const keyMatch = line.match(/^(\s*)"([^"]+)"(\s*:\s*)(.*)$/);
+        if (keyMatch) {
+          const [, indent, key, colon, rest] = keyMatch;
+          let valColor = "text-zinc-200";
+          if (rest.startsWith('"')) valColor = "text-emerald-300";
+          else if (/^-?\d/.test(rest)) valColor = "text-sky-300";
+          else if (rest.startsWith("true") || rest.startsWith("false") || rest.startsWith("null"))
+            valColor = "text-amber-300";
+
+          return (
+            <div key={i} className="whitespace-pre">
+              <span>{indent}</span>
+              <span className="text-[#f5dfb8]">&quot;{key}&quot;</span>
+              <span className="text-zinc-500">{colon}</span>
+              <span className={valColor}>{rest}</span>
+            </div>
+          );
+        }
+        return (
+          <div key={i} className="whitespace-pre text-zinc-500">
+            {line}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function LandingDashboardPage() {
   const router = useRouter();
   const [projects, setProjects] = React.useState<Project[]>([]);
@@ -39,9 +77,11 @@ export default function LandingDashboardPage() {
   const [copiedAdapter, setCopiedAdapter] = React.useState(false);
   const [copiedInput, setCopiedInput] = React.useState(false);
   const [compileNonce, setCompileNonce] = React.useState(0);
+  const [hoveredStep, setHoveredStep] = React.useState<string | null>(null);
 
-  // Interactive cursor-reactive spotlight coordinates
+  // Cursor spotlight + subtle 3D window tilt
   const [spotlight, setSpotlight] = React.useState({ x: 50, y: 30 });
+  const [tilt, setTilt] = React.useState({ rx: 0, ry: 0 });
 
   React.useEffect(() => {
     fetch("/api/projects")
@@ -114,6 +154,17 @@ export default function LandingDashboardPage() {
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
     setSpotlight({ x, y });
+  }
+
+  function handleWindowMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const nx = (e.clientX - rect.left) / rect.width - 0.5;
+    const ny = (e.clientY - rect.top) / rect.height - 0.5;
+    setTilt({ rx: -ny * 2.2, ry: nx * 2.2 });
+  }
+
+  function handleWindowMouseLeave() {
+    setTilt({ rx: 0, ry: 0 });
   }
 
   async function launchCanonicalWorkspace() {
@@ -196,29 +247,29 @@ export default function LandingDashboardPage() {
       onMouseMove={handleMouseMove}
       className="min-h-screen bg-[#090807] text-[#f5f2eb] flex flex-col font-sans relative overflow-x-hidden"
     >
-      {/* Cursor-reactive subtle studio spotlight */}
+      {/* Cursor-reactive studio ambient light */}
       <div
         aria-hidden="true"
         className="pointer-events-none fixed inset-0 z-0 transition-opacity duration-300"
         style={{
-          background: `radial-gradient(640px circle at ${spotlight.x}% ${spotlight.y}%, rgba(243, 231, 211, 0.055), transparent 65%)`,
+          background: `radial-gradient(680px circle at ${spotlight.x}% ${spotlight.y}%, rgba(243, 231, 211, 0.065), transparent 65%)`,
         }}
       />
 
       <TopBar />
 
       <main className="flex-1 relative z-10">
-        {/* Tight, Expansive Full-Bleed Hero + Live Studio */}
+        {/* Hero + Interactive 3D-Tilted macOS Studio */}
         <section className="relative overflow-hidden">
           <HeroBackdrop />
 
           <div className="relative max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-10 pt-8 pb-8 lg:pt-10 lg:pb-10">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
-              {/* Left Column: Larger, Bolder Editorial Serif + Action Controls */}
+              {/* Left Column */}
               <div className="lg:col-span-5 space-y-6">
-                <h1 className="font-editorial text-[46px] sm:text-[58px] xl:text-[66px] font-normal tracking-[-0.025em] text-[#fbf7f0] leading-[1.0]">
+                <h1 className="font-editorial text-[48px] sm:text-[60px] xl:text-[68px] font-normal tracking-[-0.025em] text-[#fbf7f0] leading-[0.98]">
                   Compile breaking API migrations into{" "}
-                  <em className="italic text-[#f5dfb8] font-normal drop-shadow-[0_0_24px_rgba(245,223,184,0.22)]">
+                  <em className="italic text-[#f5dfb8] font-normal drop-shadow-[0_0_28px_rgba(245,223,184,0.28)]">
                     verified
                   </em>{" "}
                   adapters.
@@ -242,25 +293,25 @@ export default function LandingDashboardPage() {
                   </button>
                   <Link
                     href="/projects/new"
-                    className="inline-flex items-center justify-center gap-2 text-xs sm:text-[13px] font-medium px-6 py-3 rounded-full border border-white/[0.15] bg-white/[0.06] text-zinc-100 hover:bg-white/[0.12] hover:border-white/[0.25] transition-all duration-200 backdrop-blur-md"
+                    className="inline-flex items-center justify-center gap-2 text-xs sm:text-[13px] font-medium px-6 py-3 rounded-full border border-white/[0.15] bg-white/[0.06] text-zinc-100 hover:bg-white/[0.12] hover:border-white/[0.28] transition-all duration-200 backdrop-blur-md"
                   >
                     <span>+ New Custom Project</span>
                   </Link>
                 </div>
 
-                {/* Vibrant Tactile Feature Badges */}
+                {/* Tactile Glass Metric Strip */}
                 <div className="pt-2 grid grid-cols-3 gap-3 max-w-md">
-                  <div className="apple-glass rounded-2xl px-3.5 py-3 hover:border-amber-200/30 transition-colors">
+                  <div className="apple-glass rounded-2xl px-3.5 py-3 hover:border-amber-200/35 hover:-translate-y-0.5 transition-all duration-200">
                     <div className="text-amber-300 text-sm mb-1">⚡</div>
                     <div className="text-xs font-semibold text-white">Zero Eval</div>
                     <div className="text-[11px] text-zinc-400">Sandboxed IR</div>
                   </div>
-                  <div className="apple-glass rounded-2xl px-3.5 py-3 hover:border-emerald-400/30 transition-colors">
+                  <div className="apple-glass rounded-2xl px-3.5 py-3 hover:border-emerald-400/35 hover:-translate-y-0.5 transition-all duration-200">
                     <div className="text-emerald-400 text-sm mb-1">✓</div>
                     <div className="text-xs font-semibold text-white">100%</div>
                     <div className="text-[11px] text-zinc-400">Type-Safe</div>
                   </div>
-                  <div className="apple-glass rounded-2xl px-3.5 py-3 hover:border-sky-400/30 transition-colors">
+                  <div className="apple-glass rounded-2xl px-3.5 py-3 hover:border-sky-400/35 hover:-translate-y-0.5 transition-all duration-200">
                     <div className="text-sky-400 text-sm mb-1">☁</div>
                     <div className="text-xs font-semibold text-white">Multi-Cloud</div>
                     <div className="text-[11px] text-zinc-400">Azure + Supabase</div>
@@ -268,18 +319,25 @@ export default function LandingDashboardPage() {
                 </div>
               </div>
 
-              {/* Right Column: Bigger, Vibrant macOS Studio Window */}
-              <div className="lg:col-span-7 apple-glass rounded-2xl overflow-hidden">
+              {/* Right Column: Subtle 3D Perspective-Tilting macOS Studio Window */}
+              <div
+                onMouseMove={handleWindowMouseMove}
+                onMouseLeave={handleWindowMouseLeave}
+                style={{
+                  transform: `perspective(1400px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)`,
+                }}
+                className="lg:col-span-7 apple-glass rounded-2xl overflow-hidden transition-transform duration-300 ease-out will-change-transform"
+              >
                 {/* macOS Window Chrome + Segmented Control */}
                 <div className="px-4 py-3 bg-white/[0.04] border-b border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full bg-[#ff5f56] shadow-[0_0_8px_rgba(255,95,86,0.45)]" />
-                    <span className="w-3 h-3 rounded-full bg-[#ffbd2e] shadow-[0_0_8px_rgba(255,189,46,0.4)]" />
-                    <span className="w-3 h-3 rounded-full bg-[#27c93f] shadow-[0_0_8px_rgba(39,201,63,0.45)]" />
+                    <span className="w-3 h-3 rounded-full bg-[#ff5f56] shadow-[0_0_8px_rgba(255,95,86,0.5)]" />
+                    <span className="w-3 h-3 rounded-full bg-[#ffbd2e] shadow-[0_0_8px_rgba(255,189,46,0.45)]" />
+                    <span className="w-3 h-3 rounded-full bg-[#27c93f] shadow-[0_0_8px_rgba(39,201,63,0.5)]" />
                   </div>
 
                   {/* Segmented Pill Control */}
-                  <div className="flex items-center p-0.5 rounded-full bg-black/55 border border-white/[0.1] text-xs font-medium">
+                  <div className="flex items-center p-0.5 rounded-full bg-black/60 border border-white/[0.1] text-xs font-medium">
                     <button
                       type="button"
                       onClick={() => setSandboxTab("execute")}
@@ -317,14 +375,14 @@ export default function LandingDashboardPage() {
 
                   <div className="hidden sm:flex items-center gap-2 font-mono text-[11px]">
                     <span className="text-zinc-400">v1.2.0</span>
-                    <span className="text-emerald-400 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                    <span className="text-emerald-400 flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/25">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                       Live
                     </span>
                   </div>
                 </div>
 
-                {/* Live Animated Data-Flow Beam under Chrome */}
+                {/* Live Animated Data-Flow Beam */}
                 <div className="relative h-[2px] w-full bg-white/[0.04] overflow-hidden">
                   <div
                     className={`animate-beam h-full w-1/3 ${
@@ -339,9 +397,29 @@ export default function LandingDashboardPage() {
                 {sandboxTab === "execute" && (
                   <div className="p-4 sm:p-5 space-y-3.5">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="text-xs font-mono text-zinc-300">
-                        BillingOrderSource <span className="text-emerald-400">→</span> InvoiceFulfillmentTarget
-                      </span>
+                      {/* Interactive Live Mapping Pill Chips */}
+                      <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-mono">
+                        {[
+                          { id: "id", label: "id → order_id" },
+                          { id: "amount", label: "amount → total" },
+                          { id: "currency", label: "USD → usd" },
+                          { id: "region", label: "+ region" },
+                        ].map((chip) => (
+                          <span
+                            key={chip.id}
+                            onMouseEnter={() => setHoveredStep(chip.id)}
+                            onMouseLeave={() => setHoveredStep(null)}
+                            className={`px-2 py-0.5 rounded-full border transition cursor-default ${
+                              hoveredStep === chip.id
+                                ? "bg-[#f3e7d3]/15 text-[#f5dfb8] border-[#f3e7d3]/40"
+                                : "bg-white/[0.03] text-zinc-400 border-white/[0.07]"
+                            }`}
+                          >
+                            {chip.label}
+                          </span>
+                        ))}
+                      </div>
+
                       <div className="flex items-center gap-1.5">
                         {CANONICAL_TEST_FIXTURES.map((f, idx) => (
                           <button
@@ -364,10 +442,10 @@ export default function LandingDashboardPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Left Code Editor Pane */}
-                      <div className="bg-[#090807]/90 border border-white/[0.1] rounded-xl overflow-hidden flex flex-col">
+                      <div className="bg-[#090807]/95 border border-white/[0.1] rounded-xl overflow-hidden flex flex-col">
                         <div className="px-3.5 py-2.5 border-b border-white/[0.07] bg-white/[0.03] flex items-center justify-between text-xs">
                           <span className="font-mono text-zinc-200 flex items-center gap-2">
-                            <span className="text-[#f3e7d3]">{"{}"}</span> Source JSON Input
+                            <span className="text-[#f5dfb8]">{"{}"}</span> Source JSON Input
                           </span>
                           <button
                             type="button"
@@ -393,15 +471,15 @@ export default function LandingDashboardPage() {
                             spellCheck={false}
                             rows={Math.max(10, inputLines.length)}
                             aria-label="Source JSON payload"
-                            className="w-full bg-transparent text-[#f3eadc] focus:outline-none resize-none leading-relaxed"
+                            className="w-full bg-transparent text-[#f5dfb8] focus:outline-none resize-none leading-relaxed"
                           />
                         </div>
                       </div>
 
-                      {/* Right Execution & Verification Pane with Compile Flash */}
+                      {/* Right Syntax-Highlighted Output & Verification Pane */}
                       <div
                         key={compileNonce}
-                        className="animate-compile-flash bg-[#090807]/90 border border-white/[0.1] rounded-xl overflow-hidden flex flex-col"
+                        className="animate-compile-flash bg-[#090807]/95 border border-white/[0.1] rounded-xl overflow-hidden flex flex-col"
                       >
                         <div
                           className={`px-3.5 py-2.5 border-b flex items-center justify-between text-xs ${
@@ -471,9 +549,7 @@ export default function LandingDashboardPage() {
                               {liveRun?.parseError ? (
                                 <p className="text-rose-300">{liveRun.parseError}</p>
                               ) : liveRun?.exec?.success ? (
-                                <pre className="text-emerald-300 whitespace-pre-wrap leading-relaxed">
-                                  {JSON.stringify(liveRun.exec.outputPayload, null, 2)}
-                                </pre>
+                                <HighlightedJson value={liveRun.exec.outputPayload} />
                               ) : (
                                 <p className="text-rose-300 leading-relaxed">{liveRun?.exec?.error}</p>
                               )}
@@ -488,7 +564,7 @@ export default function LandingDashboardPage() {
                                   className="flex items-center justify-between text-[11px] py-1.5 border-b border-white/[0.05]"
                                 >
                                   <span className="text-zinc-200 truncate pr-2">
-                                    <span className="text-[#f3e7d3]">{s.operation}</span> → {s.targetPath}
+                                    <span className="text-[#f5dfb8]">{s.operation}</span> → {s.targetPath}
                                   </span>
                                   <span
                                     className={`font-semibold ${
@@ -527,7 +603,7 @@ export default function LandingDashboardPage() {
                 {/* Tab 2: Structural Diff */}
                 {sandboxTab === "diff" && (
                   <div className="p-5">
-                    <div className="max-h-[320px] overflow-y-auto divide-y divide-white/[0.06] border border-white/[0.09] rounded-xl bg-[#090807]/90">
+                    <div className="max-h-[320px] overflow-y-auto divide-y divide-white/[0.06] border border-white/[0.09] rounded-xl bg-[#090807]/95">
                       {liveCompiled.diff.items.map((item) => (
                         <div key={item.id} className="p-3.5 flex items-start justify-between gap-3 text-xs">
                           <div className="space-y-1 min-w-0">
@@ -536,7 +612,7 @@ export default function LandingDashboardPage() {
                                 {item.sourcePath || "(none)"}
                               </span>
                               <span className="text-emerald-400">→</span>
-                              <span className="text-white font-semibold truncate">{item.targetPath}</span>
+                              <span className="text-[#f5dfb8] font-semibold truncate">{item.targetPath}</span>
                             </div>
                             <p className="text-[11px] text-zinc-400">{item.message}</p>
                           </div>
@@ -572,7 +648,7 @@ export default function LandingDashboardPage() {
                         {copiedAdapter ? "Copied ✓" : "Copy .ts"}
                       </button>
                     </div>
-                    <pre className="max-h-[280px] overflow-auto bg-[#090807]/90 border border-white/[0.09] rounded-xl p-4 font-mono text-xs text-[#f3eadc] leading-relaxed">
+                    <pre className="max-h-[280px] overflow-auto bg-[#090807]/95 border border-white/[0.09] rounded-xl p-4 font-mono text-xs text-[#f3eadc] leading-relaxed">
                       {liveCompiled.adapterCode}
                     </pre>
                   </div>
@@ -582,7 +658,7 @@ export default function LandingDashboardPage() {
           </div>
         </section>
 
-        {/* Full-Width Workspaces Glass Dock (Tight spacing, zero dead voids) */}
+        {/* Full-Width Workspaces Glass Dock */}
         <section className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-10 pb-10 relative z-10">
           <div className="apple-glass rounded-2xl overflow-hidden">
             <div className="px-6 py-4 border-b border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-3">

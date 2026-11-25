@@ -3,10 +3,109 @@
 import * as React from "react";
 
 /**
- * Luminous, animated architectural backdrop with warm champagne, emerald-sage,
- * and amber volumetric depth + interactive cursor spotlight.
+ * Interactive 60fps HTML5 Canvas contract-mesh + warm champagne & emerald aurora backdrop.
+ * Nodes drift organically and connect with luminous filaments that respond subtly to cursor proximity.
  */
 export function HeroBackdrop() {
+  const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
+
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animId = 0;
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = Math.max(760, window.innerHeight * 0.92));
+    const mouse = { x: width * 0.65, y: height * 0.4, active: false };
+
+    const onResize = () => {
+      if (!canvas) return;
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = Math.max(760, window.innerHeight * 0.92);
+    };
+
+    const onMouseMove = (e: MouseEvent) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+      mouse.active = true;
+    };
+
+    window.addEventListener("resize", onResize);
+    window.addEventListener("mousemove", onMouseMove);
+
+    const nodeCount = Math.min(46, Math.max(26, Math.floor(width / 34)));
+    const nodes = Array.from({ length: nodeCount }, (_, i) => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      vx: (Math.random() - 0.5) * 0.35,
+      vy: (Math.random() - 0.5) * 0.35,
+      r: Math.random() * 1.6 + 1.1,
+      isEmerald: i % 3 === 0,
+    }));
+
+    const render = () => {
+      ctx.clearRect(0, 0, width, height);
+
+      for (let i = 0; i < nodes.length; i++) {
+        const n = nodes[i];
+        n.x += n.vx;
+        n.y += n.vy;
+
+        if (n.x < 0 || n.x > width) n.vx *= -1;
+        if (n.y < 0 || n.y > height) n.vy *= -1;
+
+        // Subtle cursor gravitational pull
+        if (mouse.active) {
+          const dx = mouse.x - n.x;
+          const dy = mouse.y - n.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist < 220 && dist > 1) {
+            n.x += (dx / dist) * 0.18;
+            n.y += (dy / dist) * 0.18;
+          }
+        }
+
+        // Draw connections
+        for (let j = i + 1; j < nodes.length; j++) {
+          const m = nodes[j];
+          const dist = Math.hypot(n.x - m.x, n.y - m.y);
+          if (dist < 175) {
+            const alpha = (1 - dist / 175) * 0.22;
+            ctx.beginPath();
+            ctx.moveTo(n.x, n.y);
+            ctx.lineTo(m.x, m.y);
+            ctx.strokeStyle =
+              n.isEmerald || m.isEmerald
+                ? `rgba(52, 211, 153, ${alpha})`
+                : `rgba(243, 223, 184, ${alpha})`;
+            ctx.lineWidth = 0.85;
+            ctx.stroke();
+          }
+        }
+
+        // Draw node glow
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+        ctx.fillStyle = n.isEmerald
+          ? "rgba(52, 211, 153, 0.55)"
+          : "rgba(245, 223, 184, 0.55)";
+        ctx.fill();
+      }
+
+      animId = requestAnimationFrame(render);
+    };
+
+    animId = requestAnimationFrame(render);
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("mousemove", onMouseMove);
+    };
+  }, []);
+
   return (
     <div
       aria-hidden="true"
@@ -14,84 +113,22 @@ export function HeroBackdrop() {
     >
       {/* Animated volumetric aurora orbs */}
       <div
-        className="animate-float-slow absolute -top-28 left-[12%] w-[820px] h-[540px] rounded-full opacity-55 blur-[130px]"
+        className="animate-float-slow absolute -top-28 left-[10%] w-[860px] h-[540px] rounded-full opacity-60 blur-[135px]"
         style={{
           background:
-            "radial-gradient(circle, rgba(243,215,170,0.28) 0%, rgba(16,185,129,0.22) 45%, transparent 72%)",
+            "radial-gradient(circle, rgba(243,215,170,0.3) 0%, rgba(16,185,129,0.22) 45%, transparent 72%)",
         }}
       />
       <div
-        className="animate-float-reverse absolute top-[18%] right-[-6%] w-[720px] h-[560px] rounded-full opacity-50 blur-[140px]"
+        className="animate-float-reverse absolute top-[15%] right-[-6%] w-[760px] h-[580px] rounded-full opacity-55 blur-[140px]"
         style={{
           background:
-            "radial-gradient(circle, rgba(52,211,153,0.24) 0%, rgba(217,170,110,0.18) 48%, transparent 72%)",
-        }}
-      />
-      <div
-        className="animate-float-slow absolute bottom-[-10%] left-[38%] w-[640px] h-[420px] rounded-full opacity-35 blur-[130px]"
-        style={{
-          background:
-            "radial-gradient(circle, rgba(245,158,11,0.16) 0%, rgba(16,185,129,0.14) 55%, transparent 75%)",
+            "radial-gradient(circle, rgba(52,211,153,0.26) 0%, rgba(217,170,110,0.2) 48%, transparent 72%)",
         }}
       />
 
-      {/* Fine architectural perspective grid */}
-      <div
-        className="absolute inset-0 opacity-[0.16]"
-        style={{
-          backgroundImage:
-            "linear-gradient(to right, rgba(255,244,224,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,244,224,0.06) 1px, transparent 1px)",
-          backgroundSize: "64px 64px",
-          maskImage: "radial-gradient(ellipse 80% 65% at 50% 35%, black 30%, transparent 100%)",
-          WebkitMaskImage: "radial-gradient(ellipse 80% 65% at 50% 35%, black 30%, transparent 100%)",
-        }}
-      />
-
-      {/* Sculpted Luminous Vector Ribbons */}
-      <svg
-        viewBox="0 0 1440 900"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="absolute inset-0 w-full h-full object-cover opacity-80"
-        preserveAspectRatio="xMidYMid slice"
-      >
-        <defs>
-          <linearGradient id="ribbonChampagne" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#fde6c4" stopOpacity="0.45" />
-            <stop offset="45%" stopColor="#34d399" stopOpacity="0.22" />
-            <stop offset="100%" stopColor="#090807" stopOpacity="0" />
-          </linearGradient>
-          <linearGradient id="ribbonEmerald" x1="100%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#34d399" stopOpacity="0.3" />
-            <stop offset="50%" stopColor="#f3e7d3" stopOpacity="0.18" />
-            <stop offset="100%" stopColor="#090807" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-
-        <path
-          d="M 420 -100 C 580 180, 260 520, 640 780 C 860 930, 1240 680, 1480 340"
-          stroke="url(#ribbonChampagne)"
-          strokeWidth="92"
-          strokeLinecap="round"
-        />
-        <path
-          d="M 420 -100 C 580 180, 260 520, 640 780 C 860 930, 1240 680, 1480 340"
-          stroke="rgba(253,230,196,0.28)"
-          strokeWidth="1.5"
-        />
-
-        <path
-          d="M 980 -80 C 680 150, 760 500, 400 740 C 180 885, -40 760, -140 580"
-          stroke="url(#ribbonEmerald)"
-          strokeWidth="66"
-          strokeLinecap="round"
-        />
-        <path
-          d="M 980 -80 C 680 150, 760 500, 400 740 C 180 885, -40 760, -140 580"
-          stroke="rgba(52,211,153,0.22)"
-          strokeWidth="1.2"
-        />
-      </svg>
+      {/* Interactive 60fps Contract Graph Mesh */}
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full opacity-85" />
 
       {/* Smooth bottom blend into obsidian ground */}
       <div
