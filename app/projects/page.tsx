@@ -8,7 +8,6 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorPanel } from "@/components/ui/error-panel";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { Project } from "@/lib/supabase/models";
-import { DEMO_PROJECTS } from "@/lib/fixtures/mock-projects";
 
 export default function ProjectsListPage() {
   const [projects, setProjects] = React.useState<Project[]>([]);
@@ -32,13 +31,13 @@ export default function ProjectsListPage() {
     try {
       const res = await fetch("/api/projects");
       const data = await res.json();
-      if (data.projects && Array.isArray(data.projects) && data.projects.length > 0) {
+      if (data.projects && Array.isArray(data.projects)) {
         setProjects(data.projects);
       } else {
-        setProjects(DEMO_PROJECTS);
+        setProjects([]);
       }
     } catch {
-      setProjects(DEMO_PROJECTS);
+      setProjects([]);
     } finally {
       setLoading(false);
     }

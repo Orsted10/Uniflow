@@ -45,15 +45,9 @@ export function TopBar() {
   React.useEffect(() => {
     refreshCloudStatus();
 
-    fetch("/api/projects")
-      .then((r) => r.json())
-      .then((data) => {
-        if (Array.isArray(data?.projects)) setProjects(data.projects);
-      })
-      .catch(() => {});
-
     const onKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        if (!userEmail) return;
         e.preventDefault();
         setPaletteOpen((prev) => !prev);
       } else if (e.key === "Escape") {
@@ -67,7 +61,16 @@ export function TopBar() {
     let unsubscribe: (() => void) | undefined;
     if (supabase) {
       supabase.auth.getUser().then(({ data: { user } }) => {
-        if (user?.email) setUserEmail(user.email);
+        const email = user?.email || null;
+        setUserEmail(email);
+        if (email) {
+          fetch("/api/projects")
+            .then((r) => r.json())
+            .then((data) => {
+              if (Array.isArray(data?.projects)) setProjects(data.projects);
+            })
+            .catch(() => {});
+        }
       });
       const {
         data: { subscription },
@@ -81,7 +84,7 @@ export function TopBar() {
       window.removeEventListener("keydown", onKeyDown);
       if (unsubscribe) unsubscribe();
     };
-  }, [refreshCloudStatus]);
+  }, [refreshCloudStatus, userEmail]);
 
   async function handleSignOut() {
     const supabase = createSupabaseBrowserClient();
@@ -89,7 +92,8 @@ export function TopBar() {
       await supabase.auth.signOut();
     }
     setUserEmail(null);
-    router.push("/login");
+    setProjects([]);
+    router.push("/");
   }
 
   const activeCount = cloudStatus
@@ -103,88 +107,92 @@ export function TopBar() {
 
   return (
     <>
-      <header className="border-b border-white/[0.08] bg-[#07080f]/75 backdrop-blur-2xl sticky top-0 z-50 text-zinc-100">
+      <header className="border-b border-white/[0.08] bg-[#090807]/75 backdrop-blur-2xl sticky top-0 z-50 text-zinc-100 shadow-[inset_0_-1px_0_0_rgba(255,244,224,0.04)]">
         <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-10 h-14 flex items-center justify-between gap-4">
-          {/* Brand & Segmented Nav */}
+          {/* Brand & Authenticated App Navigation Only */}
           <div className="flex items-center gap-5">
             <Link
               href="/"
-              className="flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 rounded-lg px-1 transition group"
+              className="flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/40 rounded-lg px-1 transition group"
             >
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-400 via-teal-400 to-indigo-500 text-zinc-950 flex items-center justify-center shadow-[0_0_18px_-2px_rgba(45,212,191,0.65)] group-hover:scale-105 transition-transform">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <div className="w-7 h-7 rounded-full bg-gradient-to-b from-white/[0.14] to-white/[0.04] border border-white/[0.18] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.25)] flex items-center justify-center text-[#f5dfb8] group-hover:scale-105 transition-transform">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <path
                     d="M4.5 12C4.5 9.5 6.5 7.5 9 7.5C11.5 7.5 12.5 10 14.5 12C16.5 14 17.5 16.5 20 16.5C21.38 16.5 22.5 15.38 22.5 14"
                     stroke="currentColor"
-                    strokeWidth="2.4"
+                    strokeWidth="2"
                     strokeLinecap="round"
                   />
                   <circle cx="4.5" cy="12" r="2" fill="currentColor" />
                 </svg>
               </div>
-              <span className="font-display font-bold tracking-tight text-sm text-white">
+              <span className="font-semibold tracking-[0.08em] text-xs text-white uppercase">
                 UNIFLOW
               </span>
             </Link>
 
-            <nav className="hidden md:flex items-center gap-1 p-1 rounded-full bg-white/[0.05] border border-white/[0.08] text-xs font-medium">
-              <Link
-                href="/"
-                className={`px-3.5 py-1 rounded-full transition-all duration-150 ${
-                  pathname === "/"
-                    ? "bg-gradient-to-r from-emerald-400/90 to-teal-300/90 text-zinc-950 font-semibold shadow-sm"
-                    : "text-zinc-400 hover:text-zinc-100"
-                }`}
-              >
-                Overview
-              </Link>
-              <Link
-                href="/projects"
-                className={`px-3.5 py-1 rounded-full transition-all duration-150 ${
-                  pathname === "/projects"
-                    ? "bg-gradient-to-r from-emerald-400/90 to-teal-300/90 text-zinc-950 font-semibold shadow-sm"
-                    : "text-zinc-400 hover:text-zinc-100"
-                }`}
-              >
-                Workspaces
-              </Link>
-              <Link
-                href="/projects/new"
-                className={`px-3.5 py-1 rounded-full transition-all duration-150 ${
-                  pathname === "/projects/new"
-                    ? "bg-gradient-to-r from-emerald-400/90 to-teal-300/90 text-zinc-950 font-semibold shadow-sm"
-                    : "text-zinc-400 hover:text-zinc-100"
-                }`}
-              >
-                New Project
-              </Link>
-            </nav>
+            {userEmail && (
+              <nav className="hidden md:flex items-center gap-1 p-1 rounded-full bg-white/[0.04] border border-white/[0.07] text-xs font-medium shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]">
+                <Link
+                  href="/"
+                  className={`px-3.5 py-1 rounded-full transition-all duration-150 ${
+                    pathname === "/"
+                      ? "bg-[#f3e7d3] text-[#141210] font-semibold shadow-sm"
+                      : "text-zinc-400 hover:text-zinc-100"
+                  }`}
+                >
+                  Overview
+                </Link>
+                <Link
+                  href="/projects"
+                  className={`px-3.5 py-1 rounded-full transition-all duration-150 ${
+                    pathname === "/projects"
+                      ? "bg-[#f3e7d3] text-[#141210] font-semibold shadow-sm"
+                      : "text-zinc-400 hover:text-zinc-100"
+                  }`}
+                >
+                  Workspaces
+                </Link>
+                <Link
+                  href="/projects/new"
+                  className={`px-3.5 py-1 rounded-full transition-all duration-150 ${
+                    pathname === "/projects/new"
+                      ? "bg-[#f3e7d3] text-[#141210] font-semibold shadow-sm"
+                      : "text-zinc-400 hover:text-zinc-100"
+                  }`}
+                >
+                  New Project
+                </Link>
+              </nav>
+            )}
           </div>
 
-          {/* Center: Working ⌘K Command Palette Trigger */}
-          <button
-            type="button"
-            onClick={() => setPaletteOpen(true)}
-            className="hidden sm:flex items-center justify-between gap-6 px-3.5 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.1] hover:border-teal-400/40 text-xs text-zinc-400 hover:text-zinc-100 transition w-56 lg:w-72"
-          >
-            <span className="flex items-center gap-2 truncate">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
-                <path d="M20 20L16.5 16.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-              <span>Search workspaces &amp; actions...</span>
-            </span>
-            <kbd className="font-mono text-[10px] text-zinc-300 bg-black/40 border border-white/[0.1] px-1.5 py-0.5 rounded">
-              ⌘K
-            </kbd>
-          </button>
+          {/* Center: ⌘K Command Palette (Shown Inside App After Login) */}
+          {userEmail && (
+            <button
+              type="button"
+              onClick={() => setPaletteOpen(true)}
+              className="hidden sm:flex items-center justify-between gap-6 px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.09] hover:border-white/[0.16] text-xs text-zinc-400 hover:text-zinc-200 transition w-56 lg:w-72 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]"
+            >
+              <span className="flex items-center gap-2 truncate">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
+                  <path d="M20 20L16.5 16.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+                <span>Search workspaces &amp; actions...</span>
+              </span>
+              <kbd className="font-mono text-[10px] text-zinc-300 bg-black/50 border border-white/[0.1] px-1.5 py-0.5 rounded">
+                ⌘K
+              </kbd>
+            </button>
+          )}
 
-          {/* Right: Interactive Live Cloud Diagnostics Capsule + Auth */}
+          {/* Right: Interactive Live Cloud Diagnostics Capsule + Real Session */}
           <div className="flex items-center gap-3 text-xs relative">
             <button
               type="button"
               onClick={() => setCloudPopoverOpen((o) => !o)}
-              className="hidden xl:flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] hover:bg-white/[0.09] border border-white/[0.1] hover:border-teal-400/35 font-mono text-[11px] transition"
+              className="hidden xl:flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.09] hover:border-white/[0.18] font-mono text-[11px] transition shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]"
               title="Click to inspect live multi-cloud diagnostics"
             >
               <StatusDot label="Supabase" active={Boolean(cloudStatus?.supabase.configured)} />
@@ -209,7 +217,7 @@ export function TopBar() {
                     type="button"
                     onClick={refreshCloudStatus}
                     disabled={checkingCloud}
-                    className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-teal-500/15 hover:bg-teal-500/25 text-teal-300 border border-teal-500/30 transition disabled:opacity-50"
+                    className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-white/[0.08] hover:bg-white/[0.14] text-zinc-200 border border-white/[0.1] transition disabled:opacity-50"
                   >
                     {checkingCloud ? "Checking..." : "Re-verify"}
                   </button>
@@ -244,14 +252,14 @@ export function TopBar() {
               <div className="flex items-center gap-2">
                 <span
                   title={userEmail}
-                  className="w-7 h-7 rounded-full bg-gradient-to-br from-teal-400/25 to-indigo-400/25 border border-teal-400/40 flex items-center justify-center text-[11px] font-bold text-teal-200 uppercase"
+                  className="w-7 h-7 rounded-full bg-[#f3e7d3]/15 border border-[#f3e7d3]/30 flex items-center justify-center text-[11px] font-semibold text-[#f5dfb8] uppercase"
                 >
                   {userEmail[0]}
                 </span>
                 <button
                   type="button"
                   onClick={handleSignOut}
-                  className="text-xs text-zinc-300 hover:text-white font-medium px-2.5 py-1 rounded-full border border-white/[0.1] bg-white/[0.04] hover:bg-white/[0.1] transition"
+                  className="text-xs text-zinc-300 hover:text-white font-medium px-2.5 py-1 rounded-full border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.09] transition"
                 >
                   Sign out
                 </button>
@@ -259,7 +267,7 @@ export function TopBar() {
             ) : (
               <Link
                 href="/login"
-                className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-100 hover:text-white px-3.5 py-1.5 rounded-full border border-white/[0.14] bg-white/[0.06] hover:bg-white/[0.12] transition"
+                className="champagne-pill inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-1.5 rounded-full transition"
               >
                 Sign in
               </Link>
@@ -268,11 +276,13 @@ export function TopBar() {
         </div>
       </header>
 
-      <CommandPalette
-        isOpen={paletteOpen}
-        onClose={() => setPaletteOpen(false)}
-        projects={projects}
-      />
+      {userEmail && (
+        <CommandPalette
+          isOpen={paletteOpen}
+          onClose={() => setPaletteOpen(false)}
+          projects={projects}
+        />
+      )}
     </>
   );
 }
@@ -282,10 +292,10 @@ function StatusDot({ label, active }: { label: string; active: boolean }) {
     <span className="inline-flex items-center gap-1.5 px-1">
       <span
         className={`w-1.5 h-1.5 rounded-full ${
-          active ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.85)]" : "bg-zinc-600"
+          active ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.75)]" : "bg-zinc-600"
         }`}
       />
-      <span className={active ? "text-zinc-100" : "text-zinc-500"}>{label}</span>
+      <span className={active ? "text-zinc-200" : "text-zinc-500"}>{label}</span>
     </span>
   );
 }

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { TopBar } from "@/components/shell/topbar";
 import { HeroBackdrop } from "@/components/ui/hero-backdrop";
 import { Project } from "@/lib/supabase/models";
-import { DEMO_PROJECTS } from "@/lib/fixtures/mock-projects";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import {
   CANONICAL_SOURCE_SPEC,
   CANONICAL_TARGET_SPEC,
@@ -61,8 +61,9 @@ function HighlightedJson({ value }: { value: unknown }) {
 
 export default function LandingDashboardPage() {
   const router = useRouter();
+  const [userEmail, setUserEmail] = React.useState<string | null>(null);
   const [projects, setProjects] = React.useState<Project[]>([]);
-  const [loadingProjects, setLoadingProjects] = React.useState(true);
+  const [loadingProjects, setLoadingProjects] = React.useState(false);
   const [launchingSandbox, setLaunchingSandbox] = React.useState(false);
 
   const [sandboxTab, setSandboxTab] = React.useState<SandboxTab>("execute");
@@ -77,17 +78,25 @@ export default function LandingDashboardPage() {
   const [hoveredStep, setHoveredStep] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    fetch("/api/projects")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.projects && Array.isArray(data.projects) && data.projects.length > 0) {
-          setProjects(data.projects);
-        } else {
-          setProjects(DEMO_PROJECTS);
-        }
-      })
-      .catch(() => setProjects(DEMO_PROJECTS))
-      .finally(() => setLoadingProjects(false));
+    const supabase = createSupabaseBrowserClient();
+    if (!supabase) return;
+
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      const email = user?.email || null;
+      setUserEmail(email);
+      if (email) {
+        setLoadingProjects(true);
+        fetch("/api/projects")
+          .then((r) => r.json())
+          .then((data) => {
+            if (Array.isArray(data?.projects)) {
+              setProjects(data.projects);
+            }
+          })
+          .catch(() => {})
+          .finally(() => setLoadingProjects(false));
+      }
+    });
   }, []);
 
   const liveCompiled = React.useMemo(() => {
@@ -143,6 +152,11 @@ export default function LandingDashboardPage() {
   }, [payloadText, liveCompiled]);
 
   async function launchCanonicalWorkspace() {
+    if (!userEmail) {
+      router.push("/login?redirect=/projects/new");
+      return;
+    }
+
     setLaunchingSandbox(true);
     try {
       const res = await fetch("/api/projects", {
@@ -219,16 +233,14 @@ export default function LandingDashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#090807] text-[#f5f2eb] flex flex-col font-sans relative overflow-x-hidden">
-      {/* Supplied Warm Photographic Developer Desk Foundation */}
       <HeroBackdrop />
-
       <TopBar />
 
-      <main className="flex-1 relative z-10 flex flex-col justify-between">
+      <main className="flex-1 relative z-10 flex flex-col justify-center">
         {/* Hero & Live JSON Execution Workbench */}
-        <section className="max-w-[1440px] w-full mx-auto px-5 sm:px-8 lg:px-10 pt-8 pb-6 lg:pt-12 lg:pb-8">
+        <section className="max-w-[1440px] w-full mx-auto px-5 sm:px-8 lg:px-10 py-10 lg:py-14">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
-            {/* Left Column: Editorial Headline + Hand-Drawn Coral Brush + Tactile Capability Cards */}
+            {/* Left Column */}
             <div className="lg:col-span-5 space-y-5">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/55 backdrop-blur-md border border-white/[0.12] text-[11px] font-mono text-zinc-300">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
@@ -243,7 +255,6 @@ export default function LandingDashboardPage() {
                   <span className="font-brush text-[54px] sm:text-[64px] xl:text-[74px] text-[#f4845f] font-bold tracking-normal leading-none pr-1">
                     verified
                   </span>
-                  {/* Subtle hand-drawn brush underline */}
                   <svg
                     viewBox="0 0 180 14"
                     fill="none"
@@ -274,18 +285,24 @@ export default function LandingDashboardPage() {
                   disabled={launchingSandbox}
                   className="champagne-pill inline-flex items-center justify-center gap-2 text-xs sm:text-[13px] font-semibold px-6 py-3 rounded-full disabled:opacity-60 transition-all duration-200"
                 >
-                  <span>{launchingSandbox ? "Initializing..." : "Launch Live Workbench"}</span>
+                  <span>
+                    {launchingSandbox
+                      ? "Initializing..."
+                      : userEmail
+                      ? "Launch Live Workbench"
+                      : "Sign in to Launch Workbench"}
+                  </span>
                   <span aria-hidden="true">→</span>
                 </button>
                 <Link
-                  href="/projects/new"
+                  href={userEmail ? "/projects/new" : "/login?redirect=/projects/new"}
                   className="inline-flex items-center justify-center gap-2 text-xs sm:text-[13px] font-medium px-6 py-3 rounded-full border border-white/[0.18] bg-black/55 text-zinc-100 hover:bg-black/75 hover:border-white/[0.3] transition-all duration-200 backdrop-blur-xl"
                 >
                   <span>+ New Custom Project</span>
                 </Link>
               </div>
 
-              {/* Capability Cards with Rich Amber, Teal & Muted Violet Accents */}
+              {/* Capability Cards */}
               <div className="pt-2 grid grid-cols-3 gap-3 max-w-md">
                 <div className="apple-glass rounded-2xl px-3.5 py-3 hover:border-amber-400/40 hover:-translate-y-0.5 transition-all duration-200 flex items-center gap-2.5">
                   <div className="w-7 h-7 rounded-lg bg-amber-500/15 border border-amber-400/30 flex items-center justify-center text-amber-300 text-xs shrink-0">
@@ -319,9 +336,8 @@ export default function LandingDashboardPage() {
               </div>
             </div>
 
-            {/* Right Column: JSON Execution Workbench */}
+            {/* Right Column: Live JSON Execution Workbench */}
             <div className="lg:col-span-7 apple-glass rounded-2xl overflow-hidden">
-              {/* macOS Chrome + Segmented Tabs */}
               <div className="px-4 py-3 bg-white/[0.04] border-b border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-full bg-[#ff5f56]" />
@@ -374,7 +390,6 @@ export default function LandingDashboardPage() {
                 </div>
               </div>
 
-              {/* Subtle compiler progress beam */}
               <div className="relative h-[2px] w-full bg-white/[0.04] overflow-hidden">
                 <div
                   className={`animate-beam h-full w-1/3 ${
@@ -385,7 +400,6 @@ export default function LandingDashboardPage() {
                 />
               </div>
 
-              {/* Tab 1: Execution */}
               {sandboxTab === "execute" && (
                 <div className="p-4 sm:p-5 space-y-3.5">
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -432,7 +446,6 @@ export default function LandingDashboardPage() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Left Source JSON Pane */}
                     <div className="bg-[#090807]/95 border border-white/[0.1] rounded-xl overflow-hidden flex flex-col">
                       <div className="px-3.5 py-2.5 border-b border-white/[0.07] bg-white/[0.03] flex items-center justify-between text-xs">
                         <span className="font-mono text-zinc-200 flex items-center gap-2">
@@ -467,7 +480,6 @@ export default function LandingDashboardPage() {
                       </div>
                     </div>
 
-                    {/* Right Output & Verification Pane */}
                     <div
                       key={compileNonce}
                       className="animate-compile-flash bg-[#090807]/95 border border-white/[0.1] rounded-xl overflow-hidden flex flex-col"
@@ -591,7 +603,6 @@ export default function LandingDashboardPage() {
                 </div>
               )}
 
-              {/* Tab 2: Diff */}
               {sandboxTab === "diff" && (
                 <div className="p-5">
                   <div className="max-h-[310px] overflow-y-auto divide-y divide-white/[0.06] border border-white/[0.09] rounded-xl bg-[#090807]/95">
@@ -624,7 +635,6 @@ export default function LandingDashboardPage() {
                 </div>
               )}
 
-              {/* Tab 3: Adapters */}
               {sandboxTab === "adapter" && (
                 <div className="p-5 space-y-3">
                   <div className="flex items-center justify-between">
@@ -648,101 +658,102 @@ export default function LandingDashboardPage() {
           </div>
         </section>
 
-        {/* Active Workspaces Glass Dock */}
-        <section className="max-w-[1440px] w-full mx-auto px-5 sm:px-8 lg:px-10 pb-8 pt-2">
-          <div className="apple-glass rounded-2xl overflow-hidden">
-            <div className="px-6 py-4 border-b border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-violet-500/15 border border-violet-400/30 flex items-center justify-center text-violet-300 text-sm shrink-0">
-                  ∿
+        {/* Real Authenticated User Workspaces Only (Zero Fake Data!) */}
+        {userEmail && (
+          <section className="max-w-[1440px] w-full mx-auto px-5 sm:px-8 lg:px-10 pb-8 pt-2">
+            <div className="apple-glass rounded-2xl overflow-hidden">
+              <div className="px-6 py-4 border-b border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-violet-500/15 border border-violet-400/30 flex items-center justify-center text-violet-300 text-sm shrink-0">
+                    ∿
+                  </div>
+                  <div>
+                    <h2 className="text-base font-semibold text-white tracking-tight">Your Workspaces</h2>
+                    <p className="text-xs text-zinc-400">
+                      Projects created and persisted under your authenticated account.
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-base font-semibold text-white tracking-tight">Active Workspaces</h2>
-                  <p className="text-xs text-zinc-400">
-                    Resume a compatibility project or initialize a fresh contract pair.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Link
-                  href="/projects"
-                  className="text-xs font-medium text-zinc-200 hover:text-white px-4 py-1.5 rounded-full border border-white/[0.12] bg-white/[0.05] hover:bg-white/[0.1] transition"
-                >
-                  View all →
-                </Link>
-                <Link
-                  href="/projects/new"
-                  className="champagne-pill text-xs font-semibold px-4 py-1.5 rounded-full transition"
-                >
-                  + New Workspace
-                </Link>
-              </div>
-            </div>
-
-            <div className="divide-y divide-white/[0.06]">
-              {loadingProjects ? (
-                <div className="p-6 space-y-3">
-                  <div className="h-10 bg-white/[0.04] rounded-lg animate-pulse" />
-                  <div className="h-10 bg-white/[0.04] rounded-lg animate-pulse" />
-                </div>
-              ) : projects.length === 0 ? (
-                <div className="p-8 text-center text-xs text-zinc-400">
-                  No workspaces yet.{" "}
-                  <button
-                    type="button"
-                    onClick={launchCanonicalWorkspace}
-                    className="text-[#f4845f] hover:underline font-medium"
-                  >
-                    Launch the canonical e-commerce workspace →
-                  </button>
-                </div>
-              ) : (
-                projects.map((p, i) => (
+                <div className="flex items-center gap-2.5">
                   <Link
-                    key={p.id}
-                    href={`/projects/${p.id}`}
-                    className="px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-white/[0.04] transition group"
+                    href="/projects"
+                    className="text-xs font-medium text-zinc-200 hover:text-white px-4 py-1.5 rounded-full border border-white/[0.12] bg-white/[0.05] hover:bg-white/[0.1] transition"
                   >
-                    <div className="flex items-center gap-4 min-w-0">
-                      <div
-                        className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-mono shrink-0 border transition-transform duration-200 group-hover:scale-105 ${
-                          i % 2 === 0
-                            ? "bg-teal-500/15 border-teal-400/30 text-teal-300"
-                            : "bg-violet-500/15 border-violet-400/30 text-violet-300"
-                        }`}
-                      >
-                        {i % 2 === 0 ? "↗" : "⚡"}
-                      </div>
-                      <div className="space-y-0.5 min-w-0">
-                        <div className="flex items-center gap-2.5">
-                          <span className="text-sm font-semibold text-zinc-100 group-hover:text-[#f5dfb8] transition truncate">
-                            {p.name}
-                          </span>
-                          <span className="font-mono text-[11px] text-zinc-400 bg-white/[0.05] border border-white/[0.09] px-2.5 py-0.5 rounded-full">
-                            {p.id}
-                          </span>
-                        </div>
-                        <p className="text-xs text-zinc-400 truncate">
-                          {p.description || "API contract diff, review, and adapter compilation workspace"}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-5 shrink-0 text-xs">
-                      <span className="font-mono text-xs text-zinc-400">
-                        {new Date(p.updated_at).toLocaleDateString()}
-                      </span>
-                      <span className="inline-flex items-center gap-2 text-zinc-200 group-hover:text-white font-medium px-3 py-1 rounded-full bg-white/[0.05] group-hover:bg-white/[0.12] border border-white/[0.1] transition">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-                        Open →
-                      </span>
-                    </div>
+                    View all →
                   </Link>
-                ))
-              )}
+                  <Link
+                    href="/projects/new"
+                    className="champagne-pill text-xs font-semibold px-4 py-1.5 rounded-full transition"
+                  >
+                    + New Workspace
+                  </Link>
+                </div>
+              </div>
+
+              <div className="divide-y divide-white/[0.06]">
+                {loadingProjects ? (
+                  <div className="p-6 space-y-3">
+                    <div className="h-10 bg-white/[0.04] rounded-lg animate-pulse" />
+                  </div>
+                ) : projects.length === 0 ? (
+                  <div className="p-8 text-center text-xs text-zinc-400">
+                    You have not created any workspaces yet.{" "}
+                    <button
+                      type="button"
+                      onClick={launchCanonicalWorkspace}
+                      className="text-[#f4845f] hover:underline font-medium"
+                    >
+                      Create your first compatibility workspace →
+                    </button>
+                  </div>
+                ) : (
+                  projects.map((p, i) => (
+                    <Link
+                      key={p.id}
+                      href={`/projects/${p.id}`}
+                      className="px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-white/[0.04] transition group"
+                    >
+                      <div className="flex items-center gap-4 min-w-0">
+                        <div
+                          className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-mono shrink-0 border transition-transform duration-200 group-hover:scale-105 ${
+                            i % 2 === 0
+                              ? "bg-teal-500/15 border-teal-400/30 text-teal-300"
+                              : "bg-violet-500/15 border-violet-400/30 text-violet-300"
+                          }`}
+                        >
+                          {i % 2 === 0 ? "↗" : "⚡"}
+                        </div>
+                        <div className="space-y-0.5 min-w-0">
+                          <div className="flex items-center gap-2.5">
+                            <span className="text-sm font-semibold text-zinc-100 group-hover:text-[#f5dfb8] transition truncate">
+                              {p.name}
+                            </span>
+                            <span className="font-mono text-[11px] text-zinc-400 bg-white/[0.05] border border-white/[0.09] px-2.5 py-0.5 rounded-full">
+                              {p.id}
+                            </span>
+                          </div>
+                          <p className="text-xs text-zinc-400 truncate">
+                            {p.description || "API contract diff, review, and adapter compilation workspace"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-5 shrink-0 text-xs">
+                        <span className="font-mono text-xs text-zinc-400">
+                          {new Date(p.updated_at).toLocaleDateString()}
+                        </span>
+                        <span className="inline-flex items-center gap-2 text-zinc-200 group-hover:text-white font-medium px-3 py-1 rounded-full bg-white/[0.05] group-hover:bg-white/[0.12] border border-white/[0.1] transition">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                          Open →
+                        </span>
+                      </div>
+                    </Link>
+                  ))
+                )}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
       </main>
     </div>
   );
