@@ -503,13 +503,7 @@ export default function LandingDashboardPage() {
                           className="w-full bg-transparent text-[#f5dfb8] focus:outline-none resize-none leading-relaxed"
                         />
                       </div>
-                      <div className="apple-glass rounded-2xl px-3.5 py-3 hover:border-sky-400/35 hover:-translate-y-0.5 transition-all duration-200">
-                        <div className="text-sky-400 text-sm mb-1">☁</div>
-                        <div className="text-xs font-semibold text-white">Multi-Cloud</div>
-                        <div className="text-[11px] text-zinc-400">Azure + Supabase</div>
-                      </div>
                     </div>
-                  </div>
 
                     <div
                       key={compileNonce}
@@ -551,7 +545,7 @@ export default function LandingDashboardPage() {
                               : "border-transparent text-zinc-500 hover:text-zinc-300"
                           }`}
                         >
-                          Execution
+                          Output
                         </button>
                         <button
                           type="button"
@@ -562,7 +556,7 @@ export default function LandingDashboardPage() {
                               : "border-transparent text-zinc-500 hover:text-zinc-300"
                           }`}
                         >
-                          Diff ({liveCompiled.diff.items.length})
+                          Steps ({liveRun?.exec?.stepResults.length || 0})
                         </button>
                         <button
                           type="button"
@@ -573,7 +567,7 @@ export default function LandingDashboardPage() {
                               : "border-transparent text-zinc-500 hover:text-zinc-300"
                           }`}
                         >
-                          Adapters
+                          Validation
                         </button>
                       </div>
 
@@ -590,213 +584,49 @@ export default function LandingDashboardPage() {
                           </>
                         )}
 
-                    <div className="relative h-[2px] w-full bg-white/[0.04] overflow-hidden">
-                      <div
-                        className={`animate-beam h-full w-1/3 ${isAllValid
-                          ? "bg-gradient-to-r from-transparent via-teal-400 to-transparent"
-                          : "bg-gradient-to-r from-transparent via-rose-400 to-transparent"
-                          }`}
-                      />
+                        {outputSubTab === "steps" && (
+                          <div className="space-y-2">
+                            {liveRun?.exec?.stepResults.map((s) => (
+                              <div
+                                key={s.stepId}
+                                className="flex items-center justify-between text-xs py-1.5 border-b border-white/[0.05]"
+                              >
+                                <span className="text-zinc-200 truncate pr-2">
+                                  <span className="text-[#f5dfb8]">{s.operation}</span> → {s.targetPath}
+                                </span>
+                                <span
+                                  className={`font-semibold ${
+                                    s.success ? "text-emerald-400" : "text-rose-400"
+                                  }`}
+                                >
+                                  {s.success ? "OK" : "FAIL"}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {outputSubTab === "details" && (
+                          <div className="space-y-2 text-xs">
+                            {liveRun?.validation?.valid ? (
+                              <div className="text-emerald-300 leading-relaxed">
+                                ✓ All {liveRun.validation.checkedFieldCount} target contract fields
+                                validated against InvoiceFulfillmentTargetAPI v2.0.0.
+                              </div>
+                            ) : (
+                              liveRun?.validation?.errors.map((e, i) => (
+                                <div key={i} className="text-rose-300 leading-relaxed">
+                                  • {e.message}
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
-
-                    {sandboxTab === "execute" && (
-                      <div className="p-4 sm:p-5 space-y-3.5">
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                          <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-mono">
-                            {[
-                              { id: "id", label: "id → order_id" },
-                              { id: "amount", label: "amount → total" },
-                              { id: "currency", label: "USD → usd" },
-                              { id: "region", label: "+ region" },
-                            ].map((chip) => (
-                              <span
-                                key={chip.id}
-                                onMouseEnter={() => setHoveredStep(chip.id)}
-                                onMouseLeave={() => setHoveredStep(null)}
-                                className={`px-2.5 py-0.5 rounded-full border transition cursor-default ${hoveredStep === chip.id
-                                  ? "bg-[#f4845f]/20 text-[#f9a88b] border-[#f4845f]/40"
-                                  : "bg-black/45 text-zinc-300 border-white/[0.09]"
-                                  }`}
-                              >
-                                {chip.label}
-                              </span>
-                            ))}
-                          </div>
-
-                          <div className="flex items-center gap-1.5">
-                            {CANONICAL_TEST_FIXTURES.map((f, idx) => (
-                              <button
-                                key={idx}
-                                type="button"
-                                onClick={() => handleSelectFixture(idx)}
-                                className={`text-[11px] font-mono px-3 py-1 rounded-full border transition-all ${fixtureIdx === idx
-                                  ? f.expectValid
-                                    ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/40"
-                                    : "bg-rose-500/15 text-rose-300 border-rose-500/40"
-                                  : "bg-black/40 text-zinc-400 border-white/[0.08] hover:text-white"
-                                  }`}
-                              >
-                                {f.expectValid ? `Fixture ${idx + 1}` : `Invalid ${idx + 1}`}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="bg-[#090807]/95 border border-white/[0.1] rounded-xl overflow-hidden flex flex-col">
-                            <div className="px-3.5 py-2.5 border-b border-white/[0.07] bg-white/[0.03] flex items-center justify-between text-xs">
-                              <span className="font-mono text-zinc-200 flex items-center gap-2">
-                                <span className="text-amber-300">{"{}"}</span> Source JSON Input
-                              </span>
-                              <button
-                                type="button"
-                                onClick={handleCopyInput}
-                                className="text-[11px] font-mono text-zinc-400 hover:text-white transition"
-                              >
-                                {copiedInput ? "Copied ✓" : "Copy"}
-                              </button>
-                            </div>
-
-                            <div className="flex flex-1 p-3.5 font-mono text-xs leading-relaxed min-h-[260px]">
-                              <div
-                                aria-hidden="true"
-                                className="select-none text-zinc-600 pr-3 text-right border-r border-white/[0.06] mr-3 shrink-0"
-                              >
-                                {inputLines.map((_, i) => (
-                                  <div key={i}>{i + 1}</div>
-                                ))}
-                              </div>
-                              <textarea
-                                value={payloadText}
-                                onChange={(e) => handlePayloadEdit(e.target.value)}
-                                spellCheck={false}
-                                rows={Math.max(10, inputLines.length)}
-                                aria-label="Source JSON payload"
-                                className="w-full bg-transparent text-[#f5dfb8] focus:outline-none resize-none leading-relaxed"
-                              />
-                            </div>
-                          </div>
-
-                          <div
-                            key={compileNonce}
-                            className="animate-compile-flash bg-[#090807]/95 border border-white/[0.1] rounded-xl overflow-hidden flex flex-col"
-                          >
-                            <div
-                              key={compileNonce}
-                              className="animate-compile-flash bg-[#090807]/95 border border-white/[0.1] rounded-xl overflow-hidden flex flex-col"
-                            >
-                              <div
-                                className={`px-3.5 py-2.5 border-b flex items-center justify-between text-xs ${isAllValid
-                                  ? "bg-emerald-500/15 border-emerald-500/25 text-emerald-300"
-                                  : "bg-rose-500/15 border-rose-500/25 text-rose-300"
-                                  }`}
-                              >
-                                <span className="font-semibold flex items-center gap-2">
-                                  <span
-                                    className={`w-2 h-2 rounded-full ${isAllValid ? "bg-emerald-400" : "bg-rose-400"
-                                      }`}
-                                  />
-                                  <span>
-                                    {isAllValid
-                                      ? "Compilation Successful"
-                                      : liveRun?.parseError
-                                        ? "JSON Syntax Error"
-                                        : "Contract Violation"}
-                                  </span>
-                                </span>
-                                <span className="font-mono text-[11px] font-semibold">
-                                  {liveRun?.elapsedMs || "0.4"}ms ⚡
-                                </span>
-                              </div>
-
-                              <div className="px-3.5 pt-2.5 border-b border-white/[0.07] flex items-center gap-5 text-xs">
-                                <button
-                                  type="button"
-                                  onClick={() => setOutputSubTab("output")}
-                                  className={`pb-2 border-b-2 transition ${outputSubTab === "output"
-                                    ? "border-[#f3e7d3] text-white font-semibold"
-                                    : "border-transparent text-zinc-500 hover:text-zinc-300"
-                                    }`}
-                                >
-                                  Output
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => setOutputSubTab("steps")}
-                                  className={`pb-2 border-b-2 transition ${outputSubTab === "steps"
-                                    ? "border-[#f3e7d3] text-white font-semibold"
-                                    : "border-transparent text-zinc-500 hover:text-zinc-300"
-                                    }`}
-                                >
-                                  Steps ({liveRun?.exec?.stepResults.length || 0})
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => setOutputSubTab("details")}
-                                  className={`pb-2 border-b-2 transition ${outputSubTab === "details"
-                                    ? "border-[#f3e7d3] text-white font-semibold"
-                                    : "border-transparent text-zinc-500 hover:text-zinc-300"
-                                    }`}
-                                >
-                                  Validation
-                                </button>
-                              </div>
-
-                              <div className="p-3.5 flex-1 overflow-auto max-h-[235px] font-mono text-xs">
-                                {outputSubTab === "output" && (
-                                  <>
-                                    {liveRun?.parseError ? (
-                                      <p className="text-rose-300">{liveRun.parseError}</p>
-                                    ) : liveRun?.exec?.success ? (
-                                      <HighlightedJson value={liveRun.exec.outputPayload} />
-                                    ) : (
-                                      <p className="text-rose-300 leading-relaxed">{liveRun?.exec?.error}</p>
-                                    )}
-                                  </>
-                                )}
-
-                                {outputSubTab === "steps" && (
-                                  <div className="space-y-2">
-                                    {liveRun?.exec?.stepResults.map((s) => (
-                                      <div
-                                        key={s.stepId}
-                                        className="flex items-center justify-between text-[11px] py-1.5 border-b border-white/[0.05]"
-                                      >
-                                        <span className="text-zinc-200 truncate pr-2">
-                                          <span className="text-[#f5dfb8]">{s.operation}</span> → {s.targetPath}
-                                        </span>
-                                        <span
-                                          className={`font-semibold ${s.success ? "text-emerald-400" : "text-rose-400"
-                                            }`}
-                                        >
-                                          {s.success ? "OK" : "FAIL"}
-                                        </span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-
-                                {outputSubTab === "details" && (
-                                  <div className="space-y-2 text-[11px]">
-                                    {liveRun?.validation?.valid ? (
-                                      <div className="text-emerald-300 leading-relaxed">
-                                        ✓ All {liveRun.validation.checkedFieldCount} target contract fields
-                                        validated against InvoiceFulfillmentTargetAPI v2.0.0.
-                                      </div>
-                                    ) : (
-                                      liveRun?.validation?.errors.map((e, i) => (
-                                        <div key={i} className="text-rose-300 leading-relaxed">
-                                          • {e.message}
-                                        </div>
-                                      ))
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                )}
+                  </div>
+                </div>
+              )}
 
                         {sandboxTab === "diff" && (
                           <div className="p-5">
@@ -811,38 +641,42 @@ export default function LandingDashboardPage() {
                                       <span className="text-teal-400">→</span>
                                       <span className="text-[#f5dfb8] font-semibold truncate">{item.targetPath}</span>
                                     </div>
-                                    <span
-                                      className={`shrink-0 font-mono text-[10px] px-2.5 py-0.5 rounded-full border ${item.severity === "error"
-                                        ? "bg-rose-500/15 text-rose-300 border-rose-500/30"
-                                        : item.severity === "warning"
-                                          ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
-                                          : "bg-white/[0.06] text-zinc-300 border-white/[0.12]"
-                                        }`}
-                                    >
-                                      {item.category}
-                                    </span>
                                   </div>
-                      ))}
-                                </div>
-                  </div>
-                )}
-
-                            {sandboxTab === "adapter" && (
-                              <div className="p-5 space-y-3">
-                                <div className="flex items-center justify-between">
-                                  <span className="text-xs font-mono text-zinc-300">
-                                    Standalone TypeScript adapter (zero dynamic eval)
-                                  </span>
-                                  <button
-                                    type="button"
-                                    onClick={handleCopyAdapter}
-                                    className="text-xs font-medium px-3.5 py-1 rounded-full bg-white/[0.09] hover:bg-white/[0.16] text-white border border-white/[0.12] transition"
+                                  <span
+                                    className={`shrink-0 font-mono text-[10px] px-2.5 py-0.5 rounded-full border ${item.severity === "error"
+                                      ? "bg-rose-500/15 text-rose-300 border-rose-500/30"
+                                      : item.severity === "warning"
+                                        ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
+                                        : "bg-white/[0.06] text-zinc-300 border-white/[0.12]"
+                                      }`}
                                   >
-                                    {copiedAdapter ? "Copied ✓" : "Copy .ts"}
-                                  </button>
+                                    {item.category}
+                                  </span>
                                 </div>
-                )}
-                              </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {sandboxTab === "adapter" && (
+                          <div className="p-5 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-mono text-zinc-300">
+                                Standalone TypeScript adapter (zero dynamic eval)
+                              </span>
+                              <button
+                                type="button"
+                                onClick={handleCopyAdapter}
+                                className="text-xs font-medium px-3.5 py-1 rounded-full bg-white/[0.09] hover:bg-white/[0.16] text-white border border-white/[0.12] transition"
+                              >
+                                {copiedAdapter ? "Copied ✓" : "Copy .ts"}
+                              </button>
+                            </div>
+                            <pre className="p-4 rounded-xl bg-[#090807]/95 border border-white/[0.09] text-[12px] font-mono text-zinc-200 overflow-auto max-h-[275px] leading-relaxed">
+                              <code>{liveCompiled.adapterCode}</code>
+                            </pre>
+                          </div>
+                        )}
             </div>
           </div>
         </section>
