@@ -95,7 +95,7 @@ export default function NewProjectPage() {
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <Breadcrumb
             items={[
-              { label: "Overview", href: "/" },
+              { label: "Overview", href: "/overview" },
               { label: "Workspaces", href: "/projects" },
               { label: "New Project", current: true },
             ]}

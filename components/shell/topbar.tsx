@@ -69,7 +69,7 @@ export function TopBar() {
             .then((data) => {
               if (Array.isArray(data?.projects)) setProjects(data.projects);
             })
-            .catch(() => {});
+            .catch(() => { });
         }
       });
       const {
@@ -98,11 +98,11 @@ export function TopBar() {
 
   const activeCount = cloudStatus
     ? [
-        cloudStatus.supabase.configured,
-        cloudStatus.groq.configured,
-        cloudStatus.azureSql.configured,
-        cloudStatus.azureBlob.configured,
-      ].filter(Boolean).length
+      cloudStatus.supabase.configured,
+      cloudStatus.groq.configured,
+      cloudStatus.azureSql.configured,
+      cloudStatus.azureBlob.configured,
+    ].filter(Boolean).length
     : 0;
 
   return (
@@ -131,12 +131,12 @@ export function TopBar() {
               </span>
             </Link>
 
-            {userEmail && (
+            {userEmail && pathname !== "/" && (
               <nav className="hidden md:flex items-center gap-1.5 p-1.5 rounded-full bg-white/[0.04] border border-white/[0.07] text-[14px] font-medium shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]">
                 <Link
-                  href="/"
+                  href="/overview"
                   className={`px-4 py-1.5 rounded-full transition-all duration-150 ${
-                    pathname === "/"
+                    pathname === "/overview"
                       ? "bg-[#f3e7d3] text-[#141210] font-semibold shadow-sm"
                       : "text-zinc-400 hover:text-zinc-100"
                   }`}
@@ -145,21 +145,19 @@ export function TopBar() {
                 </Link>
                 <Link
                   href="/projects"
-                  className={`px-4 py-1.5 rounded-full transition-all duration-150 ${
-                    pathname === "/projects"
-                      ? "bg-[#f3e7d3] text-[#141210] font-semibold shadow-sm"
-                      : "text-zinc-400 hover:text-zinc-100"
-                  }`}
+                  className={`px-4 py-1.5 rounded-full transition-all duration-150 ${pathname === "/projects"
+                    ? "bg-[#f3e7d3] text-[#141210] font-semibold shadow-sm"
+                    : "text-zinc-400 hover:text-zinc-100"
+                    }`}
                 >
                   Workspaces
                 </Link>
                 <Link
                   href="/projects/new"
-                  className={`px-4 py-1.5 rounded-full transition-all duration-150 ${
-                    pathname === "/projects/new"
-                      ? "bg-[#f3e7d3] text-[#141210] font-semibold shadow-sm"
-                      : "text-zinc-400 hover:text-zinc-100"
-                  }`}
+                  className={`px-4 py-1.5 rounded-full transition-all duration-150 ${pathname === "/projects/new"
+                    ? "bg-[#f3e7d3] text-[#141210] font-semibold shadow-sm"
+                    : "text-zinc-400 hover:text-zinc-100"
+                    }`}
                 >
                   New Project
                 </Link>
@@ -167,8 +165,8 @@ export function TopBar() {
             )}
           </div>
 
-          {/* Center: ⌘K Command Palette (Shown Inside App After Login) */}
-          {userEmail && (
+          {/* Center: ⌘K Command Palette (Shown Inside App Dashboard After Login) */}
+          {userEmail && pathname !== "/" && (
             <button
               type="button"
               onClick={() => setPaletteOpen(true)}
@@ -250,6 +248,14 @@ export function TopBar() {
 
             {userEmail ? (
               <div className="flex items-center gap-2.5">
+                {pathname === "/" && (
+                  <Link
+                    href="/overview"
+                    className="champagne-pill inline-flex items-center gap-1.5 text-[14px] font-semibold px-5 py-2 rounded-full transition"
+                  >
+                    Enter Workspace →
+                  </Link>
+                )}
                 <span
                   title={userEmail}
                   className="w-9 h-9 rounded-full bg-[#f3e7d3]/15 border border-[#f3e7d3]/30 flex items-center justify-center text-xs font-semibold text-[#f5dfb8] uppercase"
@@ -291,9 +297,8 @@ function StatusDot({ label, active }: { label: string; active: boolean }) {
   return (
     <span className="inline-flex items-center gap-2 px-1">
       <span
-        className={`w-2 h-2 rounded-full ${
-          active ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.75)]" : "bg-zinc-600"
-        }`}
+        className={`w-2 h-2 rounded-full ${active ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.75)]" : "bg-zinc-600"
+          }`}
       />
       <span className={active ? "text-zinc-200" : "text-zinc-500"}>{label}</span>
     </span>

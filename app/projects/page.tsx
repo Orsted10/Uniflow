@@ -113,7 +113,7 @@ export default function ProjectsListPage() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <Breadcrumb
             items={[
-              { label: "Overview", href: "/" },
+              { label: "Overview", href: "/overview" },
               { label: "Workspaces", current: true },
             ]}
           />
@@ -167,7 +167,7 @@ export default function ProjectsListPage() {
               />
             </div>
             <Link
-              href="/"
+              href="/overview"
               className="inline-flex items-center gap-2 text-sm font-medium px-5 py-3 rounded-full border border-white/[0.16] bg-black/45 hover:bg-white/[0.1] text-zinc-100 backdrop-blur-md transition"
             >
               ← Overview

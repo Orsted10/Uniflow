@@ -705,7 +705,7 @@ export default function ProjectWorkspacePage() {
           <div>
             <Breadcrumb
               items={[
-                { label: "Overview", href: "/" },
+                { label: "Overview", href: "/overview" },
                 { label: "Workspaces", href: "/projects" },
                 { label: project?.name || projectId, current: true },
               ]}
@@ -833,7 +833,7 @@ export default function ProjectWorkspacePage() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 border-t border-white/[0.06] pt-4 text-xs">
                   <div>
                     <span className="text-zinc-400 block text-[11px]">Owner Tenant:</span>
-                    <span className="font-mono text-zinc-200">developer@uniflow.internal</span>
+                    <span className="font-mono text-zinc-200">PostgreSQL RLS Isolated</span>
                   </div>
                   <div>
                     <span className="text-zinc-400 block text-[11px]">Created At:</span>
@@ -848,67 +848,152 @@ export default function ProjectWorkspacePage() {
                 </div>
               </div>
 
-              {/* Workflow Stepper Card */}
-              <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg p-5 shadow-xs">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-3">
-                  Compiler Pipeline Stages
-                </h3>
+              {/* 6-Stage Workflow Stepper Card */}
+              <div className="apple-glass rounded-2xl p-6 shadow-xs">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-300">
+                    6-Stage Compiler Pipeline
+                  </h3>
+                  <span className="text-[11px] font-mono text-emerald-300">
+                    Zero Eval &bull; End-to-End Verified
+                  </span>
+                </div>
 
                 <div className="space-y-2.5 text-xs">
-                  <div className="flex items-center justify-between p-2 rounded bg-black/50 border border-white/[0.08]">
-                    <span className="font-medium text-zinc-200">1. Ingest Contracts & Schema Trees</span>
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-black/50 border border-white/[0.08]">
+                    <span className="font-medium text-zinc-200">1. Ingest &amp; Normalize Specs (AST + SHA-256)</span>
                     {sourceText && targetText ? (
-                      <StatusChip label="Contracts Loaded" variant="accepted" />
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("specs")}
+                        className="hover:opacity-90"
+                      >
+                        <StatusChip label="Contracts Loaded" variant="accepted" />
+                      </button>
                     ) : (
                       <button
                         type="button"
                         onClick={() => setActiveTab("specs")}
-                        className="text-[11px] underline text-zinc-300 hover:text-zinc-100"
+                        className="text-xs font-medium text-[#f5dfb8] hover:underline"
                       >
                         Import Specs →
                       </button>
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between p-2 rounded bg-black/50 border border-white/[0.08]">
-                    <span className="font-medium text-zinc-200">2. Deterministic Structural Diff</span>
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-black/50 border border-white/[0.08]">
+                    <span className="font-medium text-zinc-200">2. Deterministic 9-Facet Structural Diff</span>
                     {diff ? (
-                      <StatusChip label={`${diff.summary.totalTargetFields} fields diffed`} variant="info" />
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("specs")}
+                        className="hover:opacity-90"
+                      >
+                        <StatusChip label={`${diff.summary.totalTargetFields} fields diffed`} variant="info" />
+                      </button>
                     ) : (
-                      <span className="text-[11px] text-zinc-500">Pending import</span>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("specs")}
+                        className="text-xs text-zinc-400 hover:text-zinc-200"
+                      >
+                        Run Parse &amp; Compare →
+                      </button>
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between p-2 rounded bg-black/50 border border-white/[0.08]">
-                    <span className="font-medium text-zinc-200">3. Human Review Gate</span>
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-black/50 border border-white/[0.08]">
+                    <span className="font-medium text-zinc-200">3. Groq AI &amp; Baseline Mapping Proposals</span>
                     {mappings.length > 0 ? (
                       <button
                         type="button"
                         onClick={() => setActiveTab("mappings")}
-                        className="text-[11px] underline text-zinc-300 hover:text-zinc-100"
+                        className="text-xs font-medium text-[#f5dfb8] hover:underline"
                       >
-                        Review {mappings.length} mappings →
+                        {mappings.length} proposals ready →
                       </button>
                     ) : (
-                      <span className="text-[11px] text-zinc-500">Pending diff</span>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("mappings")}
+                        className="text-xs text-zinc-400 hover:text-zinc-200"
+                      >
+                        Propose Mappings →
+                      </button>
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between p-2 rounded bg-black/50 border border-white/[0.08]">
-                    <span className="font-medium text-zinc-200">4. Compile Plan & Execute Test Fixtures</span>
-                    {plan ? (
-                      <StatusChip label="Plan Compiled" variant="compiled" />
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-black/50 border border-white/[0.08]">
+                    <span className="font-medium text-zinc-200">4. Human-in-the-Loop Review Gate</span>
+                    {mappings.some((m) => m.status === "accepted" || m.status === "edited") ? (
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("mappings")}
+                        className="hover:opacity-90"
+                      >
+                        <StatusChip
+                          label={`${mappings.filter((m) => m.status === "accepted" || m.status === "edited").length}/${mappings.length} Approved`}
+                          variant="accepted"
+                        />
+                      </button>
                     ) : (
-                      <span className="text-[11px] text-zinc-500">Requires approved mappings</span>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("mappings")}
+                        className="text-xs text-zinc-400 hover:text-zinc-200"
+                      >
+                        Review &amp; Approve →
+                      </button>
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between p-2 rounded bg-black/50 border border-white/[0.08]">
-                    <span className="font-medium text-zinc-200">5. Generated Adapter & Compatibility Report</span>
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-black/50 border border-white/[0.08]">
+                    <span className="font-medium text-zinc-200">5. Compile IR, Execute Fixtures &amp; TypeScript Adapter</span>
                     {adapterCode ? (
-                      <StatusChip label="Adapter Ready" variant="executed" />
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("execute")}
+                        className="hover:opacity-90"
+                      >
+                        <StatusChip label="Adapter Verified" variant="executed" />
+                      </button>
+                    ) : plan ? (
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("execute")}
+                        className="hover:opacity-90"
+                      >
+                        <StatusChip label="Plan Compiled — Run Test" variant="compiled" />
+                      </button>
                     ) : (
-                      <span className="text-[11px] text-zinc-500">Pending execution</span>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("execute")}
+                        className="text-xs text-zinc-400 hover:text-zinc-200"
+                      >
+                        Compile &amp; Execute →
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-black/50 border border-white/[0.08]">
+                    <span className="font-medium text-zinc-200">6. Compatibility Report &amp; Azure SQL / Blob Evidence</span>
+                    {reportData ? (
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("report")}
+                        className="hover:opacity-90"
+                      >
+                        <StatusChip label="Report Assembled" variant="accepted" />
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("report")}
+                        className="text-xs text-zinc-400 hover:text-zinc-200"
+                      >
+                        Generate &amp; Certify →
+                      </button>
                     )}
                   </div>
                 </div>

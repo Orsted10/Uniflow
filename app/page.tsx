@@ -450,6 +450,14 @@ export default function LandingDashboardPage() {
                 >
                   <span>+ New Custom Project</span>
                 </Link>
+                {userEmail && (
+                  <Link
+                    href="/overview"
+                    className="inline-flex items-center justify-center gap-2 text-sm sm:text-[15px] font-semibold px-7 py-3.5 rounded-full border border-[#f5dfb8]/35 bg-[#f5dfb8]/10 text-[#f5dfb8] hover:bg-[#f5dfb8]/20 transition-all duration-200 backdrop-blur-xl"
+                  >
+                    <span>Enter Workspace →</span>
+                  </Link>
+                )}
               </div>
 
               {/* Capability Cards (125% Scale) */}
