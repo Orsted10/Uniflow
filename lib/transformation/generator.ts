@@ -20,7 +20,8 @@ export function generateTypeScriptAdapter(plan: TransformationPlan): string {
 
   // Add path helper functions
   lines.push(`function getValueByPath(obj: any, path: string): any {
-  if (path === "$" || !path) return obj;
+  if (path === "$") return obj;
+  if (!path) return undefined;
   const segments: Array<string | number> = [];
   const regex = /\\[(?:"((?:\\\\.|[^"\\\\])*)"|(\\d+))\\]/g;
   let match: RegExpExecArray | null;
@@ -53,11 +54,13 @@ export function generateTypeScriptAdapter(plan: TransformationPlan): string {
       segments.push(parseInt(match[2], 10));
     }
   }
+  if (segments.length === 0) return;
   let current = target;
   for (let i = 0; i < segments.length - 1; i++) {
     const seg = segments[i];
     const nextSeg = segments[i + 1];
     if (typeof seg === "string") {
+      if (seg === "__proto__" || seg === "constructor" || seg === "prototype") return;
       if (!current[seg] || typeof current[seg] !== "object") {
         current[seg] = typeof nextSeg === "number" ? [] : {};
       }
@@ -70,16 +73,45 @@ export function generateTypeScriptAdapter(plan: TransformationPlan): string {
     }
   }
   const lastSeg = segments[segments.length - 1];
+  if (lastSeg === "__proto__" || lastSeg === "constructor" || lastSeg === "prototype") return;
   current[lastSeg] = value;
 }`);
   lines.push("");
 
   // Add lookup tables if any
   const lookupSteps = plan.steps.filter((s) => s.operation === "lookup" && s.lookupTable);
-  for (const step of lookupSteps) {
-    const varName = `LOOKUP_${sanitizeVarName(step.targetPath)}`;
-    lines.push(`const ${varName}: Record<string, string> = ${JSON.stringify(step.lookupTable, null, 2)};`);
+  const usedLookupVars = new Set<string>();
+  const lookupVarByStepId = new Map<string, string>();
+  if (lookupSteps.length > 0) {
+    lines.push(`function lookupEnumValue(
+  table: Record<string, string>,
+  rawValue: unknown,
+  policyOnMissing: "fail" | "useDefault" | "omit",
+  fallback?: unknown
+): unknown {
+  const key = String(rawValue);
+  if (Object.prototype.hasOwnProperty.call(table, key)) return table[key];
+  const lower = key.toLowerCase();
+  if (Object.prototype.hasOwnProperty.call(table, lower)) return table[lower];
+  const upper = key.toUpperCase();
+  if (Object.prototype.hasOwnProperty.call(table, upper)) return table[upper];
+  if (policyOnMissing === "fail") {
+    throw new Error("Unmapped enum value: " + key);
+  }
+  return fallback !== undefined ? fallback : key;
+}`);
     lines.push("");
+
+    for (const step of lookupSteps) {
+      let varName = `LOOKUP_${sanitizeVarName(step.targetPath)}`;
+      if (usedLookupVars.has(varName)) {
+        varName = `${varName}_${usedLookupVars.size + 1}`;
+      }
+      usedLookupVars.add(varName);
+      lookupVarByStepId.set(step.stepId, varName);
+      lines.push(`const ${varName}: Record<string, string> = ${JSON.stringify(step.lookupTable, null, 2)};`);
+      lines.push("");
+    }
   }
 
   // Adapter function
@@ -90,9 +122,10 @@ export function generateTypeScriptAdapter(plan: TransformationPlan): string {
   lines.push("  const target: Record<string, unknown> = {};");
   lines.push("");
 
+  const usedVars = new Set<string>();
   for (const step of plan.steps) {
     lines.push(`  // Step ${step.stepId}: ${step.operation} -> ${step.targetPath}`);
-    generateStepCode(step, lines);
+    generateStepCode(step, lines, usedVars, lookupVarByStepId.get(step.stepId));
     lines.push("");
   }
 
@@ -105,25 +138,67 @@ export function generateTypeScriptAdapter(plan: TransformationPlan): string {
   return lines.join("\n");
 }
 
-function generateStepCode(step: TransformationStep, lines: string[]): void {
+function getUniqueValVar(stepId: string, usedVars: Set<string>): string {
+  const base = `val_${sanitizeVarName(stepId) || "step"}`;
+  if (!usedVars.has(base)) {
+    usedVars.add(base);
+    return base;
+  }
+  let suffix = 2;
+  while (usedVars.has(`${base}_${suffix}`)) {
+    suffix++;
+  }
+  const unique = `${base}_${suffix}`;
+  usedVars.add(unique);
+  return unique;
+}
+
+function generateStepCode(
+  step: TransformationStep,
+  lines: string[],
+  usedVars: Set<string>,
+  lookupVarName?: string
+): void {
   const targetPathLiteral = JSON.stringify(step.targetPath);
 
   if (step.operation === "default") {
-    const defaultValLiteral = JSON.stringify(step.defaultValue);
-    lines.push(`  setValueByPath(target, ${targetPathLiteral}, ${defaultValLiteral});`);
+    const defaultValLiteral = JSON.stringify(step.defaultValue ?? null);
+    if (!step.sourcePath) {
+      lines.push(`  setValueByPath(target, ${targetPathLiteral}, ${defaultValLiteral});`);
+      return;
+    }
+    const valVar = getUniqueValVar(step.stepId, usedVars);
+    lines.push(`  const ${valVar} = getValueByPath(source, ${JSON.stringify(step.sourcePath)});`);
+    lines.push(
+      `  setValueByPath(target, ${targetPathLiteral}, ${valVar} !== undefined && ${valVar} !== null ? ${valVar} : ${defaultValLiteral});`
+    );
+    return;
+  }
+
+  if (!step.sourcePath) {
+    if (step.operation === "constructObject") {
+      lines.push(`  setValueByPath(target, ${targetPathLiteral}, ${JSON.stringify(step.defaultValue ?? {})});`);
+    } else if (step.policyOnMissing === "useDefault") {
+      lines.push(`  setValueByPath(target, ${targetPathLiteral}, ${JSON.stringify(step.defaultValue ?? null)});`);
+    } else if (step.policyOnMissing === "fail") {
+      const missingMsgLiteral = JSON.stringify(`Missing required field for ${step.targetPath}`);
+      lines.push(`  throw new Error(${missingMsgLiteral});`);
+    } else {
+      lines.push("  // omit optional unmatched target field");
+    }
     return;
   }
 
   const sourcePathLiteral = JSON.stringify(step.sourcePath);
-  lines.push(`  const val_${sanitizeVarName(step.stepId)} = getValueByPath(source, ${sourcePathLiteral});`);
-
-  const valVar = `val_${sanitizeVarName(step.stepId)}`;
+  const valVar = getUniqueValVar(step.stepId, usedVars);
+  lines.push(`  const ${valVar} = getValueByPath(source, ${sourcePathLiteral});`);
 
   lines.push(`  if (${valVar} === undefined || ${valVar} === null) {`);
   if (step.policyOnMissing === "fail") {
-    lines.push(`    throw new Error("Missing required field for ${step.targetPath}");`);
+    const missingMsgLiteral = JSON.stringify(`Missing required field for ${step.targetPath}`);
+    lines.push(`    throw new Error(${missingMsgLiteral});`);
   } else if (step.policyOnMissing === "useDefault") {
-    lines.push(`    setValueByPath(target, ${targetPathLiteral}, ${JSON.stringify(step.defaultValue)});`);
+    lines.push(`    setValueByPath(target, ${targetPathLiteral}, ${JSON.stringify(step.defaultValue ?? null)});`);
   } else {
     lines.push("    // omit optional");
   }
@@ -134,11 +209,7 @@ function generateStepCode(step: TransformationStep, lines: string[]): void {
     case "rename":
     case "readNested":
     case "constructObject":
-      lines.push(
-        `    setValueByPath(target, ${targetPathLiteral}, ${valVar} !== undefined ? ${valVar} : ${JSON.stringify(
-          step.defaultValue ?? {}
-        )});`
-      );
+      lines.push(`    setValueByPath(target, ${targetPathLiteral}, ${valVar});`);
       break;
 
     case "typeConversion":
@@ -151,16 +222,23 @@ function generateStepCode(step: TransformationStep, lines: string[]): void {
       break;
 
     case "lookup": {
-      const varName = `LOOKUP_${sanitizeVarName(step.targetPath)}`;
+      const varName = lookupVarName || `LOOKUP_${sanitizeVarName(step.targetPath)}`;
+      const fallbackArg =
+        step.defaultValue !== undefined ? `, ${JSON.stringify(step.defaultValue)}` : "";
       lines.push(
-        `    const mapped = ${varName}[String(${valVar})] || ${varName}[String(${valVar}).toLowerCase()] || ${JSON.stringify(
-          step.defaultValue ?? null
-        )};`
+        `    const mapped = lookupEnumValue(${varName}, ${valVar}, ${JSON.stringify(
+          step.policyOnMissing
+        )}${fallbackArg});`
       );
-      if (step.policyOnMissing === "fail") {
-        lines.push(`    if (mapped === null) throw new Error("Unmapped enum value: " + ${valVar});`);
-      }
       lines.push(`    setValueByPath(target, ${targetPathLiteral}, mapped);`);
+      break;
+    }
+
+    case "reject": {
+      const rejectMsgLiteral = JSON.stringify(
+        `Step configured to reject transformation for path '${step.targetPath}'.`
+      );
+      lines.push(`    throw new Error(${rejectMsgLiteral});`);
       break;
     }
 

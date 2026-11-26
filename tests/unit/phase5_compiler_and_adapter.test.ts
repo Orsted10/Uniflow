@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import ts from "typescript";
 import { parseSpecificationText } from "../../lib/specs/parser";
 import { normalizeSpecification } from "../../lib/specs/normalizer";
 import { computeStructuralDiff } from "../../lib/specs/diff";
@@ -446,5 +447,35 @@ test("Phase 5 — Transformation Plan Compiler, Trusted Interpreter & TypeScript
     // Case 2: negative case (missing amount in source)
     assert.equal(testSuiteResult.cases[2].interpreterResult.success, false);
     assert.equal(testSuiteResult.cases[2].outputsEqual, true);
+  });
+
+  await t.test("8. Generated TypeScript Compiles Cleanly Without Escaped Quote Errors", () => {
+    const baseMappings = generateBaselineMappings(diff, normSource, normTarget);
+    const approvedMappings = baseMappings.map((m) => ({
+      ...m,
+      status: "accepted" as const,
+    }));
+
+    const compileResult = compileTransformationPlan(approvedMappings, normSource, normTarget);
+    assert.ok(compileResult.success && compileResult.plan);
+
+    const adapterCode = generateTypeScriptAdapter(compileResult.plan);
+    const transpiled = ts.transpileModule(adapterCode, {
+      fileName: "generated-adapter.ts",
+      reportDiagnostics: true,
+      compilerOptions: {
+        target: ts.ScriptTarget.ES2022,
+        module: ts.ModuleKind.CommonJS,
+        strict: true,
+      },
+    });
+
+    assert.equal(
+      transpiled.diagnostics?.length ?? 0,
+      0,
+      `Generated adapter has TypeScript syntax/transpile diagnostics: ${JSON.stringify(transpiled.diagnostics)}`
+    );
+    assert.ok(adapterCode.includes('throw new Error("Missing required field for $[\\"currency_code\\"]")'));
+    assert.ok(adapterCode.includes("function lookupEnumValue("));
   });
 });

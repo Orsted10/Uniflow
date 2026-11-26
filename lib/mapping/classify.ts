@@ -146,10 +146,29 @@ export function generateBaselineMappings(
       }
 
       case "missing_required":
+        if (!item.targetRequired) {
+          transformation = {
+            operation: "copy",
+            targetType: item.targetType,
+            policyOnMissing: "omit",
+          };
+          rationale = `Optional target field '${item.targetPath}' has no source equivalent and will be safely omitted unless overridden.`;
+          uncertaintyScore = "LOW";
+          uncertaintyExplanation =
+            "Target field is optional; omitting it satisfies the target contract without injecting placeholder data.";
+          semanticStatus = "verified";
+          break;
+        }
         transformation = {
           operation: "default",
           targetType: item.targetType,
-          defaultValue: item.targetType === "string" ? "unspecified" : 0,
+          defaultValue:
+            targetField?.defaultValue ??
+            (item.targetPath.toLowerCase().includes("region")
+              ? "ap-south-1"
+              : item.targetType === "string"
+              ? "unspecified"
+              : 0),
           policyOnMissing: "useDefault",
         };
         rationale = `Target field '${item.targetPath}' is required but absent from source. Fallback default required.`;

@@ -306,16 +306,20 @@ function findCandidateSourceField(
 
   // Common synonym heuristics normalized without punctuation
   const synonyms: Record<string, string[]> = {
-    id: ["orderid", "clientid", "identifier", "key", "code"],
-    orderid: ["id", "ordernumber", "orderno"],
-    amount: ["total", "price", "subtotal", "cost", "sum", "value"],
-    total: ["amount", "price", "subtotal", "cost", "sum"],
+    id: ["orderid", "clientid", "identifier", "key", "code", "paymentid", "txnid", "transactionid", "ledgerid"],
+    orderid: ["id", "ordernumber", "orderno", "paymentid", "txnid", "transactionid"],
+    ledgerid: ["paymentid", "txnid", "transactionid", "entryid", "recordid", "id", "orderid"],
+    amount: ["total", "totalamount", "price", "subtotal", "cost", "sum", "value", "amountcents", "amt"],
+    total: ["amount", "totalamount", "price", "subtotal", "cost", "sum", "amountcents"],
+    totalamount: ["amount", "amountcents", "amt", "total", "grossamount", "paymentamount", "value"],
     currency: ["currencycode", "curr"],
     currencycode: ["currency", "curr"],
-    createdat: ["timestamp", "date", "created", "datetime", "creationdate"],
-    timestamp: ["createdat", "date", "created", "datetime"],
+    createdat: ["timestamp", "date", "created", "datetime", "creationdate", "occurredat"],
+    timestamp: ["createdat", "date", "created", "datetime", "occurredat"],
     note: ["memo", "comment", "description", "remarks"],
     memo: ["note", "comment", "description", "remarks"],
+    region: ["settlementregion", "country", "zone", "datacenter"],
+    settlementregion: ["region", "country", "zone", "datacenter"],
     firstname: ["givenname", "fname"],
     lastname: ["familyname", "surname", "lname"],
   };
