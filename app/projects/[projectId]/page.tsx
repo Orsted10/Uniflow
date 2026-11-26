@@ -700,7 +700,7 @@ export default function ProjectWorkspacePage() {
       <TopBar />
 
       {/* Project Subheader */}
-      <div className="relative z-10 bg-black/45 backdrop-blur-2xl border-b border-white/[0.08] px-6 sm:px-10 lg:px-12 py-4">
+      <div className="relative z-10 bg-black/45 backdrop-blur-2xl border-b border-white/[0.08] px-6 sm:px-10 lg:px-12 py-5">
         <div className="max-w-[1680px] mx-auto flex flex-wrap items-center justify-between gap-4">
           <div>
             <Breadcrumb
@@ -711,8 +711,8 @@ export default function ProjectWorkspacePage() {
               ]}
               className="mb-1.5 text-zinc-400"
             />
-            <div className="flex items-center gap-2.5 flex-wrap gap-y-1">
-              <h1 className="text-xl font-semibold text-white tracking-tight">
+            <div className="flex items-center gap-3 flex-wrap gap-y-1.5">
+              <h1 className="text-2xl font-semibold text-white tracking-tight">
                 {project?.name || "Workspace"}
               </h1>
               <span className="font-mono text-xs text-zinc-400 bg-white/[0.05] px-2.5 py-0.5 rounded-full border border-white/[0.08]">
@@ -769,18 +769,18 @@ export default function ProjectWorkspacePage() {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
               onClick={loadCanonicalFixtures}
-              className="text-xs sm:text-[13px] bg-white/[0.06] hover:bg-white/[0.12] text-zinc-100 border border-white/[0.12] px-4 py-2 rounded-full font-medium transition"
+              className="text-sm bg-white/[0.06] hover:bg-white/[0.12] text-zinc-100 border border-white/[0.12] px-5 py-2.5 rounded-full font-medium transition"
             >
               Load Canonical Pair
             </button>
             <button
               type="button"
               onClick={loadSampleJsonFixture}
-              className="text-xs sm:text-[13px] bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 border border-amber-400/30 px-4 py-2 rounded-full font-medium transition"
+              className="text-sm bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 border border-amber-400/30 px-5 py-2.5 rounded-full font-medium transition"
               title="Demonstrate schema inference from arbitrary sample JSON payload"
             >
               Load Sample JSON
@@ -789,7 +789,7 @@ export default function ProjectWorkspacePage() {
               type="button"
               onClick={() => triggerImport(false)}
               disabled={loading}
-              className="champagne-pill disabled:opacity-50 text-xs sm:text-[13px] font-semibold px-5 py-2 rounded-full transition"
+              className="champagne-pill disabled:opacity-50 text-sm font-semibold px-6 py-2.5 rounded-full transition"
             >
               Parse &amp; Compare →
             </button>
@@ -823,45 +823,45 @@ export default function ProjectWorkspacePage() {
         <div className="flex-1 min-w-0">
           {/* TAB: OVERVIEW */}
           {activeTab === "overview" && (
-            <div className="space-y-4">
-              <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg p-5 shadow-xs">
-                <h2 className="text-sm font-semibold text-zinc-100 mb-1">Project Summary</h2>
-                <p className="text-xs text-zinc-400 leading-relaxed mb-4">
+            <div className="space-y-6">
+              <div className="apple-glass rounded-3xl p-7 shadow-xs">
+                <h2 className="text-lg font-semibold text-white mb-1.5">Project Summary</h2>
+                <p className="text-sm sm:text-[15px] text-zinc-300 leading-relaxed mb-5">
                   {project?.description || "This workspace manages the comparison, mapping review, and adapter compilation between source and target API contracts."}
                 </p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 border-t border-white/[0.06] pt-4 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-white/[0.08] pt-5 text-sm">
                   <div>
-                    <span className="text-zinc-400 block text-[11px]">Owner Tenant:</span>
-                    <span className="font-mono text-zinc-200">PostgreSQL RLS Isolated</span>
+                    <span className="text-zinc-400 block text-xs mb-1">Owner Tenant:</span>
+                    <span className="font-mono text-zinc-100">PostgreSQL RLS Isolated</span>
                   </div>
                   <div>
-                    <span className="text-zinc-400 block text-[11px]">Created At:</span>
-                    <span className="text-zinc-200">
+                    <span className="text-zinc-400 block text-xs mb-1">Created At:</span>
+                    <span className="text-zinc-100">
                       {project?.created_at ? new Date(project.created_at).toLocaleDateString() : "Just now"}
                     </span>
                   </div>
                   <div>
-                    <span className="text-zinc-400 block text-[11px]">Core Engine:</span>
+                    <span className="text-zinc-400 block text-xs mb-1">Core Engine:</span>
                     <StatusChip label="Deterministic IR Ready" variant="low" />
                   </div>
                 </div>
               </div>
 
               {/* 6-Stage Workflow Stepper Card */}
-              <div className="apple-glass rounded-2xl p-6 shadow-xs">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-300">
+              <div className="apple-glass rounded-3xl p-7 shadow-xs">
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="text-sm font-mono font-semibold uppercase tracking-wider text-zinc-200">
                     6-Stage Compiler Pipeline
                   </h3>
-                  <span className="text-[11px] font-mono text-emerald-300">
+                  <span className="text-xs font-mono text-emerald-300">
                     Zero Eval &bull; End-to-End Verified
                   </span>
                 </div>
 
-                <div className="space-y-2.5 text-xs">
-                  <div className="flex items-center justify-between p-3 rounded-xl bg-black/50 border border-white/[0.08]">
-                    <span className="font-medium text-zinc-200">1. Ingest &amp; Normalize Specs (AST + SHA-256)</span>
+                <div className="space-y-3 text-sm sm:text-[15px]">
+                  <div className="flex items-center justify-between p-4 rounded-2xl bg-black/50 border border-white/[0.08]">
+                    <span className="font-medium text-zinc-100">1. Ingest &amp; Normalize Specs (AST + SHA-256)</span>
                     {sourceText && targetText ? (
                       <button
                         type="button"
@@ -874,15 +874,15 @@ export default function ProjectWorkspacePage() {
                       <button
                         type="button"
                         onClick={() => setActiveTab("specs")}
-                        className="text-xs font-medium text-[#f5dfb8] hover:underline"
+                        className="text-sm font-medium text-[#f5dfb8] hover:underline"
                       >
                         Import Specs →
                       </button>
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between p-3 rounded-xl bg-black/50 border border-white/[0.08]">
-                    <span className="font-medium text-zinc-200">2. Deterministic 9-Facet Structural Diff</span>
+                  <div className="flex items-center justify-between p-4 rounded-2xl bg-black/50 border border-white/[0.08]">
+                    <span className="font-medium text-zinc-100">2. Deterministic 9-Facet Structural Diff</span>
                     {diff ? (
                       <button
                         type="button"
@@ -895,20 +895,20 @@ export default function ProjectWorkspacePage() {
                       <button
                         type="button"
                         onClick={() => setActiveTab("specs")}
-                        className="text-xs text-zinc-400 hover:text-zinc-200"
+                        className="text-sm text-zinc-400 hover:text-zinc-200"
                       >
                         Run Parse &amp; Compare →
                       </button>
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between p-3 rounded-xl bg-black/50 border border-white/[0.08]">
-                    <span className="font-medium text-zinc-200">3. Groq AI &amp; Baseline Mapping Proposals</span>
+                  <div className="flex items-center justify-between p-4 rounded-2xl bg-black/50 border border-white/[0.08]">
+                    <span className="font-medium text-zinc-100">3. Groq AI &amp; Baseline Mapping Proposals</span>
                     {mappings.length > 0 ? (
                       <button
                         type="button"
                         onClick={() => setActiveTab("mappings")}
-                        className="text-xs font-medium text-[#f5dfb8] hover:underline"
+                        className="text-sm font-medium text-[#f5dfb8] hover:underline"
                       >
                         {mappings.length} proposals ready →
                       </button>
@@ -916,15 +916,15 @@ export default function ProjectWorkspacePage() {
                       <button
                         type="button"
                         onClick={() => setActiveTab("mappings")}
-                        className="text-xs text-zinc-400 hover:text-zinc-200"
+                        className="text-sm text-zinc-400 hover:text-zinc-200"
                       >
                         Propose Mappings →
                       </button>
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between p-3 rounded-xl bg-black/50 border border-white/[0.08]">
-                    <span className="font-medium text-zinc-200">4. Human-in-the-Loop Review Gate</span>
+                  <div className="flex items-center justify-between p-4 rounded-2xl bg-black/50 border border-white/[0.08]">
+                    <span className="font-medium text-zinc-100">4. Human-in-the-Loop Review Gate</span>
                     {mappings.some((m) => m.status === "accepted" || m.status === "edited") ? (
                       <button
                         type="button"
@@ -940,15 +940,15 @@ export default function ProjectWorkspacePage() {
                       <button
                         type="button"
                         onClick={() => setActiveTab("mappings")}
-                        className="text-xs text-zinc-400 hover:text-zinc-200"
+                        className="text-sm text-zinc-400 hover:text-zinc-200"
                       >
                         Review &amp; Approve →
                       </button>
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between p-3 rounded-xl bg-black/50 border border-white/[0.08]">
-                    <span className="font-medium text-zinc-200">5. Compile IR, Execute Fixtures &amp; TypeScript Adapter</span>
+                  <div className="flex items-center justify-between p-4 rounded-2xl bg-black/50 border border-white/[0.08]">
+                    <span className="font-medium text-zinc-100">5. Compile IR, Execute Fixtures &amp; TypeScript Adapter</span>
                     {adapterCode ? (
                       <button
                         type="button"
@@ -969,15 +969,15 @@ export default function ProjectWorkspacePage() {
                       <button
                         type="button"
                         onClick={() => setActiveTab("execute")}
-                        className="text-xs text-zinc-400 hover:text-zinc-200"
+                        className="text-sm text-zinc-400 hover:text-zinc-200"
                       >
                         Compile &amp; Execute →
                       </button>
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between p-3 rounded-xl bg-black/50 border border-white/[0.08]">
-                    <span className="font-medium text-zinc-200">6. Compatibility Report &amp; Azure SQL / Blob Evidence</span>
+                  <div className="flex items-center justify-between p-4 rounded-2xl bg-black/50 border border-white/[0.08]">
+                    <span className="font-medium text-zinc-100">6. Compatibility Report &amp; Azure SQL / Blob Evidence</span>
                     {reportData ? (
                       <button
                         type="button"
@@ -990,7 +990,7 @@ export default function ProjectWorkspacePage() {
                       <button
                         type="button"
                         onClick={() => setActiveTab("report")}
-                        className="text-xs text-zinc-400 hover:text-zinc-200"
+                        className="text-sm text-zinc-400 hover:text-zinc-200"
                       >
                         Generate &amp; Certify →
                       </button>
