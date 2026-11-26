@@ -1474,22 +1474,23 @@ export default function ProjectWorkspacePage() {
                   </p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2.5">
                   <button
                     type="button"
                     onClick={() => generateProposals(false)}
                     disabled={proposeLoading || !sourceText || !targetText}
-                    className="text-xs bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-3 py-1.5 rounded font-medium transition shadow-xs flex items-center space-x-1"
+                    className="text-xs sm:text-[13px] bg-violet-500/20 hover:bg-violet-500/30 disabled:opacity-50 text-violet-200 border border-violet-400/40 px-4 py-2 rounded-full font-semibold transition flex items-center gap-1.5"
                     title={providerConfig?.configured ? "Ask Groq AI to propose field mappings" : "Groq not configured; falls back cleanly to deterministic heuristic"}
                   >
-                    <span>{proposeLoading ? "Querying Groq..." : "Propose with Groq AI"}</span>
+                    <span>✨</span>
+                    <span>{proposeLoading ? "Querying Groq AI..." : "Propose with Groq AI"}</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => generateProposals(true)}
                     disabled={proposeLoading || !sourceText || !targetText}
-                    className="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-white/[0.12] px-2.5 py-1.5 rounded font-medium transition"
+                    className="text-xs sm:text-[13px] bg-white/[0.06] hover:bg-white/[0.12] text-zinc-200 border border-white/[0.12] px-3.5 py-2 rounded-full font-medium transition"
                     title="Generate candidate mappings using deterministic structural heuristics without calling AI"
                   >
                     Heuristic Baseline
@@ -1498,7 +1499,7 @@ export default function ProjectWorkspacePage() {
                   <button
                     type="button"
                     onClick={openManualModal}
-                    className="text-xs bg-white/[0.03] backdrop-blur-xl hover:bg-black/50 text-zinc-200 border border-white/[0.12] px-2.5 py-1.5 rounded font-medium transition"
+                    className="text-xs sm:text-[13px] bg-white/[0.06] hover:bg-white/[0.12] text-zinc-200 border border-white/[0.12] px-3.5 py-2 rounded-full font-medium transition"
                   >
                     + Manual Mapping
                   </button>
@@ -1507,7 +1508,7 @@ export default function ProjectWorkspacePage() {
                     type="button"
                     onClick={acceptAllMappings}
                     disabled={loading || mappings.length === 0}
-                    className="text-xs bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-zinc-300 border border-white/[0.12] px-3 py-1.5 rounded font-medium transition"
+                    className="text-xs sm:text-[13px] bg-teal-500/15 hover:bg-teal-500/25 disabled:opacity-50 text-teal-200 border border-teal-400/35 px-4 py-2 rounded-full font-semibold transition"
                   >
                     Approve All Verified
                   </button>
@@ -1516,7 +1517,7 @@ export default function ProjectWorkspacePage() {
                     type="button"
                     onClick={compilePlan}
                     disabled={loading || mappings.filter((m) => m.status === "accepted" || m.status === "edited").length === 0}
-                    className="text-xs bg-emerald-950/400 hover:bg-emerald-400 disabled:opacity-50 text-zinc-950 font-semibold px-3.5 py-1.5 rounded font-medium transition shadow-xs"
+                    className="champagne-pill disabled:opacity-45 text-xs sm:text-[13px] font-semibold px-5 py-2 rounded-full transition"
                   >
                     Compile Plan →
                   </button>
@@ -1721,9 +1722,9 @@ export default function ProjectWorkspacePage() {
 
                         {/* Explicit Human Confirmation Warning */}
                         {m.semanticStatus === "needs_confirmation" && m.status !== "accepted" && (
-                          <div className="mt-2.5 text-xs bg-amber-950/40 text-amber-200 border border-amber-800/60 rounded p-2 flex items-center justify-between">
+                          <div className="mt-2.5 text-xs bg-amber-950/40 text-amber-200 border border-amber-500/35 rounded-xl p-2.5 flex items-center justify-between">
                             <span>
-                              &warning; Semantic ambiguity or constraint differences detected. Explicit human review and approval is required before compilation.
+                              ⚠ Semantic ambiguity or constraint differences detected. Explicit human review and approval is required before compilation.
                             </span>
                           </div>
                         )}
@@ -1734,9 +1735,9 @@ export default function ProjectWorkspacePage() {
                             <button
                               type="button"
                               onClick={() => setExpandedAuditId(expandedAuditId === m.id ? null : m.id)}
-                              className="text-[11px] text-zinc-400 hover:text-zinc-200 underline font-medium"
+                              className="text-xs text-zinc-400 hover:text-zinc-200 underline font-medium"
                             >
-                              {expandedAuditId === m.id ? "Hide Audit Trail &uarr;" : `Audit Trail (${m.decisionHistory?.length || 1}) &darr;`}
+                              {expandedAuditId === m.id ? "Hide Audit Trail ↑" : `Audit Trail (${m.decisionHistory?.length || 1}) ↓`}
                             </button>
                           </div>
 
@@ -1744,17 +1745,17 @@ export default function ProjectWorkspacePage() {
                             <button
                               type="button"
                               onClick={() => openEditModal(m)}
-                              className="text-xs px-2.5 py-1 rounded font-medium border border-white/[0.12] text-zinc-300 bg-white/[0.03] backdrop-blur-xl hover:bg-black/50 transition"
+                              className="text-xs px-3 py-1.5 rounded-full font-medium border border-white/[0.12] text-zinc-200 bg-white/[0.05] hover:bg-white/[0.1] transition"
                             >
                               Edit
                             </button>
                             <button
                               type="button"
                               onClick={() => updateMappingStatus(m.id, "rejected")}
-                              className={`text-xs px-2.5 py-1 rounded font-medium border transition ${
+                              className={`text-xs px-3 py-1.5 rounded-full font-medium border transition ${
                                 m.status === "rejected"
-                                  ? "bg-rose-600 text-white border-rose-700"
-                                  : "bg-white/[0.03] backdrop-blur-xl text-zinc-300 border-white/[0.12] hover:bg-rose-950/40 hover:text-rose-400"
+                                  ? "bg-rose-600 text-white border-rose-500"
+                                  : "bg-white/[0.05] text-zinc-200 border-white/[0.12] hover:bg-rose-950/50 hover:text-rose-300"
                               }`}
                             >
                               Reject
@@ -1762,10 +1763,10 @@ export default function ProjectWorkspacePage() {
                             <button
                               type="button"
                               onClick={() => updateMappingStatus(m.id, "accepted")}
-                              className={`text-xs px-3 py-1 rounded font-medium transition ${
+                              className={`text-xs px-4 py-1.5 rounded-full font-semibold transition ${
                                 m.status === "accepted"
-                                  ? "bg-emerald-600 text-white"
-                                  : "bg-emerald-950/400 text-zinc-950 font-semibold hover:bg-emerald-600"
+                                  ? "bg-emerald-500 text-zinc-950"
+                                  : "champagne-pill"
                               }`}
                             >
                               {m.status === "accepted" ? "Approved &check;" : "Approve Mapping"}
@@ -1805,19 +1806,19 @@ export default function ProjectWorkspacePage() {
           {/* TAB: TEST & ADAPTER */}
           {activeTab === "execute" && (
             <div className="space-y-4">
-              <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg p-4 shadow-xs flex items-center justify-between">
+              <div className="apple-glass rounded-2xl p-5 shadow-xs flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-sm font-semibold text-zinc-100">Transformation IR Compiler & Interpreter</h2>
-                  <p className="text-xs text-zinc-400">
+                  <h2 className="text-base font-semibold text-white">Transformation IR Compiler &amp; Interpreter</h2>
+                  <p className="text-xs sm:text-sm text-zinc-300 mt-0.5">
                     Executes approved TransformationPlan steps through trusted code. No eval; strict target schema validation.
                   </p>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2.5">
                   <button
                     type="button"
                     onClick={compilePlan}
                     disabled={loading}
-                    className="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-white/[0.12] px-3 py-1.5 rounded font-medium transition"
+                    className="text-xs sm:text-[13px] bg-white/[0.06] hover:bg-white/[0.12] text-zinc-100 border border-white/[0.14] px-4 py-2 rounded-full font-medium transition"
                   >
                     Recompile Plan
                   </button>
@@ -1825,20 +1826,36 @@ export default function ProjectWorkspacePage() {
                     type="button"
                     onClick={executePlan}
                     disabled={loading || !plan}
-                    className="text-xs bg-emerald-950/400 hover:bg-emerald-400 disabled:opacity-50 text-zinc-950 font-semibold px-3.5 py-1.5 rounded font-medium shadow-xs transition"
+                    className="champagne-pill disabled:opacity-45 text-xs sm:text-[13px] font-semibold px-5 py-2 rounded-full transition"
                   >
-                    Run Interpreter & Validate
+                    Run Interpreter &amp; Validate →
                   </button>
                 </div>
               </div>
 
+              {!plan && (
+                <EmptyState
+                  title="No Transformation Plan Compiled Yet"
+                  description={
+                    mappings.some((m) => m.status === "accepted" || m.status === "edited")
+                      ? "You have approved mappings ready! Compile the deterministic IR plan now to run live payload tests and generate your zero-eval TypeScript adapter."
+                      : "Approve at least one mapping in Stage 4 (Mapping Review) first, then compile the deterministic TransformationPlan IR here."
+                  }
+                  action={
+                    mappings.some((m) => m.status === "accepted" || m.status === "edited")
+                      ? { label: "Compile Plan Now", onClick: compilePlan }
+                      : { label: "Go to Mapping Review", onClick: () => setActiveTab("mappings") }
+                  }
+                />
+              )}
+
               {plan && (
-                <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg p-4 shadow-xs">
-                  <div className="flex items-center justify-between text-xs border-b border-white/[0.08] pb-2 mb-3">
+                <div className="apple-glass rounded-2xl p-5 shadow-xs">
+                  <div className="flex items-center justify-between text-xs border-b border-white/[0.08] pb-3 mb-3">
                     <span className="font-semibold text-zinc-200">
-                      Plan ID: <code className="font-mono">{plan.planId}</code>
+                      Plan ID: <code className="font-mono text-[#f5dfb8]">{plan.planId}</code>
                     </span>
-                    <span className="text-zinc-400">
+                    <span className="text-zinc-300 font-mono">
                       Compiled Steps: {plan.steps.length} | Version: {plan.version}
                     </span>
                   </div>
@@ -1847,21 +1864,21 @@ export default function ProjectWorkspacePage() {
                     <table className="w-full text-left text-xs font-mono">
                       <thead className="bg-black/50 text-zinc-400 font-semibold border-b border-white/[0.08] uppercase tracking-wider text-[11px] font-sans">
                         <tr>
-                          <th className="py-2 px-2.5">Step</th>
-                          <th className="py-2 px-2.5">Operation</th>
-                          <th className="py-2 px-2.5">Source Path</th>
-                          <th className="py-2 px-2.5">Target Path</th>
-                          <th className="py-2 px-2.5">Details</th>
+                          <th className="py-2.5 px-3">Step</th>
+                          <th className="py-2.5 px-3">Operation</th>
+                          <th className="py-2.5 px-3">Source Path</th>
+                          <th className="py-2.5 px-3">Target Path</th>
+                          <th className="py-2.5 px-3">Details</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-white/[0.06] text-[11px]">
+                      <tbody className="divide-y divide-white/[0.06] text-xs">
                         {plan.steps.map((s, idx) => (
-                          <tr key={s.stepId} className="hover:bg-black/50">
-                            <td className="py-1.5 px-2.5 text-zinc-500">#{idx + 1}</td>
-                            <td className="py-1.5 px-2.5 text-blue-700 font-bold">{s.operation}</td>
-                            <td className="py-1.5 px-2.5 text-zinc-400">{s.sourcePath || "(none)"}</td>
-                            <td className="py-1.5 px-2.5 text-zinc-100 font-semibold">{s.targetPath}</td>
-                            <td className="py-1.5 px-2.5 text-zinc-400">
+                          <tr key={s.stepId} className="hover:bg-white/[0.03]">
+                            <td className="py-2 px-3 text-zinc-500">#{idx + 1}</td>
+                            <td className="py-2 px-3 text-[#f4845f] font-bold">{s.operation}</td>
+                            <td className="py-2 px-3 text-zinc-300">{s.sourcePath || "(none)"}</td>
+                            <td className="py-2 px-3 text-[#f5dfb8] font-semibold">{s.targetPath}</td>
+                            <td className="py-2 px-3 text-zinc-400">
                               {s.conversionType || (s.defaultValue !== undefined ? JSON.stringify(s.defaultValue) : "-")}
                             </td>
                           </tr>
@@ -2232,14 +2249,14 @@ export default function ProjectWorkspacePage() {
               {reportMarkdown ? (
                 <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg p-5 shadow-xs space-y-3">
                   <div className="flex items-center justify-between border-b border-white/[0.08] pb-2">
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center gap-2">
                       <button
                         type="button"
                         onClick={() => setReportFormatView("markdown")}
-                        className={`text-xs px-2.5 py-1 rounded font-medium transition ${
+                        className={`text-xs px-4 py-1.5 rounded-full font-medium transition ${
                           reportFormatView === "markdown"
-                            ? "bg-emerald-950/400 text-zinc-950 font-semibold"
-                            : "bg-zinc-800 hover:bg-zinc-700 text-zinc-300"
+                            ? "champagne-pill font-semibold"
+                            : "bg-white/[0.06] hover:bg-white/[0.12] text-zinc-300 border border-white/[0.1]"
                         }`}
                       >
                         Markdown View
@@ -2247,29 +2264,31 @@ export default function ProjectWorkspacePage() {
                       <button
                         type="button"
                         onClick={() => setReportFormatView("json")}
-                        className={`text-xs px-2.5 py-1 rounded font-medium transition ${
+                        className={`text-xs px-4 py-1.5 rounded-full font-medium transition ${
                           reportFormatView === "json"
-                            ? "bg-emerald-950/400 text-zinc-950 font-semibold"
-                            : "bg-zinc-800 hover:bg-zinc-700 text-zinc-300"
+                            ? "champagne-pill font-semibold"
+                            : "bg-white/[0.06] hover:bg-white/[0.12] text-zinc-300 border border-white/[0.1]"
                         }`}
                       >
                         Structured JSON View
                       </button>
                     </div>
-                    <span className="text-[11px] font-mono text-zinc-500">
-                      Report ID: {reportData?.reportId || "N/A"}
+                    <span className="text-xs font-mono text-zinc-400">
+                      Report ID: <span className="text-[#f5dfb8]">{reportData?.reportId || "N/A"}</span>
                     </span>
                   </div>
 
                   {reportFormatView === "markdown" ? (
-                    <pre className="whitespace-pre-wrap font-mono text-xs bg-black/50 p-4 rounded border border-white/[0.08] text-zinc-200 overflow-auto max-h-[500px]">
-                      {reportMarkdown}
-                    </pre>
+                    <CodeViewer
+                      code={reportMarkdown || ""}
+                      language="markdown"
+                      maxHeight="520px"
+                    />
                   ) : (
                     <CodeViewer
                       code={JSON.stringify(reportData, null, 2)}
                       language="json"
-                      maxHeight="500px"
+                      maxHeight="520px"
                     />
                   )}
                 </div>
@@ -2613,8 +2632,8 @@ export default function ProjectWorkspacePage() {
 
               {/* Warning on high-risk / lossy conversion */}
               {(formOperation === "typeConversion" || formOperation === "default" || formOperation === "lookup") && (
-                <div className="p-2 bg-amber-950/40 border border-amber-800/60 rounded text-amber-200 text-[11px]">
-                  &warning; Note: Modifying this mapping to {formOperation} requires human verification. An audit record will be attached to the mapping.
+                <div className="p-2.5 bg-amber-950/40 border border-amber-500/35 rounded-xl text-amber-200 text-xs">
+                  ⚠ Note: Modifying this mapping to {formOperation} requires human verification. An audit record will be attached to the mapping.
                 </div>
               )}
 
