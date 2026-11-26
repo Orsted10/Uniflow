@@ -103,36 +103,36 @@ export function TopBar() {
 
   return (
     <>
-      <header className="border-b border-white/[0.08] bg-[#090807]/75 backdrop-blur-2xl sticky top-0 z-50 text-zinc-100 shadow-[inset_0_-1px_0_0_rgba(255,244,224,0.04)]">
+      <header className="border-b border-white/[0.08] bg-[#07080f]/75 backdrop-blur-2xl sticky top-0 z-50 text-zinc-100">
         <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-10 h-14 flex items-center justify-between gap-4">
           {/* Brand & Segmented Nav */}
           <div className="flex items-center gap-5">
             <Link
               href="/"
-              className="flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/40 rounded-lg px-1 transition group"
+              className="flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 rounded-lg px-1 transition group"
             >
-              <div className="w-7 h-7 rounded-full bg-gradient-to-b from-white/[0.14] to-white/[0.04] border border-white/[0.18] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.25)] flex items-center justify-center text-[#f5dfb8] group-hover:scale-105 transition-transform">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-400 via-teal-400 to-indigo-500 text-zinc-950 flex items-center justify-center shadow-[0_0_18px_-2px_rgba(45,212,191,0.65)] group-hover:scale-105 transition-transform">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <path
                     d="M4.5 12C4.5 9.5 6.5 7.5 9 7.5C11.5 7.5 12.5 10 14.5 12C16.5 14 17.5 16.5 20 16.5C21.38 16.5 22.5 15.38 22.5 14"
                     stroke="currentColor"
-                    strokeWidth="2"
+                    strokeWidth="2.4"
                     strokeLinecap="round"
                   />
                   <circle cx="4.5" cy="12" r="2" fill="currentColor" />
                 </svg>
               </div>
-              <span className="font-semibold tracking-[0.08em] text-xs text-white uppercase">
+              <span className="font-display font-bold tracking-tight text-sm text-white">
                 UNIFLOW
               </span>
             </Link>
 
-            <nav className="hidden md:flex items-center gap-1 p-1 rounded-full bg-white/[0.04] border border-white/[0.07] text-xs font-medium shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]">
+            <nav className="hidden md:flex items-center gap-1 p-1 rounded-full bg-white/[0.05] border border-white/[0.08] text-xs font-medium">
               <Link
                 href="/"
                 className={`px-3.5 py-1 rounded-full transition-all duration-150 ${
                   pathname === "/"
-                    ? "bg-[#f3e7d3] text-[#141210] font-semibold shadow-sm"
+                    ? "bg-gradient-to-r from-emerald-400/90 to-teal-300/90 text-zinc-950 font-semibold shadow-sm"
                     : "text-zinc-400 hover:text-zinc-100"
                 }`}
               >
@@ -142,7 +142,7 @@ export function TopBar() {
                 href="/projects"
                 className={`px-3.5 py-1 rounded-full transition-all duration-150 ${
                   pathname === "/projects"
-                    ? "bg-[#f3e7d3] text-[#141210] font-semibold shadow-sm"
+                    ? "bg-gradient-to-r from-emerald-400/90 to-teal-300/90 text-zinc-950 font-semibold shadow-sm"
                     : "text-zinc-400 hover:text-zinc-100"
                 }`}
               >
@@ -152,7 +152,7 @@ export function TopBar() {
                 href="/projects/new"
                 className={`px-3.5 py-1 rounded-full transition-all duration-150 ${
                   pathname === "/projects/new"
-                    ? "bg-[#f3e7d3] text-[#141210] font-semibold shadow-sm"
+                    ? "bg-gradient-to-r from-emerald-400/90 to-teal-300/90 text-zinc-950 font-semibold shadow-sm"
                     : "text-zinc-400 hover:text-zinc-100"
                 }`}
               >
@@ -165,7 +165,7 @@ export function TopBar() {
           <button
             type="button"
             onClick={() => setPaletteOpen(true)}
-            className="hidden sm:flex items-center justify-between gap-6 px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.09] hover:border-white/[0.16] text-xs text-zinc-400 hover:text-zinc-200 transition w-56 lg:w-72 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]"
+            className="hidden sm:flex items-center justify-between gap-6 px-3.5 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.1] hover:border-teal-400/40 text-xs text-zinc-400 hover:text-zinc-100 transition w-56 lg:w-72"
           >
             <span className="flex items-center gap-2 truncate">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -174,17 +174,17 @@ export function TopBar() {
               </svg>
               <span>Search workspaces &amp; actions...</span>
             </span>
-            <kbd className="font-mono text-[10px] text-zinc-300 bg-black/50 border border-white/[0.1] px-1.5 py-0.5 rounded">
+            <kbd className="font-mono text-[10px] text-zinc-300 bg-black/40 border border-white/[0.1] px-1.5 py-0.5 rounded">
               ⌘K
             </kbd>
           </button>
 
-          {/* Right: Interactive Live Cloud Diagnostics Capsule + Real Session */}
+          {/* Right: Interactive Live Cloud Diagnostics Capsule + Auth */}
           <div className="flex items-center gap-3 text-xs relative">
             <button
               type="button"
               onClick={() => setCloudPopoverOpen((o) => !o)}
-              className="hidden xl:flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.09] hover:border-white/[0.18] font-mono text-[11px] transition shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]"
+              className="hidden xl:flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] hover:bg-white/[0.09] border border-white/[0.1] hover:border-teal-400/35 font-mono text-[11px] transition"
               title="Click to inspect live multi-cloud diagnostics"
             >
               <StatusDot label="Supabase" active={Boolean(cloudStatus?.supabase.configured)} />
@@ -196,7 +196,6 @@ export function TopBar() {
               </span>
             </button>
 
-            {/* Interactive Cloud Diagnostics Popover */}
             {cloudPopoverOpen && (
               <div className="absolute right-0 top-12 w-80 apple-glass rounded-2xl p-4 z-50 text-xs space-y-3">
                 <div className="flex items-center justify-between border-b border-white/[0.08] pb-2.5">
@@ -210,7 +209,7 @@ export function TopBar() {
                     type="button"
                     onClick={refreshCloudStatus}
                     disabled={checkingCloud}
-                    className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-white/[0.08] hover:bg-white/[0.14] text-zinc-200 border border-white/[0.1] transition disabled:opacity-50"
+                    className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-teal-500/15 hover:bg-teal-500/25 text-teal-300 border border-teal-500/30 transition disabled:opacity-50"
                   >
                     {checkingCloud ? "Checking..." : "Re-verify"}
                   </button>
@@ -245,14 +244,14 @@ export function TopBar() {
               <div className="flex items-center gap-2">
                 <span
                   title={userEmail}
-                  className="w-7 h-7 rounded-full bg-[#f3e7d3]/15 border border-[#f3e7d3]/30 flex items-center justify-center text-[11px] font-semibold text-[#f5dfb8] uppercase"
+                  className="w-7 h-7 rounded-full bg-gradient-to-br from-teal-400/25 to-indigo-400/25 border border-teal-400/40 flex items-center justify-center text-[11px] font-bold text-teal-200 uppercase"
                 >
                   {userEmail[0]}
                 </span>
                 <button
                   type="button"
                   onClick={handleSignOut}
-                  className="text-xs text-zinc-300 hover:text-white font-medium px-2.5 py-1 rounded-full border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.09] transition"
+                  className="text-xs text-zinc-300 hover:text-white font-medium px-2.5 py-1 rounded-full border border-white/[0.1] bg-white/[0.04] hover:bg-white/[0.1] transition"
                 >
                   Sign out
                 </button>
@@ -260,7 +259,7 @@ export function TopBar() {
             ) : (
               <Link
                 href="/login"
-                className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-100 hover:text-white px-3.5 py-1.5 rounded-full border border-white/[0.12] bg-white/[0.05] hover:bg-white/[0.1] transition"
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-100 hover:text-white px-3.5 py-1.5 rounded-full border border-white/[0.14] bg-white/[0.06] hover:bg-white/[0.12] transition"
               >
                 Sign in
               </Link>
@@ -283,10 +282,10 @@ function StatusDot({ label, active }: { label: string; active: boolean }) {
     <span className="inline-flex items-center gap-1.5 px-1">
       <span
         className={`w-1.5 h-1.5 rounded-full ${
-          active ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.75)]" : "bg-zinc-600"
+          active ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.85)]" : "bg-zinc-600"
         }`}
       />
-      <span className={active ? "text-zinc-200" : "text-zinc-500"}>{label}</span>
+      <span className={active ? "text-zinc-100" : "text-zinc-500"}>{label}</span>
     </span>
   );
 }
