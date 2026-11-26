@@ -210,6 +210,17 @@ export default function LandingDashboardPage() {
   const [tilt, setTilt] = React.useState({ rx: 0, ry: 0 });
 
   React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const authCode = params.get("code");
+      if (authCode) {
+        window.location.replace(
+          `/auth/callback?code=${encodeURIComponent(authCode)}`
+        );
+        return;
+      }
+    }
+
     const supabase = createSupabaseBrowserClient();
     if (!supabase) return;
 

@@ -11,7 +11,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectPath = searchParams.get("redirect") || "/projects";
+  const redirectPath = searchParams.get("redirect") || "/overview";
   const urlError = searchParams.get("error");
 
   const [email, setEmail] = React.useState("");
@@ -57,12 +57,16 @@ function LoginContent() {
 
     setGoogleLoading(true);
     try {
+      const origin =
+        process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || window.location.origin;
+      document.cookie = `uniflow_auth_next=${encodeURIComponent(
+        redirectPath
+      )}; path=/; max-age=600; SameSite=Lax`;
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(
-            redirectPath
-          )}`,
+          redirectTo: `${origin}/auth/callback`,
         },
       });
       if (error) throw error;
@@ -95,14 +99,18 @@ function LoginContent() {
 
     setLoading(true);
     try {
+      const origin =
+        process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || window.location.origin;
+      document.cookie = `uniflow_auth_next=${encodeURIComponent(
+        redirectPath
+      )}; path=/; max-age=600; SameSite=Lax`;
+
       if (isSignUp) {
         const { data, error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(
-              redirectPath
-            )}`,
+            emailRedirectTo: `${origin}/auth/callback`,
           },
         });
         if (error) throw error;
@@ -149,12 +157,16 @@ function LoginContent() {
 
     setLoading(true);
     try {
+      const origin =
+        process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || window.location.origin;
+      document.cookie = `uniflow_auth_next=${encodeURIComponent(
+        redirectPath
+      )}; path=/; max-age=600; SameSite=Lax`;
+
       const { error } = await supabase.auth.signInWithOtp({
         email: email.trim(),
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(
-            redirectPath
-          )}`,
+          emailRedirectTo: `${origin}/auth/callback`,
         },
       });
       if (error) throw error;

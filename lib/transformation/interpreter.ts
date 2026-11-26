@@ -36,8 +36,39 @@ export function executeTransformationPlan(
       sourceVal = getValueByPath(inputPayload, step.sourcePath);
     }
 
+    // Handle explicit "default" operation first regardless of sourcePath
+    if (step.operation === "default") {
+      const defVal = sourceVal !== undefined && sourceVal !== null ? sourceVal : step.defaultValue;
+      setValueByPath(outputPayload, step.targetPath, defVal);
+      stepResults.push({
+        stepId: step.stepId,
+        operation: step.operation,
+        targetPath: step.targetPath,
+        sourcePath: step.sourcePath,
+        inputValue: sourceVal,
+        outputValue: defVal,
+        success: true,
+      });
+      continue;
+    }
+
     // Handle missing or null values
     if (sourceVal === undefined || sourceVal === null) {
+      if (step.policyOnMissing === "useDefault") {
+        const defVal = step.defaultValue;
+        setValueByPath(outputPayload, step.targetPath, defVal);
+        stepResults.push({
+          stepId: step.stepId,
+          operation: step.operation,
+          targetPath: step.targetPath,
+          sourcePath: step.sourcePath,
+          inputValue: sourceVal,
+          outputValue: defVal,
+          success: true,
+        });
+        continue;
+      }
+
       if (step.policyOnMissing === "fail") {
         const err = `Execution failed at step '${step.stepId}': Required source path '${step.sourcePath}' is missing or null.`;
         stepResults.push({
@@ -57,21 +88,6 @@ export function executeTransformationPlan(
           error: err,
           failedStepId: step.stepId,
         };
-      }
-
-      if (step.policyOnMissing === "useDefault" || step.operation === "default") {
-        const defVal = step.defaultValue;
-        setValueByPath(outputPayload, step.targetPath, defVal);
-        stepResults.push({
-          stepId: step.stepId,
-          operation: step.operation,
-          targetPath: step.targetPath,
-          sourcePath: step.sourcePath,
-          inputValue: sourceVal,
-          outputValue: defVal,
-          success: true,
-        });
-        continue;
       }
 
       // Omit
@@ -122,10 +138,6 @@ export function executeTransformationPlan(
           }
           break;
         }
-
-        case "default":
-          finalVal = step.defaultValue;
-          break;
 
         case "reject":
           throw new Error(`Step configured to reject transformation for path '${step.targetPath}'.`);

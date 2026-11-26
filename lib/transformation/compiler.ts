@@ -53,8 +53,13 @@ export function compileTransformationPlan(
       continue;
     }
 
-    if (m.sourcePath && !sourceSchema.flatFields[m.sourcePath]) {
-      errors.push(`Source path '${m.sourcePath}' does not exist in source schema.`);
+    const normalizedSourcePath =
+      m.sourcePath === "null" || m.sourcePath === "(none)" || m.sourcePath?.trim() === ""
+        ? null
+        : m.sourcePath;
+
+    if (normalizedSourcePath && !sourceSchema.flatFields[normalizedSourcePath]) {
+      errors.push(`Source path '${normalizedSourcePath}' does not exist in source schema.`);
       continue;
     }
 
@@ -87,14 +92,17 @@ export function compileTransformationPlan(
     steps.push({
       stepId: `step-${m.id}`,
       operation: op,
-      sourcePath: m.sourcePath,
+      sourcePath: normalizedSourcePath,
       targetPath: m.targetPath,
       sourceType: m.transformation.sourceType,
       targetType: targetField.type,
       conversionType,
       defaultValue: m.transformation.defaultValue,
       lookupTable: m.transformation.lookupTable,
-      policyOnMissing: m.transformation.policyOnMissing || (targetField.required ? "fail" : "omit"),
+      policyOnMissing:
+        op === "default"
+          ? "useDefault"
+          : m.transformation.policyOnMissing || (targetField.required ? "fail" : "omit"),
       rationale: m.rationale,
     });
 

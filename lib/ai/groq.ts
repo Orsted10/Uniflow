@@ -216,7 +216,15 @@ Provide candidate mappings for target fields. Output strictly valid JSON matchin
       continue;
     }
 
-    // 2. Verify sourcePath exists in source schema (if not null)
+    // 2. Normalize null-like sourcePath strings & verify sourcePath exists
+    if (
+      candidate.sourcePath === "null" ||
+      candidate.sourcePath === "(none)" ||
+      candidate.sourcePath?.trim() === ""
+    ) {
+      candidate.sourcePath = null;
+    }
+
     let sourceField = null;
     if (candidate.sourcePath) {
       sourceField = sourceSchema.flatFields[candidate.sourcePath];
@@ -225,8 +233,70 @@ Provide candidate mappings for target fields. Output strictly valid JSON matchin
         candidate.sourcePath = null;
         if (candidate.operation !== "default") {
           candidate.operation = "default";
-          candidate.defaultValue = targetField.type === "string" ? "unspecified" : 0;
+          candidate.defaultValue =
+            targetField.enum?.[0] ??
+            (targetField.path.toLowerCase().includes("region")
+              ? "us-east-1"
+              : targetField.type === "string"
+              ? "unspecified"
+              : targetField.type === "boolean"
+              ? false
+              : 0);
         }
+      }
+    }
+
+    // 2b. Guarantee valid lookup tables when operation === "lookup"
+    let sanitizedLookup = candidate.lookupTable
+      ? sanitizeLookupTable(candidate.lookupTable)
+      : undefined;
+    if (candidate.operation === "lookup") {
+      if (!sanitizedLookup || Object.keys(sanitizedLookup).length === 0) {
+        const autoTable: Record<string, string> = {};
+        if (sourceField?.enum && targetField.enum) {
+          for (const srcEnum of sourceField.enum) {
+            const s = String(srcEnum);
+            const matched = targetField.enum.find(
+              (te) => String(te).toLowerCase() === s.toLowerCase()
+            );
+            if (matched !== undefined) {
+              autoTable[s] = String(matched);
+            }
+          }
+        }
+        if (Object.keys(autoTable).length > 0) {
+          sanitizedLookup = autoTable;
+        } else if (sourceField?.enum && sourceField.enum.length > 0) {
+          for (const srcEnum of sourceField.enum) {
+            const s = String(srcEnum);
+            autoTable[s] = s.toLowerCase();
+          }
+          sanitizedLookup = autoTable;
+        } else {
+          // Non-enum lookup without dictionary falls back cleanly to rename/copy
+          candidate.operation = candidate.sourcePath === candidate.targetPath ? "copy" : "rename";
+          sanitizedLookup = undefined;
+        }
+      }
+    }
+
+    // 2c. Guarantee valid non-null defaults when operation === "default" for non-nullable targets
+    let resolvedDefault = sanitizeDefaultValue(candidate.defaultValue);
+    if (candidate.operation === "default" || !candidate.sourcePath) {
+      candidate.operation = "default";
+      if (
+        resolvedDefault === undefined ||
+        (resolvedDefault === null && !targetField.nullable)
+      ) {
+        resolvedDefault =
+          targetField.enum?.[0] ??
+          (targetField.path.toLowerCase().includes("region")
+            ? "us-east-1"
+            : targetField.type === "string"
+            ? "default"
+            : targetField.type === "boolean"
+            ? false
+            : 0);
       }
     }
 
@@ -236,9 +306,14 @@ Provide candidate mappings for target fields. Output strictly valid JSON matchin
       sourceType: sourceField?.type,
       targetType: targetField.type,
       conversionType: candidate.conversionType,
-      defaultValue: sanitizeDefaultValue(candidate.defaultValue),
-      lookupTable: candidate.lookupTable ? sanitizeLookupTable(candidate.lookupTable) : undefined,
-      policyOnMissing: targetField.required ? "fail" : "omit",
+      defaultValue: resolvedDefault,
+      lookupTable: sanitizedLookup,
+      policyOnMissing:
+        candidate.operation === "default"
+          ? "useDefault"
+          : targetField.required
+          ? "fail"
+          : "omit",
     };
 
     // 4. Determine semanticStatus & uncertainty

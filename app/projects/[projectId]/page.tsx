@@ -544,8 +544,14 @@ export default function ProjectWorkspacePage() {
     setSuccessMsg(null);
 
     try {
+      const isEventLike =
+        customPayload !== null &&
+        typeof customPayload === "object" &&
+        ("nativeEvent" in (customPayload as Record<string, unknown>) ||
+          "currentTarget" in (customPayload as Record<string, unknown>));
+
       let payloadToSend: unknown;
-      if (customPayload !== undefined) {
+      if (customPayload !== undefined && !isEventLike) {
         payloadToSend = customPayload;
       } else if (selectedFixtureIdx >= 0 && selectedFixtureIdx < CANONICAL_TEST_FIXTURES.length) {
         payloadToSend = CANONICAL_TEST_FIXTURES[selectedFixtureIdx].payload;
@@ -1560,22 +1566,22 @@ export default function ProjectWorkspacePage() {
           {activeTab === "mappings" && (
             <div className="space-y-4">
               {/* Header and Advisory Status */}
-              <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg p-4 shadow-xs flex flex-wrap items-center justify-between gap-3">
+              <div className="apple-glass rounded-3xl p-6 shadow-xs flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <div className="flex items-center space-x-2">
-                    <h2 className="text-sm font-bold text-zinc-100">Review Candidate Mappings</h2>
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <h2 className="text-lg font-semibold text-white">Review Candidate Mappings</h2>
                     {providerConfig?.configured ? (
-                      <span className="text-[10px] font-mono bg-emerald-950/40 text-emerald-300 border border-emerald-300 px-2 py-0.5 rounded font-medium">
+                      <span className="text-xs font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-400/35 px-3 py-0.5 rounded-full font-medium">
                         Groq AI Active &bull; {providerConfig.model}
                       </span>
                     ) : (
-                      <span className="text-[10px] font-mono bg-amber-950/40 text-amber-300 border border-amber-800/60 px-2 py-0.5 rounded font-medium">
+                      <span className="text-xs font-mono bg-amber-500/15 text-amber-300 border border-amber-400/35 px-3 py-0.5 rounded-full font-medium">
                         Groq Offline (Heuristic Fallback)
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-zinc-400 mt-0.5">
-                    <span className="font-semibold text-zinc-300">Trust Rule:</span> AI may propose; deterministic code validates; humans approve ambiguous semantics.
+                  <p className="text-sm text-zinc-300 mt-1">
+                    <span className="font-semibold text-[#f5dfb8]">Trust Rule:</span> AI explains &amp; proposes; deterministic engine compiles &amp; checks; human approves before deployment.
                   </p>
                 </div>
 
@@ -1631,18 +1637,18 @@ export default function ProjectWorkspacePage() {
 
               {/* Filters & Search Toolbar */}
               {mappings.length > 0 && (
-                <div className="p-3 bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg shadow-xs flex flex-wrap items-center justify-between gap-2 text-xs">
-                  <div className="flex flex-wrap items-center gap-2 flex-1 min-w-[240px]">
+                <div className="apple-glass p-4 rounded-2xl shadow-xs flex flex-wrap items-center justify-between gap-3 text-sm">
+                  <div className="flex flex-wrap items-center gap-2.5 flex-1 min-w-[240px]">
                     <input
                       type="text"
                       value={mappingSearchQuery}
                       onChange={(e) => setMappingSearchQuery(e.target.value)}
                       placeholder="Search mapped paths, rationale, or operation..."
-                      className="p-1.5 text-xs border border-white/[0.12] rounded bg-white/[0.03] backdrop-blur-xl text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-slate-500 w-full sm:w-64"
+                      className="px-4 py-2 text-sm border border-white/[0.12] rounded-full bg-black/50 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#f5dfb8]/50 w-full sm:w-72"
                     />
 
                     {/* Status filter pills */}
-                    <div className="flex flex-wrap items-center gap-1">
+                    <div className="flex flex-wrap items-center gap-1.5">
                       {["all", "proposed", "needs_confirmation", "accepted", "rejected", "edited"].map((st) => {
                         const count =
                           st === "all" ? mappings.length : mappings.filter((m) => m.status === st).length;
@@ -1651,10 +1657,10 @@ export default function ProjectWorkspacePage() {
                             key={st}
                             type="button"
                             onClick={() => setMappingFilterStatus(st)}
-                            className={`px-2 py-0.5 rounded text-[11px] font-medium border transition ${
+                            className={`px-3 py-1 rounded-full text-xs font-medium border transition ${
                               mappingFilterStatus === st
-                                ? "bg-zinc-800 text-white border-slate-900"
-                                : "bg-white/[0.03] backdrop-blur-xl text-zinc-400 border-white/[0.08] hover:bg-zinc-800"
+                                ? "bg-[#f3e7d3] text-[#141210] border-[#f3e7d3] font-semibold"
+                                : "bg-white/[0.04] text-zinc-300 border-white/[0.1] hover:bg-white/[0.1]"
                             }`}
                           >
                             {st === "needs_confirmation" ? "Needs Review" : st} ({count})
@@ -1666,14 +1672,14 @@ export default function ProjectWorkspacePage() {
 
                   {/* Uncertainty filter */}
                   <div className="flex items-center space-x-2">
-                    <label htmlFor="uncertainty-select" className="text-[11px] font-medium text-zinc-400">
+                    <label htmlFor="uncertainty-select" className="text-xs font-medium text-zinc-300">
                       Uncertainty:
                     </label>
                     <select
                       id="uncertainty-select"
                       value={mappingFilterUncertainty}
                       onChange={(e) => setMappingFilterUncertainty(e.target.value)}
-                      className="text-xs p-1.5 border border-white/[0.12] rounded bg-white/[0.03] backdrop-blur-xl text-zinc-200 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                      className="text-xs px-3 py-1.5 border border-white/[0.12] rounded-full bg-[#090807] text-zinc-100 focus:outline-none focus:ring-1 focus:ring-[#f5dfb8]/50"
                     >
                       <option value="all">All Levels</option>
                       <option value="LOW">Low</option>
@@ -1713,99 +1719,137 @@ export default function ProjectWorkspacePage() {
                   No candidate mappings match the current filters or search query.
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {filteredMappings.map((m) => {
                     const isAccepted = m.status === "accepted";
                     const isRejected = m.status === "rejected";
                     const isEdited = m.status === "edited";
                     const isNeedsReview = m.status === "needs_confirmation" || m.semanticStatus === "needs_confirmation";
+                    const lookupPairs = m.transformation.lookupTable
+                      ? Object.entries(m.transformation.lookupTable)
+                      : [];
 
                     return (
                       <div
                         key={m.id}
-                        className={`bg-white/[0.03] backdrop-blur-xl border rounded-lg p-4 shadow-xs transition ${
+                        className={`apple-glass rounded-3xl p-6 shadow-xs transition ${
                           isAccepted
-                            ? "border-emerald-300 bg-emerald-950/40/15"
+                            ? "border-emerald-400/50 bg-emerald-950/20"
                             : isRejected
-                            ? "border-rose-300 bg-rose-950/40/15 opacity-60"
+                            ? "border-rose-400/40 bg-rose-950/20 opacity-65"
                             : isEdited
-                            ? "border-indigo-300 bg-indigo-950/40/15"
+                            ? "border-violet-400/50 bg-violet-950/20"
                             : isNeedsReview
-                            ? "border-amber-800/60 bg-amber-950/40/15"
+                            ? "border-amber-400/45 bg-amber-950/20"
                             : "border-white/[0.12]"
                         }`}
                       >
-                        {/* Header: Paths & Status Badges */}
-                        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.06] pb-2 mb-2.5">
-                          <div className="flex items-center space-x-2 font-mono text-xs">
-                            <span className="font-bold text-zinc-100 bg-zinc-800 px-1.5 py-0.5 rounded">
-                              {m.targetPath}
+                        {/* Top Visual Dataflow Header: Source -> Operation Pill -> Target */}
+                        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.08] pb-4 mb-4">
+                          <div className="flex flex-wrap items-center gap-2.5 font-mono text-sm">
+                            <span className="text-zinc-200 bg-black/55 border border-white/[0.12] px-3 py-1 rounded-xl">
+                              {m.sourcePath || "(constant / default)"}
+                              {m.transformation.sourceType && (
+                                <span className="ml-2 text-xs text-zinc-400">
+                                  :{m.transformation.sourceType}
+                                </span>
+                              )}
                             </span>
-                            <span className="text-zinc-500">&larr;</span>
-                            <span className="text-zinc-300 bg-black/50 border border-white/[0.08] px-1.5 py-0.5 rounded">
-                              {m.sourcePath || "(default value)"}
+                            <span className="text-[#f4845f] font-bold">→</span>
+                            <span className="font-mono text-xs px-3 py-1 rounded-full bg-[#f4845f]/15 text-[#f4845f] border border-[#f4845f]/35 font-semibold">
+                              {m.transformation.operation}
+                              {m.transformation.conversionType ? ` (${m.transformation.conversionType})` : ""}
+                              {m.transformation.operation === "default" && m.transformation.defaultValue !== undefined
+                                ? ` = ${JSON.stringify(m.transformation.defaultValue)}`
+                                : ""}
+                            </span>
+                            <span className="text-teal-400 font-bold">→</span>
+                            <span className="font-bold text-[#f5dfb8] bg-white/[0.06] border border-[#f5dfb8]/30 px-3 py-1 rounded-xl">
+                              {m.targetPath}
+                              {m.transformation.targetType && (
+                                <span className="ml-2 text-xs text-teal-300 font-normal">
+                                  :{m.transformation.targetType}
+                                </span>
+                              )}
                             </span>
                           </div>
 
-                          <div className="flex flex-wrap items-center gap-1.5">
-                            {/* Provider chip */}
-                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-white/[0.08]">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-xs font-mono px-3 py-1 rounded-full bg-white/[0.06] text-zinc-200 border border-white/[0.1]">
                               {m.provider === "groq"
-                                ? "Groq AI"
+                                ? "✨ Groq AI"
                                 : m.provider === "manual"
-                                ? "Manual"
-                                : "Deterministic Heuristic"}
+                                ? "✎ Manual"
+                                : "⚙ Heuristic"}
                             </span>
 
-                            {/* Uncertainty Chip */}
                             <StatusChip
-                              label={`Uncertainty: ${m.uncertaintyScore}`}
+                              label={`Risk: ${m.uncertaintyScore}`}
                               variant={m.uncertaintyScore === "LOW" ? "low" : m.uncertaintyScore === "MEDIUM" ? "medium" : "high"}
                             />
 
-                            {/* Status Chip */}
                             <StatusChip label={m.status} variant={m.status} />
                           </div>
                         </div>
 
-                        {/* Operation Details and Facts */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-zinc-300">
-                          <div>
-                            <span className="font-semibold text-zinc-200">Operation:</span>{" "}
-                            <code className="font-mono bg-[#f4845f]/15 px-2.5 py-0.5 rounded-full text-[#f4845f] border border-[#f4845f]/30 font-semibold">
-                              {m.transformation.operation}
-                            </code>
-                            {m.transformation.conversionType && (
-                              <span className="block mt-1.5 text-xs font-mono text-violet-300">
-                                Convert: {m.transformation.conversionType}
-                              </span>
-                            )}
-                            {m.transformation.defaultValue !== undefined && (
-                              <span className="block mt-1.5 text-xs font-mono text-amber-300">
-                                Default: {JSON.stringify(m.transformation.defaultValue)}
-                              </span>
-                            )}
-                            {m.transformation.lookupTable && (
-                              <span className="block mt-1.5 text-xs font-mono text-teal-300">
-                                Lookup: {Object.keys(m.transformation.lookupTable).length} dictionary pairs
-                              </span>
+                        {/* Clear Plain-English AI Explanation & Parameters */}
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 text-sm">
+                          <div className="lg:col-span-8 p-4 rounded-2xl bg-black/45 border border-white/[0.08] space-y-1.5">
+                            <div className="text-xs font-mono uppercase tracking-wider text-[#f5dfb8]">
+                              {m.provider === "groq" ? "AI Explanation & Transformation Logic" : "Mapping Logic"}
+                            </div>
+                            <p className="text-zinc-100 leading-relaxed text-[15px]">{m.rationale}</p>
+                            {m.uncertaintyExplanation && (
+                              <p className="text-xs text-zinc-400 leading-relaxed pt-1">
+                                {m.uncertaintyExplanation}
+                              </p>
                             )}
                           </div>
 
-                          <div className="md:col-span-2">
-                            <span className="font-semibold text-zinc-200">Rationale:</span>{" "}
-                            <span className="text-zinc-200">{m.rationale}</span>
+                          <div className="lg:col-span-4 p-4 rounded-2xl bg-black/45 border border-white/[0.08] space-y-2 text-xs font-mono">
+                            <div className="text-zinc-400 uppercase tracking-wider font-sans font-semibold">
+                              Rule Parameters
+                            </div>
+                            <div>
+                              <span className="text-zinc-400">On Missing:</span>{" "}
+                              <span className="text-amber-300 font-semibold">
+                                {m.transformation.policyOnMissing || "default"}
+                              </span>
+                            </div>
+                            {m.transformation.defaultValue !== undefined && (
+                              <div>
+                                <span className="text-zinc-400">Default Value:</span>{" "}
+                                <span className="text-emerald-300 font-semibold">
+                                  {JSON.stringify(m.transformation.defaultValue)}
+                                </span>
+                              </div>
+                            )}
+                            {lookupPairs.length > 0 && (
+                              <div className="space-y-1">
+                                <div className="text-zinc-400">Enum Lookup Dictionary:</div>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {lookupPairs.slice(0, 6).map(([k, v]) => (
+                                    <span
+                                      key={k}
+                                      className="px-2 py-0.5 rounded bg-teal-500/15 text-teal-200 border border-teal-400/30"
+                                    >
+                                      {k} → {v}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
 
                         {/* Unresolved Questions if flagged by AI */}
                         {m.unresolvedQuestions && m.unresolvedQuestions.length > 0 && (
-                          <div className="mt-3 p-3 bg-amber-950/35 border border-amber-500/35 rounded-xl text-xs text-amber-200 space-y-1">
+                          <div className="mt-3 p-3.5 bg-amber-950/35 border border-amber-500/35 rounded-2xl text-xs sm:text-sm text-amber-200 space-y-1">
                             <div className="font-semibold text-xs uppercase tracking-wider text-amber-300">
                               Unresolved Semantic Questions:
                             </div>
                             {m.unresolvedQuestions.map((q, idx) => (
-                              <div key={idx} className="flex items-start gap-1.5 text-xs">
+                              <div key={idx} className="flex items-start gap-2">
                                 <span className="font-bold text-amber-400">&bull;</span>
                                 <span>{q}</span>
                               </div>
@@ -1815,10 +1859,12 @@ export default function ProjectWorkspacePage() {
 
                         {/* Information Loss Declarations */}
                         {m.informationLoss && m.informationLoss.length > 0 && (
-                          <div className="mt-3 p-3 bg-orange-950/35 border border-orange-500/35 rounded-xl text-xs text-orange-200">
-                            <span className="font-semibold text-xs block">Information Loss Disclosures:</span>
+                          <div className="mt-3 p-3.5 bg-orange-950/35 border border-orange-500/35 rounded-2xl text-xs sm:text-sm text-orange-200">
+                            <span className="font-semibold text-xs uppercase tracking-wider text-orange-300 block mb-1">
+                              Information Loss Disclosures:
+                            </span>
                             {m.informationLoss.map((loss, idx) => (
-                              <div key={idx} className="text-xs text-orange-300">
+                              <div key={idx} className="text-orange-200">
                                 &bull; {loss.description}
                               </div>
                             ))}
@@ -1827,40 +1873,40 @@ export default function ProjectWorkspacePage() {
 
                         {/* Explicit Human Confirmation Warning */}
                         {m.semanticStatus === "needs_confirmation" && m.status !== "accepted" && (
-                          <div className="mt-2.5 text-xs bg-amber-950/40 text-amber-200 border border-amber-500/35 rounded-xl p-2.5 flex items-center justify-between">
+                          <div className="mt-3 text-xs sm:text-sm bg-amber-950/40 text-amber-200 border border-amber-500/35 rounded-2xl p-3 flex items-center justify-between">
                             <span>
-                              ⚠ Semantic ambiguity or constraint differences detected. Explicit human review and approval is required before compilation.
+                              ⚠ Semantic ambiguity or constraint differences detected. Click &quot;Approve Mapping&quot; after reviewing the explanation above.
                             </span>
                           </div>
                         )}
 
                         {/* Actions Row */}
-                        <div className="mt-3 pt-2.5 border-t border-white/[0.06] flex flex-wrap items-center justify-between gap-2">
+                        <div className="mt-4 pt-3 border-t border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
                           <div>
                             <button
                               type="button"
                               onClick={() => setExpandedAuditId(expandedAuditId === m.id ? null : m.id)}
-                              className="text-xs text-zinc-400 hover:text-zinc-200 underline font-medium"
+                              className="text-xs sm:text-sm text-zinc-300 hover:text-white underline font-medium"
                             >
                               {expandedAuditId === m.id ? "Hide Audit Trail ↑" : `Audit Trail (${m.decisionHistory?.length || 1}) ↓`}
                             </button>
                           </div>
 
-                          <div className="flex items-center space-x-2">
+                          <div className="flex items-center gap-2.5">
                             <button
                               type="button"
                               onClick={() => openEditModal(m)}
-                              className="text-xs px-3 py-1.5 rounded-full font-medium border border-white/[0.12] text-zinc-200 bg-white/[0.05] hover:bg-white/[0.1] transition"
+                              className="text-xs sm:text-sm px-4 py-2 rounded-full font-medium border border-white/[0.14] text-zinc-200 bg-white/[0.05] hover:bg-white/[0.12] transition"
                             >
-                              Edit
+                              ✎ Edit
                             </button>
                             <button
                               type="button"
                               onClick={() => updateMappingStatus(m.id, "rejected")}
-                              className={`text-xs px-3 py-1.5 rounded-full font-medium border transition ${
+                              className={`text-xs sm:text-sm px-4 py-2 rounded-full font-medium border transition ${
                                 m.status === "rejected"
                                   ? "bg-rose-600 text-white border-rose-500"
-                                  : "bg-white/[0.05] text-zinc-200 border-white/[0.12] hover:bg-rose-950/50 hover:text-rose-300"
+                                  : "bg-white/[0.05] text-zinc-200 border-white/[0.14] hover:bg-rose-950/50 hover:text-rose-300"
                               }`}
                             >
                               Reject
@@ -1868,13 +1914,13 @@ export default function ProjectWorkspacePage() {
                             <button
                               type="button"
                               onClick={() => updateMappingStatus(m.id, "accepted")}
-                              className={`text-xs px-4 py-1.5 rounded-full font-semibold transition ${
+                              className={`text-xs sm:text-sm px-5 py-2 rounded-full font-semibold transition ${
                                 m.status === "accepted"
                                   ? "bg-emerald-500 text-zinc-950"
                                   : "champagne-pill"
                               }`}
                             >
-                              {m.status === "accepted" ? "Approved &check;" : "Approve Mapping"}
+                              {m.status === "accepted" ? "Approved ✓" : "Approve Mapping"}
                             </button>
                           </div>
                         </div>
@@ -1929,7 +1975,7 @@ export default function ProjectWorkspacePage() {
                   </button>
                   <button
                     type="button"
-                    onClick={executePlan}
+                    onClick={() => executePlan()}
                     disabled={loading || !plan}
                     className="champagne-pill disabled:opacity-45 text-xs sm:text-[13px] font-semibold px-5 py-2 rounded-full transition"
                   >
@@ -1983,8 +2029,13 @@ export default function ProjectWorkspacePage() {
                             <td className="py-2 px-3 text-[#f4845f] font-bold">{s.operation}</td>
                             <td className="py-2 px-3 text-zinc-300">{s.sourcePath || "(none)"}</td>
                             <td className="py-2 px-3 text-[#f5dfb8] font-semibold">{s.targetPath}</td>
-                            <td className="py-2 px-3 text-zinc-400">
-                              {s.conversionType || (s.defaultValue !== undefined ? JSON.stringify(s.defaultValue) : "-")}
+                            <td className="py-2 px-3 text-zinc-300">
+                              {s.conversionType ||
+                                (s.lookupTable && Object.keys(s.lookupTable).length > 0
+                                  ? `${Object.keys(s.lookupTable).length} lookup pairs`
+                                  : s.defaultValue !== undefined
+                                  ? JSON.stringify(s.defaultValue)
+                                  : "-")}
                             </td>
                           </tr>
                         ))}
@@ -2006,7 +2057,7 @@ export default function ProjectWorkspacePage() {
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-xs">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-sm">
                     {CANONICAL_TEST_FIXTURES.map((fix, idx) => (
                       <button
                         key={idx}
@@ -2015,27 +2066,29 @@ export default function ProjectWorkspacePage() {
                           setSelectedFixtureIdx(idx);
                           setCustomPayloadText(JSON.stringify(fix.payload, null, 2));
                         }}
-                        className={`p-2 rounded border text-left transition ${
+                        className={`p-3.5 rounded-2xl border text-left transition ${
                           selectedFixtureIdx === idx
-                            ? "border-blue-500 bg-blue-50/50 text-blue-900 font-medium"
-                            : "border-white/[0.08] bg-black/50 text-zinc-300 hover:bg-zinc-800"
+                            ? fix.expectValid
+                              ? "border-emerald-400/60 bg-emerald-500/15 text-white shadow-sm"
+                              : "border-rose-400/60 bg-rose-500/15 text-white shadow-sm"
+                            : "border-white/[0.1] bg-black/50 text-zinc-300 hover:bg-white/[0.07]"
                         }`}
                       >
-                        <div className="font-semibold text-[11px]">Fixture #{idx + 1}</div>
-                        <div className="text-[10px] text-zinc-400 truncate">{fix.description}</div>
+                        <div className="font-semibold text-xs text-[#f5dfb8]">Fixture #{idx + 1}</div>
+                        <div className="text-xs text-zinc-300 truncate mt-0.5">{fix.description}</div>
                       </button>
                     ))}
                     <button
                       type="button"
                       onClick={() => setSelectedFixtureIdx(-1)}
-                      className={`p-2 rounded border text-left transition ${
+                      className={`p-3.5 rounded-2xl border text-left transition ${
                         selectedFixtureIdx === -1
-                          ? "border-purple-500 bg-purple-50/50 text-purple-900 font-medium"
-                          : "border-white/[0.08] bg-black/50 text-zinc-300 hover:bg-zinc-800"
+                          ? "border-violet-400/60 bg-violet-500/15 text-white shadow-sm"
+                          : "border-white/[0.1] bg-black/50 text-zinc-300 hover:bg-white/[0.07]"
                       }`}
                     >
-                      <div className="font-semibold text-[11px]">Custom Payload</div>
-                      <div className="text-[10px] text-zinc-400">Edit JSON input directly</div>
+                      <div className="font-semibold text-xs text-violet-300">Custom Payload</div>
+                      <div className="text-xs text-zinc-300 mt-0.5">Edit JSON input directly</div>
                     </button>
                   </div>
 
@@ -2689,14 +2742,14 @@ export default function ProjectWorkspacePage() {
 
               {/* Conditional Operation Arguments */}
               {formOperation === "typeConversion" && (
-                <div className="p-3 bg-purple-50/70 border border-purple-200 rounded space-y-1">
-                  <label className="block font-semibold text-purple-900 mb-1">
-                    Conversion Type <span className="text-rose-500">*</span>
+                <div className="p-3.5 bg-violet-950/40 border border-violet-400/30 rounded-2xl space-y-1.5">
+                  <label className="block font-semibold text-violet-200 mb-1">
+                    Conversion Type <span className="text-rose-400">*</span>
                   </label>
                   <select
                     value={formConversionType}
                     onChange={(e) => setFormConversionType(e.target.value)}
-                    className="w-full font-mono text-xs p-1.5 border border-purple-300 rounded bg-white/[0.03] backdrop-blur-xl text-purple-950 focus:outline-none"
+                    className="w-full font-mono text-xs p-2 border border-violet-400/30 rounded-xl bg-black/60 text-zinc-100 focus:outline-none"
                   >
                     {SUPPORTED_CONVERSIONS.map((c) => (
                       <option key={c} value={c}>
@@ -2852,14 +2905,14 @@ export default function ProjectWorkspacePage() {
 
               {/* Conditional Operation Arguments */}
               {formOperation === "typeConversion" && (
-                <div className="p-3 bg-purple-50/70 border border-purple-200 rounded space-y-1">
-                  <label className="block font-semibold text-purple-900 mb-1">
-                    Conversion Type <span className="text-rose-500">*</span>
+                <div className="p-3.5 bg-violet-950/40 border border-violet-400/30 rounded-2xl space-y-1.5">
+                  <label className="block font-semibold text-violet-200 mb-1">
+                    Conversion Type <span className="text-rose-400">*</span>
                   </label>
                   <select
                     value={formConversionType}
                     onChange={(e) => setFormConversionType(e.target.value)}
-                    className="w-full font-mono text-xs p-1.5 border border-purple-300 rounded bg-white/[0.03] backdrop-blur-xl text-purple-950 focus:outline-none"
+                    className="w-full font-mono text-xs p-2 border border-violet-400/30 rounded-xl bg-black/60 text-zinc-100 focus:outline-none"
                   >
                     {SUPPORTED_CONVERSIONS.map((c) => (
                       <option key={c} value={c}>
