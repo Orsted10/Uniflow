@@ -1,6 +1,6 @@
 import * as React from "react";
 
-export type WorkspaceTab = "overview" | "specs" | "mappings" | "execute" | "report";
+export type WorkspaceTab = "overview" | "specs" | "mappings" | "execute" | "report" | "architecture";
 
 export interface ProjectSidebarProps {
   activeTab: WorkspaceTab;
@@ -23,6 +23,7 @@ export function ProjectSidebar({
     { id: "mappings", label: "Mapping Review", badge: mappingCount > 0 ? mappingCount : undefined },
     { id: "execute", label: "Test & Adapter", badge: hasPlan ? "Ready" : undefined },
     { id: "report", label: "Report & Cloud" },
+    { id: "architecture", label: "Cloud, DBMS & Security", badge: "RLS" },
   ];
 
   return (
