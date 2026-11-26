@@ -1,3 +1,7 @@
+import * as crypto from "crypto";
+import * as fs from "fs";
+import * as os from "os";
+import * as path from "path";
 import { Project, Spec, MappingSet } from "../supabase/models";
 import { CandidateMapping } from "../mapping/types";
 import { TransformationPlan } from "../transformation/ir";
@@ -33,11 +37,44 @@ export type ProjectState = {
   };
 };
 
+const SNAPSHOT_FILE = path.join(os.tmpdir(), "uniflow-project-store-v1.json");
+
 class InMemoryProjectStore {
   private projects = new Map<string, ProjectState>();
+  private loadedFromDisk = false;
+
+  private ensureDiskLoaded() {
+    if (this.loadedFromDisk) return;
+    this.loadedFromDisk = true;
+    try {
+      if (fs.existsSync(SNAPSHOT_FILE)) {
+        const raw = fs.readFileSync(SNAPSHOT_FILE, "utf8");
+        const entries = JSON.parse(raw) as Array<[string, ProjectState]>;
+        if (Array.isArray(entries)) {
+          for (const [id, st] of entries) {
+            if (st?.project?.id && !this.projects.has(id)) {
+              this.projects.set(id, st);
+            }
+          }
+        }
+      }
+    } catch {
+      // Non-fatal in read-only or test environments
+    }
+  }
+
+  private saveDiskSnapshot() {
+    try {
+      const entries = Array.from(this.projects.entries());
+      fs.writeFileSync(SNAPSHOT_FILE, JSON.stringify(entries), "utf8");
+    } catch {
+      // Non-fatal on read-only file systems
+    }
+  }
 
   createProject(ownerId: string, name: string, description?: string): Project {
-    const id = `proj-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    this.ensureDiskLoaded();
+    const id = crypto.randomUUID();
     const now = new Date().toISOString();
     const project: Project = {
       id,
@@ -53,11 +90,20 @@ class InMemoryProjectStore {
       specs: {},
       mappings: [],
     });
+    this.saveDiskSnapshot();
 
     return project;
   }
 
+  hydrateState(state: ProjectState): ProjectState {
+    this.ensureDiskLoaded();
+    this.projects.set(state.project.id, state);
+    this.saveDiskSnapshot();
+    return state;
+  }
+
   listProjects(ownerId: string): Project[] {
+    this.ensureDiskLoaded();
     const list: Project[] = [];
     for (const state of this.projects.values()) {
       if (state.project.owner_id === ownerId) {
@@ -68,6 +114,7 @@ class InMemoryProjectStore {
   }
 
   getProjectState(projectId: string, ownerId: string): ProjectState | null {
+    this.ensureDiskLoaded();
     const state = this.projects.get(projectId);
     if (!state) return null;
     if (state.project.owner_id !== ownerId) {
@@ -90,6 +137,7 @@ class InMemoryProjectStore {
       state.project.description = description.trim() || null;
     }
     state.project.updated_at = new Date().toISOString();
+    this.saveDiskSnapshot();
     return state.project;
   }
 
@@ -100,14 +148,6 @@ class InMemoryProjectStore {
     const state = this.getProjectState(projectId, ownerId);
     if (!state) throw new Error("Project not found");
 
-    // Safe deletion: verify no orphaned external blob artifacts
-    const hasExternalBlobs = Object.values(state.specs).some(
-      (s) => s?.spec.artifact_ref || s?.spec.blob_reference
-    );
-    if (hasExternalBlobs) {
-      // In live cloud deployment, blob objects would be queued for Azure Blob deletion here
-    }
-
     const cleanedUpChildCount =
       (state.specs.source ? 1 : 0) +
       (state.specs.target ? 1 : 0) +
@@ -116,6 +156,7 @@ class InMemoryProjectStore {
       (state.report ? 1 : 0);
 
     this.projects.delete(projectId);
+    this.saveDiskSnapshot();
     return { success: true, cleanedUpChildCount };
   }
 
@@ -138,7 +179,7 @@ class InMemoryProjectStore {
     const replaced = Boolean(existingSpec);
     const hashChanged = !existingSpec || existingSpec.content_hash !== computedHash;
 
-    const specId = existingSpec ? existingSpec.id : `spec-${side}-${Date.now()}`;
+    const specId = existingSpec ? existingSpec.id : crypto.randomUUID();
     const now = new Date().toISOString();
 
     const spec: Spec = {
@@ -162,7 +203,6 @@ class InMemoryProjectStore {
       state.specs.target = { spec, normalized };
     }
 
-    // Invalidate dependent mapping state if contract changed
     let invalidatedDownstream = false;
     if (replaced && hashChanged) {
       invalidatedDownstream = true;
@@ -171,7 +211,6 @@ class InMemoryProjectStore {
       state.testSuiteResult = undefined;
       state.report = undefined;
 
-      // Invalidate any previously accepted/edited mappings to require re-confirmation
       if (state.mappings && state.mappings.length > 0) {
         state.mappings = state.mappings.map((m) => ({
           ...m,
@@ -191,6 +230,7 @@ class InMemoryProjectStore {
     }
 
     state.project.updated_at = now;
+    this.saveDiskSnapshot();
     return { spec, replaced, invalidatedDownstream };
   }
 
@@ -198,12 +238,14 @@ class InMemoryProjectStore {
     const state = this.getProjectState(projectId, ownerId);
     if (!state) throw new Error("Project not found");
     state.diff = diff;
+    this.saveDiskSnapshot();
   }
 
   setMappings(projectId: string, ownerId: string, mappings: CandidateMapping[]): void {
     const state = this.getProjectState(projectId, ownerId);
     if (!state) throw new Error("Project not found");
     state.mappings = mappings;
+    this.saveDiskSnapshot();
   }
 
   addMapping(
@@ -219,6 +261,7 @@ class InMemoryProjectStore {
     } else {
       state.mappings.push(mapping);
     }
+    this.saveDiskSnapshot();
     return mapping;
   }
 
@@ -238,7 +281,7 @@ class InMemoryProjectStore {
     const updated: CandidateMapping = {
       ...existing,
       ...update,
-      decisionHistory: [
+      decisionHistory: update.decisionHistory ?? [
         ...existing.decisionHistory,
         {
           action: update.status || existing.status,
@@ -250,6 +293,7 @@ class InMemoryProjectStore {
     };
 
     state.mappings[idx] = updated;
+    this.saveDiskSnapshot();
     return updated;
   }
 
@@ -257,6 +301,7 @@ class InMemoryProjectStore {
     const state = this.getProjectState(projectId, ownerId);
     if (!state) throw new Error("Project not found");
     state.plan = plan;
+    this.saveDiskSnapshot();
   }
 
   setAdapter(projectId: string, ownerId: string, code: string): void {
@@ -267,6 +312,7 @@ class InMemoryProjectStore {
       language: "ts",
       generatedAt: new Date().toISOString(),
     };
+    this.saveDiskSnapshot();
   }
 
   setExecutionResults(
@@ -277,6 +323,7 @@ class InMemoryProjectStore {
     const state = this.getProjectState(projectId, ownerId);
     if (!state) throw new Error("Project not found");
     state.testSuiteResult = testSuiteResult;
+    this.saveDiskSnapshot();
   }
 
   setReport(
@@ -288,16 +335,13 @@ class InMemoryProjectStore {
     const state = this.getProjectState(projectId, ownerId);
     if (!state) throw new Error("Project not found");
     state.report = { data, markdown };
+    this.saveDiskSnapshot();
   }
 }
 
-// Global singleton across hot reloads in Next.js development
 const globalForStore = globalThis as unknown as {
   projectStore?: InMemoryProjectStore;
 };
 
 export const projectStore = globalForStore.projectStore ?? new InMemoryProjectStore();
-
-if (process.env.NODE_ENV !== "production") {
-  globalForStore.projectStore = projectStore;
-}
+globalForStore.projectStore = projectStore;

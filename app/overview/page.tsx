@@ -8,6 +8,7 @@ import { HeroBackdrop } from "@/components/ui/hero-backdrop";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Project } from "@/lib/supabase/models";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import type { ProjectState } from "@/lib/store/project-store";
 
 interface CloudServices {
   supabase: { configured: boolean; status: string; endpoint?: string | null };
@@ -16,59 +17,68 @@ interface CloudServices {
   azureSql: { configured: boolean; status: string; server?: string | null; database?: string | null };
 }
 
-const PIPELINE_STAGES = [
-  {
-    step: "01",
-    title: "Ingest & Normalize Specs",
-    desc: "Parse OpenAPI 3.x, JSON Schema, or sample JSON into a canonical AST with SHA-256 digests and SSRF guards.",
-    accent: "text-amber-300 bg-amber-500/15 border-amber-400/30",
-    tab: "specs",
-  },
-  {
-    step: "02",
-    title: "9-Facet Structural Diff",
-    desc: "Deterministically classify breaking renames, type shifts, enum narrowing, and required field additions.",
-    accent: "text-teal-300 bg-teal-500/15 border-teal-400/30",
-    tab: "specs",
-  },
-  {
-    step: "03",
-    title: "Groq AI Mapping Proposals",
-    desc: "Generate schema-bounded transformation proposals with prompt-injection sanitization and zero key exposure.",
-    accent: "text-violet-300 bg-violet-500/15 border-violet-400/30",
-    tab: "mappings",
-  },
-  {
-    step: "04",
-    title: "Human-in-the-Loop Review",
-    desc: "Approve, edit, or reject every mapping decision with explicit confidence scoring and audit attribution.",
-    accent: "text-sky-300 bg-sky-500/15 border-sky-400/30",
-    tab: "mappings",
-  },
-  {
-    step: "05",
-    title: "Compile IR & Zero-Eval Adapter",
-    desc: "Compile approved mappings into validated IR, run the trusted interpreter, and emit standalone TypeScript.",
-    accent: "text-[#f4845f] bg-[#f4845f]/15 border-[#f4845f]/30",
-    tab: "execute",
-  },
-  {
-    step: "06",
-    title: "Compatibility Report & Cloud",
-    desc: "Assemble cryptographic compatibility reports and certify execution evidence in Azure SQL & Azure Blob.",
-    accent: "text-emerald-300 bg-emerald-500/15 border-emerald-400/30",
-    tab: "report",
-  },
-];
+interface HydratedWorkspaceSummary {
+  project: Project;
+  state: ProjectState | null;
+}
 
 export default function OverviewDashboardPage() {
   const router = useRouter();
   const [userEmail, setUserEmail] = React.useState<string | null>(null);
-  const [projects, setProjects] = React.useState<Project[]>([]);
+  const [workspaces, setWorkspaces] = React.useState<HydratedWorkspaceSummary[]>([]);
   const [cloud, setCloud] = React.useState<CloudServices | null>(null);
   const [cloudLatencyMs, setCloudLatencyMs] = React.useState<number | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const [syncing, setSyncing] = React.useState(false);
   const [runningQuickMigrate, setRunningQuickMigrate] = React.useState(false);
+  const [statusError, setStatusError] = React.useState<string | null>(null);
+
+  const loadAllTelemetry = React.useCallback(async () => {
+    setSyncing(true);
+    try {
+      const t0 = performance.now();
+      const [projRes, cloudRes] = await Promise.all([
+        fetch("/api/projects", { cache: "no-store" }),
+        fetch("/api/cloud/status", { cache: "no-store" }),
+      ]);
+
+      if (cloudRes.ok) {
+        const cloudData = await cloudRes.json();
+        if (cloudData?.services) {
+          setCloud(cloudData.services);
+          setCloudLatencyMs(Math.round(performance.now() - t0));
+        }
+      }
+
+      if (projRes.ok) {
+        const projData = await projRes.json();
+        const projectList: Project[] = Array.isArray(projData?.projects)
+          ? projData.projects
+          : [];
+
+        const detailed = await Promise.all(
+          projectList.map(async (p) => {
+            try {
+              const stRes = await fetch(`/api/projects/${p.id}`, { cache: "no-store" });
+              if (stRes.ok) {
+                const stJson = await stRes.json();
+                return { project: p, state: stJson.state || null };
+              }
+            } catch {
+              // ignore individual state fetch error
+            }
+            return { project: p, state: null };
+          })
+        );
+        setWorkspaces(detailed);
+      }
+    } catch {
+      // keep existing UI state
+    } finally {
+      setLoading(false);
+      setSyncing(false);
+    }
+  }, []);
 
   React.useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -77,45 +87,31 @@ export default function OverviewDashboardPage() {
         setUserEmail(user?.email || null);
       });
     }
+    loadAllTelemetry();
+  }, [loadAllTelemetry]);
 
-    fetch("/api/projects")
-      .then((r) => r.json())
-      .then((data) => {
-        if (Array.isArray(data?.projects)) {
-          setProjects(data.projects);
-        }
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-
-    const t0 = performance.now();
-    fetch("/api/cloud/status", { cache: "no-store" })
-      .then((r) => r.json())
-      .then((data) => {
-        if (data?.services) {
-          setCloud(data.services);
-          setCloudLatencyMs(Math.round(performance.now() - t0));
-        }
-      })
-      .catch(() => {});
-  }, []);
-
-  async function handleOneClickMigration() {
+  async function handleOneClickFullMigration() {
     setRunningQuickMigrate(true);
+    setStatusError(null);
     try {
       const res = await fetch("/api/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: "Billing API → Invoice Fulfillment (Groq AI)",
-          description: "Live 6-stage migration initialized from Overview Command Center.",
+          name: "Billing API → Invoice Fulfillment (Verified AI)",
+          description:
+            "End-to-end compatibility migration with Groq AI proposals, zero-eval TypeScript adapter, and Azure ledger evidence.",
         }),
       });
       const data = await res.json();
-      if (!res.ok || !data?.project?.id) return;
+      if (!res.ok || !data?.project?.id) {
+        throw new Error(data?.error || "Could not create workspace.");
+      }
 
       const newId = data.project.id;
-      const { CANONICAL_SOURCE_SPEC, CANONICAL_TARGET_SPEC } = await import("@/lib/specs/fixtures");
+      const { CANONICAL_SOURCE_SPEC, CANONICAL_TARGET_SPEC } = await import(
+        "@/lib/specs/fixtures"
+      );
 
       await fetch(`/api/projects/${newId}/specs`, {
         method: "POST",
@@ -137,20 +133,121 @@ export default function OverviewDashboardPage() {
         }),
       });
 
-      // Trigger Groq AI mapping proposal immediately so Stage 3 is live
       await fetch(`/api/projects/${newId}/mappings/propose`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ deterministicOnly: false }),
-      }).catch(() => {});
+        body: JSON.stringify({ allowFallbackOnFailure: true }),
+      });
 
       router.push(`/projects/${newId}`);
-    } finally {
+    } catch (err: unknown) {
+      setStatusError(err instanceof Error ? err.message : String(err));
       setRunningQuickMigrate(false);
     }
   }
 
-  const latestProjectId = projects[0]?.id;
+  // Real aggregated live metrics derived strictly from user's real workspaces
+  const aggregate = React.useMemo(() => {
+    let totalDiffs = 0;
+    let totalApproved = 0;
+    let totalMappings = 0;
+    let compiledCount = 0;
+    let certifiedCount = 0;
+
+    for (const w of workspaces) {
+      const st = w.state;
+      if (!st) continue;
+      if (st.diff) totalDiffs += st.diff.items.length;
+      if (Array.isArray(st.mappings)) {
+        totalMappings += st.mappings.length;
+        totalApproved += st.mappings.filter(
+          (m) => m.status === "accepted" || m.status === "edited"
+        ).length;
+      }
+      if (st.plan) compiledCount++;
+      if (st.report?.data) certifiedCount++;
+    }
+
+    return {
+      totalDiffs,
+      totalApproved,
+      totalMappings,
+      compiledCount,
+      certifiedCount,
+    };
+  }, [workspaces]);
+
+  // Real dynamic activity stream pulled from real workspaces & audit trails
+  const liveEvents = React.useMemo(() => {
+    const events: Array<{
+      id: string;
+      project: string;
+      projectId: string;
+      title: string;
+      detail: string;
+      time: string;
+      badge: string;
+      badgeColor: string;
+    }> = [];
+
+    for (const w of workspaces) {
+      const st = w.state;
+      if (st?.report?.data) {
+        events.push({
+          id: `rep-${w.project.id}`,
+          project: w.project.name,
+          projectId: w.project.id,
+          title: `Report ${st.report.data.status} (${st.report.data.summary.compatibilityScore}%)`,
+          detail: st.report.data.cloudEvidence?.azureSqlRunId
+            ? `Azure SQL Run: ${st.report.data.cloudEvidence.azureSqlRunId}`
+            : `Source SHA-256: ${st.report.data.checksums.sourceSchemaHash.slice(0, 12)}...`,
+          time: st.report.data.generatedAt,
+          badge: "CERTIFIED",
+          badgeColor: "text-emerald-300 bg-emerald-500/15 border-emerald-400/30",
+        });
+      } else if (st?.plan) {
+        events.push({
+          id: `plan-${w.project.id}`,
+          project: w.project.name,
+          projectId: w.project.id,
+          title: `Compiled Plan '${st.plan.planId}' (${st.plan.steps.length} IR steps)`,
+          detail: st.adapter
+            ? "Standalone TypeScript adapter ready"
+            : "Ready for interpreter fixture execution",
+          time: st.plan.compiledAt,
+          badge: "COMPILED",
+          badgeColor: "text-violet-300 bg-violet-500/15 border-violet-400/30",
+        });
+      } else if (st?.mappings && st.mappings.length > 0) {
+        const latestDecision = st.mappings[0]?.decisionHistory?.slice(-1)[0];
+        events.push({
+          id: `map-${w.project.id}`,
+          project: w.project.name,
+          projectId: w.project.id,
+          title: `${st.mappings.length} Candidate Mappings Generated`,
+          detail: latestDecision?.note || "Waiting for human gate review",
+          time: latestDecision?.timestamp || w.project.updated_at,
+          badge: st.mappings[0]?.provider === "groq" ? "GROQ AI" : "HEURISTIC",
+          badgeColor: "text-amber-300 bg-amber-500/15 border-amber-400/30",
+        });
+      } else {
+        events.push({
+          id: `proj-${w.project.id}`,
+          project: w.project.name,
+          projectId: w.project.id,
+          title: "Workspace Initialized in PostgreSQL",
+          detail: w.project.description || "Ready for OpenAPI / JSON Schema ingestion",
+          time: w.project.updated_at,
+          badge: "ACTIVE",
+          badgeColor: "text-sky-300 bg-sky-500/15 border-sky-400/30",
+        });
+      }
+    }
+
+    return events.sort(
+      (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
+    );
+  }, [workspaces]);
 
   return (
     <div className="min-h-screen bg-[#090807] text-[#f5f2eb] flex flex-col font-sans relative overflow-x-hidden">
@@ -160,23 +257,39 @@ export default function OverviewDashboardPage() {
       <main className="relative z-10 max-w-[1680px] mx-auto px-6 sm:px-10 lg:px-12 py-10 w-full flex-1 space-y-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <Breadcrumb items={[{ label: "Overview", current: true }]} />
-          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/[0.14] text-xs font-mono text-zinc-200">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" />
-            <span>
-              CERT-In &bull; DPDP Act 2023 &bull; PostgreSQL RLS
-              {cloudLatencyMs !== null ? ` • ${cloudLatencyMs}ms` : ""}
-            </span>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={loadAllTelemetry}
+              disabled={syncing}
+              className="text-xs font-mono px-4 py-1.5 rounded-full bg-black/60 hover:bg-white/[0.1] border border-white/[0.14] text-zinc-200 transition disabled:opacity-50"
+            >
+              {syncing ? "↻ Syncing Telemetry..." : "↻ Refresh Telemetry"}
+            </button>
+            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/[0.14] text-xs font-mono text-zinc-200">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" />
+              <span>
+                CERT-In &bull; DPDP Act 2023 &bull; PostgreSQL RLS
+                {cloudLatencyMs !== null ? ` • ${cloudLatencyMs}ms` : ""}
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Hero Command Header */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-6 border-b border-white/[0.1]">
+        {statusError && (
+          <div className="p-4 rounded-2xl bg-rose-950/60 border border-rose-500/40 text-rose-200 text-sm">
+            {statusError}
+          </div>
+        )}
+
+        {/* Dynamic Command Header */}
+        <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6 pb-6 border-b border-white/[0.1]">
           <div className="space-y-3">
-            <h1 className="font-editorial text-[48px] sm:text-[58px] font-normal tracking-[-0.025em] text-[#fdfaf5] leading-[1.02] drop-shadow-[0_4px_24px_rgba(0,0,0,0.75)]">
-              Workspace{" "}
+            <h1 className="font-editorial text-[48px] sm:text-[60px] font-normal tracking-[-0.025em] text-[#fdfaf5] leading-[1.02] drop-shadow-[0_4px_24px_rgba(0,0,0,0.75)]">
+              Live migration{" "}
               <span className="relative inline-block">
-                <span className="font-brush text-[56px] sm:text-[66px] text-[#f4845f] font-bold tracking-normal leading-none pr-1">
-                  command
+                <span className="font-brush text-[58px] sm:text-[68px] text-[#f4845f] font-bold tracking-normal leading-none pr-1">
+                  pulse
                 </span>
                 <svg
                   viewBox="0 0 180 14"
@@ -192,15 +305,15 @@ export default function OverviewDashboardPage() {
                   />
                 </svg>
               </span>{" "}
-              overview.
+              &amp; telemetry.
             </h1>
             <p className="text-base sm:text-lg text-[#ebe3d8] max-w-2xl leading-relaxed">
               {userEmail ? (
                 <>
-                  Signed in as <span className="font-mono text-[#f5dfb8]">{userEmail}</span>. Launch a Groq-assisted 6-stage migration or inspect live multi-cloud telemetry.
+                  Live tenant console for <span className="font-mono text-[#f5dfb8]">{userEmail}</span>. Every card below reflects real PostgreSQL records, Groq AI reviews, and compiled adapters.
                 </>
               ) : (
-                "Launch a Groq-assisted 6-stage migration or inspect live multi-cloud telemetry."
+                "Live tenant console reflecting real PostgreSQL records, Groq AI reviews, and compiled adapters."
               )}
             </p>
           </div>
@@ -208,190 +321,323 @@ export default function OverviewDashboardPage() {
           <div className="flex flex-wrap items-center gap-3.5">
             <button
               type="button"
-              onClick={handleOneClickMigration}
+              onClick={handleOneClickFullMigration}
               disabled={runningQuickMigrate}
-              className="inline-flex items-center gap-2 text-sm sm:text-[15px] font-semibold px-6 py-3 rounded-full border border-violet-400/40 bg-violet-500/20 hover:bg-violet-500/30 text-violet-100 backdrop-blur-md transition disabled:opacity-50"
+              className="inline-flex items-center gap-2 text-sm sm:text-[15px] font-semibold px-6 py-3.5 rounded-full border border-violet-400/45 bg-violet-500/20 hover:bg-violet-500/30 text-violet-100 backdrop-blur-md transition disabled:opacity-50"
             >
               <span>✨</span>
-              <span>{runningQuickMigrate ? "Initializing Groq AI Pipeline..." : "Launch Groq AI Migration"}</span>
+              <span>
+                {runningQuickMigrate
+                  ? "Generating Groq AI Migration..."
+                  : "Launch New AI Migration"}
+              </span>
             </button>
             <Link
-              href="/projects"
-              className="inline-flex items-center gap-2 text-sm sm:text-[15px] font-medium px-6 py-3 rounded-full border border-white/[0.16] bg-black/45 hover:bg-white/[0.1] text-zinc-100 backdrop-blur-md transition"
-            >
-              All Workspaces ({projects.length})
-            </Link>
-            <Link
               href="/projects/new"
-              className="champagne-pill inline-flex items-center gap-2 text-sm sm:text-[15px] font-semibold px-7 py-3 rounded-full transition"
+              className="champagne-pill inline-flex items-center gap-2 text-sm sm:text-[15px] font-semibold px-7 py-3.5 rounded-full transition"
             >
-              + New Project
+              + New Custom Project
             </Link>
           </div>
         </div>
 
-        {/* Live Multi-Cloud & India Security Telemetry */}
+        {/* Live Telemetry & Cloud Metrics Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-          <div className="apple-glass rounded-2xl px-5 py-4 flex items-center justify-between">
+          <div className="apple-glass rounded-2xl p-5 flex items-center justify-between">
             <div>
-              <div className="text-xs font-mono text-zinc-400">Supabase Postgres</div>
-              <div className="text-base font-semibold text-white mt-0.5">
-                {cloud?.supabase.configured ? "RLS Connected" : "Local Fallback"}
+              <div className="text-xs font-mono text-zinc-400">Active Workspaces</div>
+              <div className="text-2xl font-bold text-white mt-1">
+                {workspaces.length}
+              </div>
+              <div className="text-xs text-emerald-300 mt-0.5 font-mono">
+                {aggregate.certifiedCount} certified reports
               </div>
             </div>
-            <span className={`w-3 h-3 rounded-full ${cloud?.supabase.configured ? "bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]" : "bg-zinc-600"}`} />
+            <div className="w-11 h-11 rounded-2xl bg-emerald-500/15 border border-emerald-400/30 flex items-center justify-center text-emerald-300 text-lg">
+              ↗
+            </div>
           </div>
 
-          <div className="apple-glass rounded-2xl px-5 py-4 flex items-center justify-between">
+          <div className="apple-glass rounded-2xl p-5 flex items-center justify-between">
             <div>
-              <div className="text-xs font-mono text-zinc-400">Groq AI Inference</div>
-              <div className="text-base font-semibold text-white mt-0.5 truncate max-w-[190px]">
-                {cloud?.groq.configured ? cloud.groq.model : "Heuristic Ready"}
+              <div className="text-xs font-mono text-zinc-400">Mapping Approvals</div>
+              <div className="text-2xl font-bold text-white mt-1">
+                {aggregate.totalApproved} / {aggregate.totalMappings}
+              </div>
+              <div className="text-xs text-violet-300 mt-0.5 font-mono">
+                {aggregate.totalDiffs} structural diffs tracked
               </div>
             </div>
-            <span className={`w-3 h-3 rounded-full ${cloud?.groq.configured ? "bg-violet-400 shadow-[0_0_10px_rgba(167,139,250,0.8)]" : "bg-amber-400"}`} />
+            <div className="w-11 h-11 rounded-2xl bg-violet-500/15 border border-violet-400/30 flex items-center justify-center text-violet-300 text-lg">
+              ✨
+            </div>
           </div>
 
-          <div className="apple-glass rounded-2xl px-5 py-4 flex items-center justify-between">
+          <div className="apple-glass rounded-2xl p-5 flex items-center justify-between">
             <div>
-              <div className="text-xs font-mono text-zinc-400">Azure SQL Ledger</div>
-              <div className="text-base font-semibold text-white mt-0.5">
-                {cloud?.azureSql.configured ? cloud.azureSql.database || "Connected" : "Simulated"}
+              <div className="text-xs font-mono text-zinc-400">Compiled Adapters</div>
+              <div className="text-2xl font-bold text-white mt-1">
+                {aggregate.compiledCount}
+              </div>
+              <div className="text-xs text-amber-300 mt-0.5 font-mono">
+                Groq: {cloud?.groq.configured ? cloud.groq.model : "Heuristic"}
               </div>
             </div>
-            <span className={`w-3 h-3 rounded-full ${cloud?.azureSql.configured ? "bg-teal-400 shadow-[0_0_10px_rgba(45,212,191,0.8)]" : "bg-amber-400"}`} />
+            <div className="w-11 h-11 rounded-2xl bg-amber-500/15 border border-amber-400/30 flex items-center justify-center text-amber-300 text-lg">
+              ⚡
+            </div>
           </div>
 
-          <div className="apple-glass rounded-2xl px-5 py-4 flex items-center justify-between">
+          <div className="apple-glass rounded-2xl p-5 flex items-center justify-between">
             <div>
-              <div className="text-xs font-mono text-zinc-400">Azure Blob Evidence</div>
-              <div className="text-base font-semibold text-white mt-0.5">
-                {cloud?.azureBlob.configured ? cloud.azureBlob.containerName || "Connected" : "In-Memory"}
+              <div className="text-xs font-mono text-zinc-400">Azure Cloud Evidence</div>
+              <div className="text-lg font-bold text-white mt-1 truncate max-w-[180px]">
+                {cloud?.azureSql.configured ? cloud.azureSql.database : "Simulated"}
+              </div>
+              <div className="text-xs text-teal-300 mt-0.5 font-mono truncate max-w-[180px]">
+                Blob: {cloud?.azureBlob.configured ? cloud.azureBlob.containerName : "In-Memory"}
               </div>
             </div>
-            <span className={`w-3 h-3 rounded-full ${cloud?.azureBlob.configured ? "bg-sky-400 shadow-[0_0_10px_rgba(56,189,248,0.8)]" : "bg-amber-400"}`} />
+            <div className="w-11 h-11 rounded-2xl bg-teal-500/15 border border-teal-400/30 flex items-center justify-center text-teal-300 text-lg">
+              ☁
+            </div>
           </div>
         </div>
 
-        {/* 6-Stage Interactive Compiler Architecture Grid */}
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-mono uppercase tracking-wider text-zinc-300">
-              6-Stage Deterministic Compiler Pipeline
-            </h2>
-            <span className="text-xs font-mono text-zinc-400">
-              {latestProjectId ? "Click any stage to jump into your latest studio →" : "Zero Eval • 100% Type-Safe"}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {PIPELINE_STAGES.map((stage) => {
-              const href = latestProjectId
-                ? `/projects/${latestProjectId}`
-                : "/projects/new";
-              return (
-                <Link
-                  key={stage.step}
-                  href={href}
-                  className="apple-glass rounded-2xl p-5 flex items-start gap-4 hover:border-[#f5dfb8]/40 hover:-translate-y-0.5 transition-all duration-200 group"
-                >
-                  <span
-                    className={`w-10 h-10 rounded-xl border font-mono text-sm font-bold flex items-center justify-center shrink-0 ${stage.accent}`}
-                  >
-                    {stage.step}
-                  </span>
-                  <div className="space-y-1">
-                    <h3 className="text-base font-semibold text-white group-hover:text-[#f5dfb8] transition">
-                      {stage.title}
-                    </h3>
-                    <p className="text-xs sm:text-[13px] text-zinc-300 leading-relaxed">
-                      {stage.desc}
-                    </p>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* Recent Real Workspaces */}
-        <section className="apple-glass rounded-3xl overflow-hidden">
-          <div className="px-7 py-5 border-b border-white/[0.08] flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h2 className="text-lg font-semibold text-white tracking-tight">
-                Recent Workspaces
-              </h2>
-              <p className="text-xs text-zinc-400 mt-0.5">
-                Jump back into an active contract migration or initialize a new one.
-              </p>
-            </div>
-            <Link
-              href="/projects"
-              className="text-xs sm:text-sm font-medium text-[#f5dfb8] hover:underline"
-            >
-              View all workspaces →
-            </Link>
-          </div>
-
-          <div className="divide-y divide-white/[0.07]">
-            {loading ? (
-              <div className="p-8 space-y-3">
-                <div className="h-12 bg-white/[0.04] rounded-xl animate-pulse" />
-                <div className="h-12 bg-white/[0.04] rounded-xl animate-pulse" />
-              </div>
-            ) : projects.length === 0 ? (
-              <div className="p-10 text-center space-y-3">
-                <p className="text-sm text-zinc-300">
-                  No workspaces created yet under your account.
+        {/* Main 2-Column Dynamic Workspace Matrix + Live Audit Feed */}
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+          {/* Left 8 cols: Dynamic Workspace Health Matrix */}
+          <div className="xl:col-span-8 apple-glass rounded-3xl overflow-hidden">
+            <div className="px-7 py-5 border-b border-white/[0.08] flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-semibold text-white tracking-tight">
+                  Workspace Migration Matrix
+                </h2>
+                <p className="text-xs sm:text-sm text-zinc-400 mt-0.5">
+                  Real-time progress, contract pair checksums, and next recommended action per project.
                 </p>
+              </div>
+              <Link
+                href="/projects"
+                className="text-xs sm:text-sm font-medium text-[#f5dfb8] hover:underline"
+              >
+                Manage all workspaces →
+              </Link>
+            </div>
+
+            {loading ? (
+              <div className="p-8 space-y-4">
+                <div className="h-24 bg-white/[0.04] rounded-2xl animate-pulse" />
+                <div className="h-24 bg-white/[0.04] rounded-2xl animate-pulse" />
+              </div>
+            ) : workspaces.length === 0 ? (
+              <div className="p-12 text-center space-y-4">
+                <div className="w-14 h-14 mx-auto rounded-2xl bg-amber-500/15 border border-amber-400/30 flex items-center justify-center text-2xl text-[#f5dfb8]">
+                  ∿
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-lg font-semibold text-white">No Live Workspaces Yet</h3>
+                  <p className="text-sm text-zinc-400 max-w-md mx-auto">
+                    Initialize your first compatibility migration with Groq AI proposals in one click.
+                  </p>
+                </div>
                 <button
                   type="button"
-                  onClick={handleOneClickMigration}
+                  onClick={handleOneClickFullMigration}
                   disabled={runningQuickMigrate}
-                  className="champagne-pill inline-flex items-center gap-2 text-sm font-semibold px-6 py-2.5 rounded-full transition"
+                  className="champagne-pill inline-flex items-center gap-2 text-sm font-semibold px-7 py-3 rounded-full transition"
                 >
-                  {runningQuickMigrate ? "Creating..." : "Create First AI Workspace →"}
+                  {runningQuickMigrate ? "Initializing..." : "✨ Launch First AI Migration →"}
                 </button>
               </div>
             ) : (
-              projects.slice(0, 5).map((p, i) => (
-                <Link
-                  key={p.id}
-                  href={`/projects/${p.id}`}
-                  className="px-7 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-white/[0.03] transition group"
-                >
-                  <div className="flex items-center gap-4 min-w-0">
+              <div className="divide-y divide-white/[0.08]">
+                {workspaces.map(({ project: p, state: st }) => {
+                  const hasSpecs = Boolean(st?.specs?.source && st?.specs?.target);
+                  const totalMap = st?.mappings?.length || 0;
+                  const approvedMap =
+                    st?.mappings?.filter(
+                      (m) => m.status === "accepted" || m.status === "edited"
+                    ).length || 0;
+                  const hasPlan = Boolean(st?.plan);
+                  const hasAdapter = Boolean(st?.adapter?.code);
+                  const hasReport = Boolean(st?.report?.data);
+
+                  const completedSteps = [
+                    Boolean(st?.specs?.source),
+                    Boolean(st?.diff),
+                    totalMap > 0,
+                    approvedMap > 0 && approvedMap === totalMap,
+                    hasPlan && hasAdapter,
+                    hasReport,
+                  ].filter(Boolean).length;
+
+                  const nextLabel = !hasSpecs
+                    ? "Import Specs →"
+                    : totalMap === 0
+                    ? "Propose Mappings →"
+                    : approvedMap < totalMap
+                    ? `Approve ${totalMap - approvedMap} Mappings →`
+                    : !hasPlan || !hasAdapter
+                    ? "Compile & Execute →"
+                    : !hasReport
+                    ? "Certify Report →"
+                    : "Open Verified Studio →";
+
+                  return (
                     <div
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center text-base font-mono shrink-0 border ${
-                        i % 2 === 0
-                          ? "bg-teal-500/15 border-teal-400/30 text-teal-300"
-                          : "bg-violet-500/15 border-violet-400/30 text-violet-300"
-                      }`}
+                      key={p.id}
+                      className="p-6 sm:p-7 hover:bg-white/[0.025] transition space-y-4"
                     >
-                      {i % 2 === 0 ? "↗" : "⚡"}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2.5">
-                        <span className="text-base font-semibold text-zinc-100 group-hover:text-[#f5dfb8] transition truncate">
-                          {p.name}
-                        </span>
-                        <span className="font-mono text-xs text-zinc-400 bg-white/[0.05] border border-white/[0.09] px-2.5 py-0.5 rounded-full">
-                          {p.id}
-                        </span>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="space-y-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2.5">
+                            <Link
+                              href={`/projects/${p.id}`}
+                              className="text-lg font-semibold text-white hover:text-[#f5dfb8] transition truncate"
+                            >
+                              {p.name}
+                            </Link>
+                            <span className="font-mono text-xs text-zinc-400 bg-white/[0.05] border border-white/[0.1] px-2.5 py-0.5 rounded-full">
+                              {p.id.slice(0, 18)}
+                            </span>
+                          </div>
+                          <p className="text-sm text-zinc-300 truncate">
+                            {st?.specs?.source?.normalized?.title &&
+                            st?.specs?.target?.normalized?.title
+                              ? `${st.specs.source.normalized.title} ──▶ ${st.specs.target.normalized.title}`
+                              : p.description || "Ready for OpenAPI / JSON Schema ingestion"}
+                          </p>
+                        </div>
+
+                        <Link
+                          href={`/projects/${p.id}`}
+                          className="champagne-pill inline-flex items-center gap-2 text-xs sm:text-sm font-semibold px-5 py-2.5 rounded-full shrink-0 transition"
+                        >
+                          {nextLabel}
+                        </Link>
                       </div>
-                      <p className="text-xs sm:text-sm text-zinc-400 truncate mt-0.5">
-                        {p.description || "API contract diff, review, and adapter compilation workspace"}
-                      </p>
+
+                      {/* Real 6-Stage Progress Indicators */}
+                      <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+                        <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
+                          <span
+                            className={`px-2.5 py-1 rounded-full border ${
+                              hasSpecs
+                                ? "bg-emerald-500/15 text-emerald-300 border-emerald-400/30"
+                                : "bg-white/[0.04] text-zinc-500 border-white/[0.08]"
+                            }`}
+                          >
+                            {hasSpecs ? "✓ Specs" : "• Specs"}
+                          </span>
+                          <span
+                            className={`px-2.5 py-1 rounded-full border ${
+                              st?.diff
+                                ? "bg-sky-500/15 text-sky-300 border-sky-400/30"
+                                : "bg-white/[0.04] text-zinc-500 border-white/[0.08]"
+                            }`}
+                          >
+                            {st?.diff ? `${st.diff.items.length} Diffs` : "• Diff"}
+                          </span>
+                          <span
+                            className={`px-2.5 py-1 rounded-full border ${
+                              totalMap > 0
+                                ? approvedMap === totalMap
+                                  ? "bg-emerald-500/15 text-emerald-300 border-emerald-400/30"
+                                  : "bg-amber-500/15 text-amber-300 border-amber-400/30"
+                                : "bg-white/[0.04] text-zinc-500 border-white/[0.08]"
+                            }`}
+                          >
+                            {totalMap > 0
+                              ? `${approvedMap}/${totalMap} Approved`
+                              : "• Review"}
+                          </span>
+                          <span
+                            className={`px-2.5 py-1 rounded-full border ${
+                              hasPlan
+                                ? "bg-violet-500/15 text-violet-300 border-violet-400/30"
+                                : "bg-white/[0.04] text-zinc-500 border-white/[0.08]"
+                            }`}
+                          >
+                            {hasPlan ? `IR: ${st?.plan?.steps.length} steps` : "• Plan"}
+                          </span>
+                          <span
+                            className={`px-2.5 py-1 rounded-full border ${
+                              hasReport
+                                ? "bg-teal-500/15 text-teal-300 border-teal-400/30"
+                                : "bg-white/[0.04] text-zinc-500 border-white/[0.08]"
+                            }`}
+                          >
+                            {hasReport
+                              ? `${st?.report?.data?.summary.compatibilityScore}% Certified`
+                              : "• Report"}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2.5 min-w-[140px]">
+                          <div className="flex-1 h-2 rounded-full bg-white/[0.08] overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-[#f4845f] to-emerald-400 rounded-full transition-all duration-300"
+                              style={{ width: `${Math.round((completedSteps / 6) * 100)}%` }}
+                            />
+                          </div>
+                          <span className="text-xs font-mono text-zinc-300">
+                            {completedSteps}/6
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <span className="champagne-pill inline-flex items-center gap-2 text-xs sm:text-sm font-semibold px-5 py-2 rounded-full shrink-0">
-                    Open Studio →
-                  </span>
-                </Link>
-              ))
+                  );
+                })}
+              </div>
             )}
           </div>
-        </section>
+
+          {/* Right 4 cols: Real Live Activity & Provenance Feed */}
+          <div className="xl:col-span-4 apple-glass rounded-3xl overflow-hidden">
+            <div className="px-6 py-5 border-b border-white/[0.08]">
+              <h2 className="text-lg font-semibold text-white tracking-tight">
+                Live Audit &amp; Provenance Stream
+              </h2>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                Computed directly from active specs, Groq runs, and Azure evidence.
+              </p>
+            </div>
+
+            <div className="p-5 space-y-3 max-h-[540px] overflow-y-auto">
+              {loading ? (
+                <div className="h-24 bg-white/[0.04] rounded-2xl animate-pulse" />
+              ) : liveEvents.length === 0 ? (
+                <p className="text-sm text-zinc-400 text-center py-8">
+                  Activity appears here as soon as you create a workspace or compile contracts.
+                </p>
+              ) : (
+                liveEvents.map((ev) => (
+                  <Link
+                    key={ev.id}
+                    href={`/projects/${ev.projectId}`}
+                    className="block p-4 rounded-2xl bg-black/45 border border-white/[0.08] hover:border-[#f5dfb8]/35 transition space-y-1.5"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className={`text-[11px] font-mono px-2.5 py-0.5 rounded-full border ${ev.badgeColor}`}>
+                        {ev.badge}
+                      </span>
+                      <span className="text-[11px] font-mono text-zinc-500">
+                        {new Date(ev.time).toLocaleTimeString()}
+                      </span>
+                    </div>
+                    <div className="text-sm font-semibold text-white truncate">
+                      {ev.title}
+                    </div>
+                    <div className="text-xs text-zinc-400 truncate">
+                      {ev.project} &bull; {ev.detail}
+                    </div>
+                  </Link>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
       </main>
     </div>
   );

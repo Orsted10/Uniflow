@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedUser } from "@/lib/auth/session";
 import { projectStore } from "@/lib/store/project-store";
+import {
+  hydrateProjectState,
+  persistProjectUpdate,
+  persistProjectDelete,
+} from "@/lib/store/supabase-persist";
 
 export async function GET(
   req: NextRequest,
@@ -9,7 +14,7 @@ export async function GET(
   try {
     const { id } = await context.params;
     const user = await getAuthenticatedUser(req);
-    const state = projectStore.getProjectState(id, user.id);
+    const state = await hydrateProjectState(id, user);
 
     if (!state) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
@@ -30,6 +35,7 @@ export async function PATCH(
   try {
     const { id } = await context.params;
     const user = await getAuthenticatedUser(req);
+    await hydrateProjectState(id, user);
     const body = await req.json().catch(() => ({}));
 
     if (typeof body.name !== "string" || !body.name.trim()) {
@@ -45,6 +51,7 @@ export async function PATCH(
       body.name.trim(),
       typeof body.description === "string" ? body.description.trim() : undefined
     );
+    await persistProjectUpdate(updated, user);
 
     return NextResponse.json({ project: updated });
   } catch (err: unknown) {
@@ -61,8 +68,10 @@ export async function DELETE(
   try {
     const { id } = await context.params;
     const user = await getAuthenticatedUser(req);
+    await hydrateProjectState(id, user);
 
     const result = projectStore.deleteProject(id, user.id);
+    await persistProjectDelete(id, user);
     return NextResponse.json({
       success: true,
       message: `Project '${id}' and ${result.cleanedUpChildCount} child resources successfully deleted.`,

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedUser } from "@/lib/auth/session";
 import { projectStore } from "@/lib/store/project-store";
+import { hydrateProjectState } from "@/lib/store/supabase-persist";
 import { assembleCompatibilityReport } from "@/lib/reports/assemble";
 import { persistCompatibilityRunEvidence } from "@/lib/azure/sql";
 import { uploadReportToBlob } from "@/lib/azure/storage";
@@ -12,7 +13,7 @@ export async function GET(
   try {
     const { id } = await context.params;
     const user = await getAuthenticatedUser(req);
-    const state = projectStore.getProjectState(id, user.id);
+    const state = await hydrateProjectState(id, user);
     if (!state) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
@@ -55,7 +56,7 @@ export async function POST(
   try {
     const { id } = await context.params;
     const user = await getAuthenticatedUser(req);
-    const state = projectStore.getProjectState(id, user.id);
+    const state = await hydrateProjectState(id, user);
     if (!state) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }

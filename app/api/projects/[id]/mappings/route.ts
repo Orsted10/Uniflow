@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedUser } from "@/lib/auth/session";
 import { projectStore } from "@/lib/store/project-store";
+import { hydrateProjectState, persistProjectMappings } from "@/lib/store/supabase-persist";
 import {
   MappingStatus,
   ProposedTransformation,
@@ -17,7 +18,7 @@ export async function GET(
   try {
     const { id } = await context.params;
     const user = await getAuthenticatedUser(req);
-    const state = projectStore.getProjectState(id, user.id);
+    const state = await hydrateProjectState(id, user);
     if (!state) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
@@ -39,7 +40,7 @@ export async function POST(
   try {
     const { id } = await context.params;
     const user = await getAuthenticatedUser(req);
-    const state = projectStore.getProjectState(id, user.id);
+    const state = await hydrateProjectState(id, user);
     if (!state) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
@@ -116,7 +117,12 @@ export async function POST(
       conversionType: operation === "typeConversion" ? conversionType : undefined,
       defaultValue: operation === "default" ? defaultValue : undefined,
       lookupTable: operation === "lookup" ? lookupTable : undefined,
-      policyOnMissing: targetField.required ? "fail" : "omit",
+      policyOnMissing:
+        operation === "default"
+          ? "useDefault"
+          : targetField.required
+          ? "fail"
+          : "omit",
     };
 
     const newMapping: CandidateMapping = {
@@ -143,6 +149,7 @@ export async function POST(
     };
 
     const saved = projectStore.addMapping(id, user.id, newMapping);
+    await persistProjectMappings(state, user);
     return NextResponse.json({ mapping: saved });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
@@ -158,7 +165,7 @@ export async function PATCH(
   try {
     const { id } = await context.params;
     const user = await getAuthenticatedUser(req);
-    const state = projectStore.getProjectState(id, user.id);
+    const state = await hydrateProjectState(id, user);
     if (!state) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
@@ -188,6 +195,7 @@ export async function PATCH(
         return m;
       });
       projectStore.setMappings(id, user.id, updatedList);
+      await persistProjectMappings(state, user);
       return NextResponse.json({ mappings: updatedList });
     }
 
@@ -267,6 +275,7 @@ export async function PATCH(
         },
       ],
     });
+    await persistProjectMappings(state, user);
 
     return NextResponse.json({ mapping: updated });
   } catch (err: unknown) {

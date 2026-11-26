@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedUser } from "@/lib/auth/session";
 import { projectStore } from "@/lib/store/project-store";
+import { hydrateProjectState } from "@/lib/store/supabase-persist";
 import { executeTransformationPlan } from "@/lib/transformation/interpreter";
 import { validateAgainstTargetSchema } from "@/lib/transformation/validate";
 import { generateTypeScriptAdapter } from "@/lib/transformation/generator";
@@ -14,7 +15,7 @@ export async function POST(
   try {
     const { id } = await context.params;
     const user = await getAuthenticatedUser(req);
-    const state = projectStore.getProjectState(id, user.id);
+    const state = await hydrateProjectState(id, user);
     if (!state) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }

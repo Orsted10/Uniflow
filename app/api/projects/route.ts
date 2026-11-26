@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedUser } from "@/lib/auth/session";
 import { projectStore } from "@/lib/store/project-store";
+import { listProjectsWithDb, persistProjectCreate } from "@/lib/store/supabase-persist";
 
 export async function GET(req: NextRequest) {
   try {
     const user = await getAuthenticatedUser(req);
-    const projects = projectStore.listProjects(user.id);
+    const projects = await listProjectsWithDb(user);
     return NextResponse.json({ projects, user });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
@@ -21,6 +22,7 @@ export async function POST(req: NextRequest) {
     const description = typeof body.description === "string" ? body.description.trim() : "";
 
     const project = projectStore.createProject(user.id, name, description);
+    await persistProjectCreate(project, user);
     return NextResponse.json({ project }, { status: 201 });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
