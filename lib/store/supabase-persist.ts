@@ -217,20 +217,36 @@ export async function hydrateProjectState(
             CANONICAL_TEST_FIXTURES
           );
           if (hydrated.specs.source) {
-            const assembled = assembleCompatibilityReport(
-              projectId,
-              hydrated.specs.source.normalized,
-              hydrated.specs.target.normalized,
-              hydrated.diff,
-              hydrated.mappings,
-              hydrated.plan || null,
-              hydrated.testSuiteResult || null,
-              code
-            );
-            hydrated.report = {
-              data: assembled.reportData,
-              markdown: assembled.markdown,
-            };
+            // Restore persisted compatibility report + Azure cloudEvidence if saved
+            const { data: repRow } = await supabase
+              .from("compatibility_reports")
+              .select("*")
+              .eq("mapping_set_id", mappingSetRow.id)
+              .order("exported_at", { ascending: false })
+              .limit(1)
+              .maybeSingle();
+
+            if (repRow?.summary && repRow?.report_text_markdown) {
+              hydrated.report = {
+                data: repRow.summary as ProjectState["report"] extends { data: infer D } ? D : never,
+                markdown: repRow.report_text_markdown as string,
+              };
+            } else {
+              const assembled = assembleCompatibilityReport(
+                projectId,
+                hydrated.specs.source.normalized,
+                hydrated.specs.target.normalized,
+                hydrated.diff,
+                hydrated.mappings,
+                hydrated.plan || null,
+                hydrated.testSuiteResult || null,
+                code
+              );
+              hydrated.report = {
+                data: assembled.reportData,
+                markdown: assembled.markdown,
+              };
+            }
           }
         }
       }
@@ -439,6 +455,44 @@ export async function persistProjectPlan(
       plan_json: state.plan,
       plan_hash: planHash,
       status: "compiled",
+    });
+  } catch {
+    // Non-blocking
+  }
+}
+
+export async function persistProjectReport(
+  state: ProjectState,
+  user: AuthUser
+) {
+  if (
+    !canUseSupabaseDb(user) ||
+    !UUID_REGEX.test(state.project.id) ||
+    !state.report
+  ) {
+    return;
+  }
+  try {
+    const supabase = await createSupabaseServerClient();
+    if (!supabase) return;
+
+    const { data: setRow } = await supabase
+      .from("mapping_sets")
+      .select("id")
+      .eq("project_id", state.project.id)
+      .limit(1)
+      .maybeSingle();
+
+    if (!setRow?.id) return;
+
+    await supabase.from("compatibility_reports").insert({
+      mapping_set_id: setRow.id,
+      summary: state.report.data,
+      report_text_markdown: state.report.markdown,
+      artifact_ref:
+        state.report.data.cloudEvidence?.azureSqlRunId ||
+        state.report.data.cloudEvidence?.azureBlobReportJsonUrl ||
+        null,
     });
   } catch {
     // Non-blocking

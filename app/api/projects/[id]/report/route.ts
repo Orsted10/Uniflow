@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedUser } from "@/lib/auth/session";
 import { projectStore } from "@/lib/store/project-store";
-import { hydrateProjectState } from "@/lib/store/supabase-persist";
+import { hydrateProjectState, persistProjectReport } from "@/lib/store/supabase-persist";
 import { assembleCompatibilityReport } from "@/lib/reports/assemble";
 import { persistCompatibilityRunEvidence } from "@/lib/azure/sql";
 import { uploadReportToBlob } from "@/lib/azure/storage";
@@ -37,6 +37,7 @@ export async function GET(
     );
 
     projectStore.setReport(id, user.id, report.reportData, report.markdown);
+    await persistProjectReport(state, user);
 
     return NextResponse.json({
       reportData: report.reportData,
@@ -157,6 +158,7 @@ export async function POST(
     );
 
     projectStore.setReport(id, user.id, finalReport.reportData, finalReport.markdown);
+    await persistProjectReport(state, user);
 
     return NextResponse.json({
       success: true,

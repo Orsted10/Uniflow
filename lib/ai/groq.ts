@@ -246,13 +246,34 @@ Provide candidate mappings for target fields. Output strictly valid JSON matchin
       }
     }
 
-    // 2b. Guarantee valid lookup tables when operation === "lookup"
+    // 2b. Guarantee valid lookup tables when target has enum constraints or operation === "lookup"
     let sanitizedLookup = candidate.lookupTable
       ? sanitizeLookupTable(candidate.lookupTable)
       : undefined;
-    if (candidate.operation === "lookup") {
+
+    const targetHasEnum = Boolean(targetField.enum && targetField.enum.length > 0);
+    const sourceDiffersFromTargetEnum =
+      targetHasEnum &&
+      sourceField &&
+      (!sourceField.enum ||
+        sourceField.enum.some((sv) => !targetField.enum!.includes(String(sv))));
+
+    if (
+      candidate.operation === "lookup" ||
+      ((candidate.operation === "rename" || candidate.operation === "copy") &&
+        sourceDiffersFromTargetEnum)
+    ) {
+      candidate.operation = "lookup";
       if (!sanitizedLookup || Object.keys(sanitizedLookup).length === 0) {
         const autoTable: Record<string, string> = {};
+        if (targetField.enum) {
+          for (const te of targetField.enum) {
+            const targetVal = String(te);
+            autoTable[targetVal.toUpperCase()] = targetVal;
+            autoTable[targetVal.toLowerCase()] = targetVal;
+            autoTable[targetVal] = targetVal;
+          }
+        }
         if (sourceField?.enum && targetField.enum) {
           for (const srcEnum of sourceField.enum) {
             const s = String(srcEnum);
@@ -265,12 +286,6 @@ Provide candidate mappings for target fields. Output strictly valid JSON matchin
           }
         }
         if (Object.keys(autoTable).length > 0) {
-          sanitizedLookup = autoTable;
-        } else if (sourceField?.enum && sourceField.enum.length > 0) {
-          for (const srcEnum of sourceField.enum) {
-            const s = String(srcEnum);
-            autoTable[s] = s.toLowerCase();
-          }
           sanitizedLookup = autoTable;
         } else {
           // Non-enum lookup without dictionary falls back cleanly to rename/copy

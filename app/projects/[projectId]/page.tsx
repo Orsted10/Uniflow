@@ -254,6 +254,41 @@ export default function ProjectWorkspacePage() {
     setSuccessMsg("Loaded canonical e-commerce Billing -> Invoice contracts.");
   }
 
+  function loadFintechWebhookPreset() {
+    const src = {
+      $schema: "http://json-schema.org/draft-07/schema#",
+      title: "StripeWebhookSourceV1",
+      version: "1.0.0",
+      type: "object",
+      required: ["event_id", "amount_cents", "currency", "status"],
+      properties: {
+        event_id: { type: "integer", description: "Legacy numeric webhook event ID" },
+        amount_cents: { type: "number", description: "Total charged in minor units" },
+        currency: { type: "string", enum: ["USD", "EUR", "INR"] },
+        status: { type: "string" },
+        raw_note: { type: "string" },
+      },
+    };
+    const tgt = {
+      $schema: "http://json-schema.org/draft-07/schema#",
+      title: "ERPLedgerSyncTargetV2",
+      version: "2.0.0",
+      type: "object",
+      required: ["ledger_id", "total_amount", "currency_code", "settlement_region"],
+      properties: {
+        ledger_id: { type: "string", description: "Canonical string ledger ID" },
+        total_amount: { type: "string", description: "Stringified ledger total" },
+        currency_code: { type: "string", enum: ["usd", "eur", "inr"] },
+        status: { type: "string" },
+        memo: { type: "string" },
+        settlement_region: { type: "string", default: "ap-south-1" },
+      },
+    };
+    setSourceText(JSON.stringify(src, null, 2));
+    setTargetText(JSON.stringify(tgt, null, 2));
+    setSuccessMsg("Loaded Fintech Payment Webhook -> ERP Ledger v2 example contracts.");
+  }
+
   function loadSampleJsonFixture() {
     const sample = {
       orderId: "ord_99812",
@@ -610,6 +645,38 @@ export default function ProjectWorkspacePage() {
     }
   }
 
+  async function approveAllAndCompile() {
+    if (!projectId) return;
+    setLoading(true);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+
+    try {
+      const appRes = await fetch(`/api/projects/${projectId}/mappings`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ acceptAll: true }),
+      });
+      const appData = await appRes.json();
+      if (!appRes.ok) throw new Error(appData.error || "Failed to approve mappings.");
+      if (appData.mappings) setMappings(appData.mappings);
+
+      const res = await fetch(`/api/projects/${projectId}/compile`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) {
+        const errorList = data.errors ? data.errors.join(" | ") : data.error;
+        throw new Error(errorList || "Compilation failed.");
+      }
+      setPlan(data.plan);
+      setActiveTab("execute");
+      setSuccessMsg(`Approved verified mappings and compiled plan '${data.plan.planId}' (${data.plan.steps.length} steps).`);
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : String(err));
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function executePlan(customPayload?: unknown) {
     if (!projectId || !plan) return;
     setLoading(true);
@@ -945,14 +1012,21 @@ export default function ProjectWorkspacePage() {
             <button
               type="button"
               onClick={loadCanonicalFixtures}
-              className="text-sm bg-white/[0.06] hover:bg-white/[0.12] text-zinc-100 border border-white/[0.12] px-5 py-2.5 rounded-full font-medium transition"
+              className="text-sm bg-white/[0.06] hover:bg-white/[0.12] text-zinc-100 border border-white/[0.12] px-4 py-2.5 rounded-full font-medium transition"
             >
               Load Canonical Pair
             </button>
             <button
               type="button"
+              onClick={loadFintechWebhookPreset}
+              className="text-sm bg-sky-500/15 hover:bg-sky-500/25 text-sky-200 border border-sky-400/30 px-4 py-2.5 rounded-full font-medium transition"
+            >
+              Load Fintech Webhook Pair
+            </button>
+            <button
+              type="button"
               onClick={loadSampleJsonFixture}
-              className="text-sm bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 border border-amber-400/30 px-5 py-2.5 rounded-full font-medium transition"
+              className="text-sm bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 border border-amber-400/30 px-4 py-2.5 rounded-full font-medium transition"
               title="Demonstrate schema inference from arbitrary sample JSON payload"
             >
               Load Sample JSON
@@ -1697,14 +1771,56 @@ export default function ProjectWorkspacePage() {
                     Approve All Verified
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={compilePlan}
-                    disabled={loading || mappings.filter((m) => m.status === "accepted" || m.status === "edited").length === 0}
-                    className="champagne-pill disabled:opacity-45 text-xs sm:text-[13px] font-semibold px-5 py-2 rounded-full transition"
-                  >
-                    Compile Plan →
-                  </button>
+                  {(() => {
+                    const approvedPaths = new Set(
+                      mappings
+                        .filter((m) => m.status === "accepted" || m.status === "edited")
+                        .map((m) => m.targetPath)
+                    );
+                    const requiredTargets = targetNormalized
+                      ? Object.values(targetNormalized.flatFields).filter(
+                          (f) => f.path !== "$" && f.required && (!f.children || f.children.length === 0)
+                        )
+                      : [];
+                    const missingReqCount = requiredTargets.filter(
+                      (f) => !approvedPaths.has(f.path)
+                    ).length;
+                    const canCompile = approvedPaths.size > 0 && missingReqCount === 0;
+
+                    return (
+                      <>
+                        {missingReqCount > 0 && mappings.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={approveAllAndCompile}
+                            disabled={loading}
+                            className="champagne-pill disabled:opacity-45 text-xs sm:text-[13px] font-semibold px-5 py-2 rounded-full transition"
+                          >
+                            ✨ Approve All &amp; Compile →
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={compilePlan}
+                          disabled={loading || !canCompile}
+                          title={
+                            missingReqCount > 0
+                              ? `Approve remaining ${missingReqCount} required target field(s) before compiling standalone`
+                              : "Compile verified TransformationPlan IR"
+                          }
+                          className={`${
+                            canCompile
+                              ? "champagne-pill"
+                              : "bg-white/[0.06] text-zinc-400 border border-white/[0.1]"
+                          } disabled:opacity-45 text-xs sm:text-[13px] font-semibold px-5 py-2 rounded-full transition`}
+                        >
+                          {missingReqCount > 0
+                            ? `Compile Plan (${missingReqCount} req pending)`
+                            : "Compile Plan →"}
+                        </button>
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
 
@@ -2397,12 +2513,12 @@ export default function ProjectWorkspacePage() {
               {reportData && (
                 <>
                   {/* Executive Header & Cloud Certification Card */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg p-4 shadow-xs">
-                      <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div className="apple-glass rounded-3xl p-6 shadow-xs">
+                      <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block mb-2">
                         Compatibility Status
                       </span>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-3">
                         <StatusChip
                           variant={
                             reportData.status === "COMPATIBLE"
@@ -2413,54 +2529,64 @@ export default function ProjectWorkspacePage() {
                           }
                           label={reportData.status}
                         />
-                        <span className="text-xs font-mono font-bold text-zinc-200">
+                        <span className="text-lg font-mono font-bold text-white">
                           {reportData.summary.compatibilityScore}%
                         </span>
                       </div>
-                      <p className="text-[11px] text-zinc-400 mt-2">
+                      <p className="text-sm text-zinc-300 mt-3">
                         {reportData.summary.approvedMappingsCount} approved mappings across {reportData.summary.totalTargetFields} target fields.
                       </p>
                     </div>
 
-                    <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg p-4 shadow-xs">
-                      <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
+                    <div className="apple-glass rounded-3xl p-6 shadow-xs">
+                      <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block mb-2">
                         Equivalence Verification
                       </span>
-                      <div className="text-xs text-zinc-200 font-medium">
+                      <div className="text-base text-zinc-100 font-medium">
                         {reportData.testResults.equivalenceVerified ? (
-                          <span className="text-emerald-400 font-bold flex items-center gap-1">
+                          <span className="text-emerald-400 font-bold flex items-center gap-1.5">
                             ✓ Deterministic Equality Verified
                           </span>
                         ) : (
-                          <span className="text-amber-300 font-bold flex items-center gap-1">
+                          <span className="text-amber-300 font-bold flex items-center gap-1.5">
                             ⚠ Equivalence Not Certified
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-zinc-300 mt-2">
+                      <p className="text-sm text-zinc-300 mt-3">
                         Passed {reportData.testResults.passedCasesCount} of {reportData.testResults.testCasesCount} deterministic test fixtures.
                       </p>
                     </div>
 
-                    <div className="apple-glass rounded-2xl p-5 shadow-xs">
-                      <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
+                    <div className="apple-glass rounded-3xl p-6 shadow-xs">
+                      <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block mb-2">
                         Azure Cloud Evidence
                       </span>
-                      <div className="text-sm font-mono truncate">
+                      <div className="text-sm font-mono space-y-1">
                         {reportData.cloudEvidence?.azureSqlRunId ? (
-                          <span className="text-teal-300 font-medium" title={reportData.cloudEvidence.azureSqlRunId}>
-                            SQL Run: {reportData.cloudEvidence.azureSqlRunId.slice(0, 16)}...
-                          </span>
+                          <>
+                            <div className="text-emerald-300 font-semibold">
+                              ✓ Certified &amp; Persisted
+                            </div>
+                            <div className="text-xs text-teal-300 truncate" title={reportData.cloudEvidence.azureSqlRunId}>
+                              SQL Run: {reportData.cloudEvidence.azureSqlRunId}
+                            </div>
+                            {reportData.cloudEvidence.persistedAt && (
+                              <div className="text-xs text-zinc-400">
+                                {new Date(reportData.cloudEvidence.persistedAt).toLocaleString()}
+                              </div>
+                            )}
+                          </>
                         ) : (
-                          <span className="text-zinc-400">Uncertified (Not persisted)</span>
+                          <span className="text-amber-300">Ready — click Certify to Azure</span>
                         )}
                       </div>
-                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <div className="mt-4 flex flex-wrap items-center gap-2">
                         <button
                           type="button"
                           onClick={() => persistEvidence("all")}
                           disabled={persistingToCloud}
-                          className="champagne-pill disabled:opacity-50 text-xs font-semibold px-3.5 py-1.5 rounded-full transition"
+                          className="champagne-pill disabled:opacity-50 text-xs sm:text-sm font-semibold px-4 py-2 rounded-full transition"
                         >
                           {persistingToCloud ? "Persisting..." : "Certify to Azure"}
                         </button>
@@ -2468,7 +2594,7 @@ export default function ProjectWorkspacePage() {
                           type="button"
                           onClick={() => persistEvidence("azure_sql")}
                           disabled={persistingToCloud}
-                          className="text-[11px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-white/[0.12] px-2 py-1 rounded font-medium transition"
+                          className="text-xs bg-white/[0.06] hover:bg-white/[0.12] text-zinc-200 border border-white/[0.12] px-3 py-2 rounded-full font-medium transition"
                         >
                           SQL Only
                         </button>
@@ -2476,7 +2602,7 @@ export default function ProjectWorkspacePage() {
                           type="button"
                           onClick={() => persistEvidence("azure_blob")}
                           disabled={persistingToCloud}
-                          className="text-[11px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-white/[0.12] px-2 py-1 rounded font-medium transition"
+                          className="text-xs bg-white/[0.06] hover:bg-white/[0.12] text-zinc-200 border border-white/[0.12] px-3 py-2 rounded-full font-medium transition"
                         >
                           Blob Only
                         </button>
@@ -2485,32 +2611,32 @@ export default function ProjectWorkspacePage() {
                   </div>
 
                   {/* Cryptographic Digest Ledger */}
-                  <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-lg p-4 shadow-xs">
-                    <h3 className="text-xs font-semibold text-zinc-100 uppercase tracking-wider mb-2">
+                  <div className="apple-glass rounded-3xl p-6 shadow-xs">
+                    <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-3">
                       Cryptographic SHA-256 Digest Ledger
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
-                      <div className="p-2.5 bg-black/50 border border-white/[0.08] rounded">
-                        <span className="text-zinc-400 block text-[10px] uppercase">Source Spec Checksum:</span>
-                        <span className="text-zinc-200 break-all select-all font-semibold">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs sm:text-sm font-mono">
+                      <div className="p-3.5 bg-black/50 border border-white/[0.08] rounded-2xl">
+                        <span className="text-zinc-400 block text-xs uppercase mb-1">Source Spec Checksum:</span>
+                        <span className="text-[#f5dfb8] break-all select-all font-semibold">
                           {reportData.checksums.sourceSchemaHash}
                         </span>
                       </div>
-                      <div className="p-2.5 bg-black/50 border border-white/[0.08] rounded">
-                        <span className="text-zinc-400 block text-[10px] uppercase">Target Spec Checksum:</span>
-                        <span className="text-zinc-200 break-all select-all font-semibold">
+                      <div className="p-3.5 bg-black/50 border border-white/[0.08] rounded-2xl">
+                        <span className="text-zinc-400 block text-xs uppercase mb-1">Target Spec Checksum:</span>
+                        <span className="text-[#f5dfb8] break-all select-all font-semibold">
                           {reportData.checksums.targetSchemaHash}
                         </span>
                       </div>
-                      <div className="p-2.5 bg-black/50 border border-white/[0.08] rounded">
-                        <span className="text-zinc-400 block text-[10px] uppercase">Plan IR Checksum:</span>
-                        <span className="text-zinc-200 break-all select-all">
+                      <div className="p-3.5 bg-black/50 border border-white/[0.08] rounded-2xl">
+                        <span className="text-zinc-400 block text-xs uppercase mb-1">Plan IR Checksum:</span>
+                        <span className="text-teal-300 break-all select-all">
                           {reportData.checksums.planHash || "No compiled plan"}
                         </span>
                       </div>
-                      <div className="p-2.5 bg-black/50 border border-white/[0.08] rounded">
-                        <span className="text-zinc-400 block text-[10px] uppercase">Adapter Code Checksum:</span>
-                        <span className="text-zinc-200 break-all select-all">
+                      <div className="p-3.5 bg-black/50 border border-white/[0.08] rounded-2xl">
+                        <span className="text-zinc-400 block text-xs uppercase mb-1">Adapter Code Checksum:</span>
+                        <span className="text-violet-300 break-all select-all">
                           {reportData.checksums.adapterHash || "No adapter generated"}
                         </span>
                       </div>
@@ -2760,29 +2886,29 @@ export default function ProjectWorkspacePage() {
 
       {/* Manual Mapping Modal Dialog */}
       {isManualModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white/[0.03] backdrop-blur-xl rounded-lg shadow-xl border border-white/[0.08] max-w-lg w-full p-6 text-zinc-100 space-y-4 animate-in fade-in duration-150">
-            <div className="border-b border-white/[0.08] pb-3">
-              <h3 className="text-sm font-bold text-zinc-100 uppercase tracking-wider">
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+          <div className="apple-glass bg-[#0c0b09]/95 rounded-3xl shadow-2xl border border-white/[0.14] max-w-xl w-full p-7 text-zinc-100 space-y-5 animate-in fade-in duration-150">
+            <div className="border-b border-white/[0.08] pb-3.5">
+              <h3 className="text-base font-semibold text-white tracking-tight">
                 Create Deterministic Manual Mapping
               </h3>
-              <p className="text-xs text-zinc-400 mt-0.5">
-                Define an exact field mapping manually. Manual mappings bypass AI proposals and are immediately approved and recorded into the review ledger.
+              <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+                Define an exact field mapping manually. Manual mappings bypass AI proposals and are immediately approved into the review ledger.
               </p>
             </div>
 
-            <form onSubmit={submitManualMapping} className="space-y-3.5 text-xs">
+            <form onSubmit={submitManualMapping} className="space-y-4 text-sm">
               {/* Target Path */}
               <div>
-                <label className="block font-semibold text-zinc-300 mb-1">
-                  Target Field Path <span className="text-rose-500">*</span>
+                <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
+                  Target Field Path <span className="text-rose-400">*</span>
                 </label>
                 {targetNormalized ? (
                   <select
                     value={formTargetPath}
                     onChange={(e) => setFormTargetPath(e.target.value)}
                     required
-                    className="w-full font-mono text-xs p-2 border border-white/[0.12] rounded bg-white/[0.03] backdrop-blur-xl text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                    className="w-full font-mono text-sm p-3 border border-white/[0.14] rounded-xl bg-[#090807] text-zinc-100 focus:outline-none focus:ring-1 focus:ring-[#f5dfb8]/50"
                   >
                     {Object.keys(targetNormalized.flatFields)
                       .filter((p) => p !== "$")
@@ -2800,21 +2926,21 @@ export default function ProjectWorkspacePage() {
                     onChange={(e) => setFormTargetPath(e.target.value)}
                     placeholder="$.invoice.id"
                     required
-                    className="w-full font-mono text-xs p-2 border border-white/[0.12] rounded focus:outline-none focus:ring-1 focus:ring-slate-500"
+                    className="w-full font-mono text-sm p-3 border border-white/[0.14] rounded-xl bg-[#090807] text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#f5dfb8]/50"
                   />
                 )}
               </div>
 
               {/* Source Path */}
               <div>
-                <label className="block font-semibold text-zinc-300 mb-1">
+                <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
                   Source Field Path (or empty for default/constructed)
                 </label>
                 {sourceNormalized ? (
                   <select
                     value={formSourcePath}
                     onChange={(e) => setFormSourcePath(e.target.value)}
-                    className="w-full font-mono text-xs p-2 border border-white/[0.12] rounded bg-white/[0.03] backdrop-blur-xl text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                    className="w-full font-mono text-sm p-3 border border-white/[0.14] rounded-xl bg-[#090807] text-zinc-100 focus:outline-none focus:ring-1 focus:ring-[#f5dfb8]/50"
                   >
                     <option value="">(None - use default value or object constructor)</option>
                     {Object.keys(sourceNormalized.flatFields)
@@ -2831,20 +2957,20 @@ export default function ProjectWorkspacePage() {
                     value={formSourcePath}
                     onChange={(e) => setFormSourcePath(e.target.value)}
                     placeholder="$.billing.order_id"
-                    className="w-full font-mono text-xs p-2 border border-white/[0.12] rounded focus:outline-none focus:ring-1 focus:ring-slate-500"
+                    className="w-full font-mono text-sm p-3 border border-white/[0.14] rounded-xl bg-[#090807] text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#f5dfb8]/50"
                   />
                 )}
               </div>
 
               {/* Operation */}
               <div>
-                <label className="block font-semibold text-zinc-300 mb-1">
-                  Transformation Operation <span className="text-rose-500">*</span>
+                <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
+                  Transformation Operation <span className="text-rose-400">*</span>
                 </label>
                 <select
                   value={formOperation}
                   onChange={(e) => setFormOperation(e.target.value as AllowedOperation)}
-                  className="w-full font-mono text-xs p-2 border border-white/[0.12] rounded bg-white/[0.03] backdrop-blur-xl text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                  className="w-full font-mono text-sm p-3 border border-white/[0.14] rounded-xl bg-[#090807] text-zinc-100 focus:outline-none focus:ring-1 focus:ring-[#f5dfb8]/50"
                 >
                   {ALLOWED_OPERATIONS.map((op) => (
                     <option key={op} value={op}>
@@ -2856,14 +2982,14 @@ export default function ProjectWorkspacePage() {
 
               {/* Conditional Operation Arguments */}
               {formOperation === "typeConversion" && (
-                <div className="p-3.5 bg-violet-950/40 border border-violet-400/30 rounded-2xl space-y-1.5">
-                  <label className="block font-semibold text-violet-200 mb-1">
+                <div className="p-4 bg-violet-950/40 border border-violet-400/30 rounded-2xl space-y-2">
+                  <label className="block text-xs font-semibold text-violet-200 mb-1">
                     Conversion Type <span className="text-rose-400">*</span>
                   </label>
                   <select
                     value={formConversionType}
                     onChange={(e) => setFormConversionType(e.target.value)}
-                    className="w-full font-mono text-xs p-2 border border-violet-400/30 rounded-xl bg-black/60 text-zinc-100 focus:outline-none"
+                    className="w-full font-mono text-sm p-2.5 border border-violet-400/30 rounded-xl bg-[#090807] text-zinc-100 focus:outline-none"
                   >
                     {SUPPORTED_CONVERSIONS.map((c) => (
                       <option key={c} value={c}>
@@ -2875,65 +3001,65 @@ export default function ProjectWorkspacePage() {
               )}
 
               {formOperation === "default" && (
-                <div className="p-3 bg-black/50 border border-white/[0.08] rounded space-y-1">
-                  <label className="block font-semibold text-zinc-200 mb-1">
-                    Default Value (literal string, number, or JSON) <span className="text-rose-500">*</span>
+                <div className="p-4 bg-black/50 border border-white/[0.12] rounded-2xl space-y-2">
+                  <label className="block text-xs font-semibold text-zinc-200 mb-1">
+                    Default Value (literal string, number, or JSON) <span className="text-rose-400">*</span>
                   </label>
                   <input
                     type="text"
                     value={formDefaultValue}
                     onChange={(e) => setFormDefaultValue(e.target.value)}
-                    placeholder='"standard" or 0 or false'
+                    placeholder='"us-east-1" or 0 or false'
                     required
-                    className="w-full font-mono text-xs p-1.5 border border-white/[0.12] rounded bg-white/[0.03] backdrop-blur-xl focus:outline-none"
+                    className="w-full font-mono text-sm p-3 border border-white/[0.14] rounded-xl bg-[#090807] text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#f5dfb8]/50"
                   />
                 </div>
               )}
 
               {formOperation === "lookup" && (
-                <div className="p-3.5 bg-violet-950/40 border border-violet-400/30 rounded-2xl space-y-1.5">
-                  <label className="block font-semibold text-violet-200 mb-1">
+                <div className="p-4 bg-violet-950/40 border border-violet-400/30 rounded-2xl space-y-2">
+                  <label className="block text-xs font-semibold text-violet-200 mb-1">
                     Lookup Table JSON (Dictionary mapping) <span className="text-rose-400">*</span>
                   </label>
                   <textarea
                     rows={4}
                     value={formLookupTable}
                     onChange={(e) => setFormLookupTable(e.target.value)}
-                    placeholder={'{\n  "pending": "OPEN",\n  "paid": "SETTLED"\n}'}
+                    placeholder={'{\n  "USD": "usd",\n  "EUR": "eur"\n}'}
                     required
-                    className="w-full font-mono text-xs p-2.5 border border-violet-400/30 rounded-xl bg-black/50 text-zinc-100 focus:outline-none resize-none"
+                    className="w-full font-mono text-sm p-3 border border-violet-400/30 rounded-xl bg-[#090807] text-zinc-100 placeholder-zinc-500 focus:outline-none resize-none"
                   />
                 </div>
               )}
 
               {/* Rationale */}
               <div>
-                <label className="block font-semibold text-zinc-300 mb-1">
+                <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
                   Human Rationale / Mapping Notes
                 </label>
                 <input
                   type="text"
                   value={formRationale}
                   onChange={(e) => setFormRationale(e.target.value)}
-                  placeholder="e.g., Target requires invoice currency code, defaulting to USD."
-                  className="w-full text-xs p-2 border border-white/[0.12] rounded focus:outline-none focus:ring-1 focus:ring-slate-500"
+                  placeholder="e.g., Target requires lowercase invoice currency code."
+                  className="w-full text-sm p-3 border border-white/[0.14] rounded-xl bg-[#090807] text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#f5dfb8]/50"
                 />
               </div>
 
               {/* Buttons */}
-              <div className="pt-2 flex items-center justify-end space-x-2 border-t border-white/[0.08]">
+              <div className="pt-3 flex items-center justify-end space-x-3 border-t border-white/[0.08]">
                 <button
                   type="button"
                   onClick={() => setIsManualModalOpen(false)}
                   disabled={loading}
-                  className="px-3 py-1.5 border border-white/[0.12] rounded text-zinc-300 hover:bg-zinc-800 transition"
+                  className="px-4 py-2 border border-white/[0.14] rounded-full text-sm text-zinc-300 hover:bg-white/[0.08] transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading || !formTargetPath.trim()}
-                  className="champagne-pill disabled:opacity-50 px-5 py-2 text-sm font-semibold rounded-full transition"
+                  className="champagne-pill disabled:opacity-50 px-6 py-2.5 text-sm font-semibold rounded-full transition"
                 >
                   {loading ? "Saving..." : "Save & Approve Manual Mapping"}
                 </button>
@@ -2945,39 +3071,39 @@ export default function ProjectWorkspacePage() {
 
       {/* Edit Candidate Mapping Modal Dialog */}
       {activeMappingForEdit && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white/[0.03] backdrop-blur-xl rounded-lg shadow-xl border border-white/[0.08] max-w-lg w-full p-6 text-zinc-100 space-y-4 animate-in fade-in duration-150">
-            <div className="border-b border-white/[0.08] pb-3">
-              <h3 className="text-sm font-bold text-zinc-100 uppercase tracking-wider">
-                Edit Mapping: {activeMappingForEdit.targetPath}
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+          <div className="apple-glass bg-[#0c0b09]/95 rounded-3xl shadow-2xl border border-white/[0.14] max-w-xl w-full p-7 text-zinc-100 space-y-5 animate-in fade-in duration-150">
+            <div className="border-b border-white/[0.08] pb-3.5">
+              <h3 className="text-base font-semibold text-white tracking-tight">
+                Edit Mapping: <span className="font-mono text-[#f5dfb8]">{activeMappingForEdit.targetPath}</span>
               </h3>
-              <p className="text-xs text-zinc-400 mt-0.5">
+              <p className="text-xs sm:text-sm text-zinc-400 mt-1">
                 Adjust source path, operation type, conversion rules, or default parameters. Saved changes update this proposal with status &apos;edited&apos;.
               </p>
             </div>
 
-            <form onSubmit={submitEditMapping} className="space-y-3.5 text-xs">
+            <form onSubmit={submitEditMapping} className="space-y-4 text-sm">
               {/* Target Path (read-only) */}
               <div>
-                <label className="block font-semibold text-zinc-300 mb-1">Target Field Path</label>
+                <label className="block text-xs font-semibold text-zinc-300 mb-1.5">Target Field Path</label>
                 <input
                   type="text"
                   value={activeMappingForEdit.targetPath}
                   disabled
-                  className="w-full font-mono text-xs p-2 border border-white/[0.08] bg-zinc-800 text-zinc-400 rounded cursor-not-allowed"
+                  className="w-full font-mono text-sm p-3 border border-white/[0.1] bg-black/40 text-zinc-400 rounded-xl cursor-not-allowed"
                 />
               </div>
 
               {/* Source Path */}
               <div>
-                <label className="block font-semibold text-zinc-300 mb-1">
+                <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
                   Source Field Path (or empty for default/constructed)
                 </label>
                 {sourceNormalized ? (
                   <select
                     value={formSourcePath}
                     onChange={(e) => setFormSourcePath(e.target.value)}
-                    className="w-full font-mono text-xs p-2 border border-white/[0.12] rounded bg-white/[0.03] backdrop-blur-xl text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                    className="w-full font-mono text-sm p-3 border border-white/[0.14] rounded-xl bg-[#090807] text-zinc-100 focus:outline-none focus:ring-1 focus:ring-[#f5dfb8]/50"
                   >
                     <option value="">(None - use default value or object constructor)</option>
                     {Object.keys(sourceNormalized.flatFields)
@@ -2994,20 +3120,20 @@ export default function ProjectWorkspacePage() {
                     value={formSourcePath}
                     onChange={(e) => setFormSourcePath(e.target.value)}
                     placeholder="$.billing.order_id"
-                    className="w-full font-mono text-xs p-2 border border-white/[0.12] rounded focus:outline-none focus:ring-1 focus:ring-slate-500"
+                    className="w-full font-mono text-sm p-3 border border-white/[0.14] rounded-xl bg-[#090807] text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#f5dfb8]/50"
                   />
                 )}
               </div>
 
               {/* Operation */}
               <div>
-                <label className="block font-semibold text-zinc-300 mb-1">
-                  Transformation Operation <span className="text-rose-500">*</span>
+                <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
+                  Transformation Operation <span className="text-rose-400">*</span>
                 </label>
                 <select
                   value={formOperation}
                   onChange={(e) => setFormOperation(e.target.value as AllowedOperation)}
-                  className="w-full font-mono text-xs p-2 border border-white/[0.12] rounded bg-white/[0.03] backdrop-blur-xl text-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                  className="w-full font-mono text-sm p-3 border border-white/[0.14] rounded-xl bg-[#090807] text-zinc-100 focus:outline-none focus:ring-1 focus:ring-[#f5dfb8]/50"
                 >
                   {ALLOWED_OPERATIONS.map((op) => (
                     <option key={op} value={op}>
@@ -3019,14 +3145,14 @@ export default function ProjectWorkspacePage() {
 
               {/* Conditional Operation Arguments */}
               {formOperation === "typeConversion" && (
-                <div className="p-3.5 bg-violet-950/40 border border-violet-400/30 rounded-2xl space-y-1.5">
-                  <label className="block font-semibold text-violet-200 mb-1">
+                <div className="p-4 bg-violet-950/40 border border-violet-400/30 rounded-2xl space-y-2">
+                  <label className="block text-xs font-semibold text-violet-200 mb-1">
                     Conversion Type <span className="text-rose-400">*</span>
                   </label>
                   <select
                     value={formConversionType}
                     onChange={(e) => setFormConversionType(e.target.value)}
-                    className="w-full font-mono text-xs p-2 border border-violet-400/30 rounded-xl bg-black/60 text-zinc-100 focus:outline-none"
+                    className="w-full font-mono text-sm p-2.5 border border-violet-400/30 rounded-xl bg-[#090807] text-zinc-100 focus:outline-none"
                   >
                     {SUPPORTED_CONVERSIONS.map((c) => (
                       <option key={c} value={c}>
@@ -3038,58 +3164,58 @@ export default function ProjectWorkspacePage() {
               )}
 
               {formOperation === "default" && (
-                <div className="p-3 bg-black/50 border border-white/[0.08] rounded space-y-1">
-                  <label className="block font-semibold text-zinc-200 mb-1">
-                    Default Value (literal string, number, or JSON) <span className="text-rose-500">*</span>
+                <div className="p-4 bg-black/50 border border-white/[0.12] rounded-2xl space-y-2">
+                  <label className="block text-xs font-semibold text-zinc-200 mb-1">
+                    Default Value (literal string, number, or JSON) <span className="text-rose-400">*</span>
                   </label>
                   <input
                     type="text"
                     value={formDefaultValue}
                     onChange={(e) => setFormDefaultValue(e.target.value)}
-                    placeholder='"standard" or 0 or false'
+                    placeholder='"us-east-1" or 0 or false'
                     required
-                    className="w-full font-mono text-xs p-1.5 border border-white/[0.12] rounded bg-white/[0.03] backdrop-blur-xl focus:outline-none"
+                    className="w-full font-mono text-sm p-3 border border-white/[0.14] rounded-xl bg-[#090807] text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#f5dfb8]/50"
                   />
                 </div>
               )}
 
               {formOperation === "lookup" && (
-                <div className="p-3.5 bg-violet-950/40 border border-violet-400/30 rounded-2xl space-y-1.5">
-                  <label className="block font-semibold text-violet-200 mb-1">
+                <div className="p-4 bg-violet-950/40 border border-violet-400/30 rounded-2xl space-y-2">
+                  <label className="block text-xs font-semibold text-violet-200 mb-1">
                     Lookup Table JSON (Dictionary mapping) <span className="text-rose-400">*</span>
                   </label>
                   <textarea
                     rows={4}
                     value={formLookupTable}
                     onChange={(e) => setFormLookupTable(e.target.value)}
-                    placeholder={'{\n  "pending": "OPEN",\n  "paid": "SETTLED"\n}'}
+                    placeholder={'{\n  "USD": "usd",\n  "EUR": "eur"\n}'}
                     required
-                    className="w-full font-mono text-xs p-2.5 border border-violet-400/30 rounded-xl bg-black/50 text-zinc-100 focus:outline-none resize-none"
+                    className="w-full font-mono text-sm p-3 border border-violet-400/30 rounded-xl bg-[#090807] text-zinc-100 placeholder-zinc-500 focus:outline-none resize-none"
                   />
                 </div>
               )}
 
               {/* Warning on high-risk / lossy conversion */}
               {(formOperation === "typeConversion" || formOperation === "default" || formOperation === "lookup") && (
-                <div className="p-2.5 bg-amber-950/40 border border-amber-500/35 rounded-xl text-amber-200 text-xs">
+                <div className="p-3 bg-amber-950/40 border border-amber-500/35 rounded-xl text-amber-200 text-xs">
                   ⚠ Note: Modifying this mapping to {formOperation} requires human verification. An audit record will be attached to the mapping.
                 </div>
               )}
 
               {/* Buttons */}
-              <div className="pt-2 flex items-center justify-end space-x-2 border-t border-white/[0.08]">
+              <div className="pt-3 flex items-center justify-end space-x-3 border-t border-white/[0.08]">
                 <button
                   type="button"
                   onClick={() => setActiveMappingForEdit(null)}
                   disabled={loading}
-                  className="px-3 py-1.5 border border-white/[0.12] rounded text-zinc-300 hover:bg-zinc-800 transition"
+                  className="px-4 py-2 border border-white/[0.14] rounded-full text-sm text-zinc-300 hover:bg-white/[0.08] transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="champagne-pill disabled:opacity-50 px-5 py-2 text-sm font-semibold rounded-full transition"
+                  className="champagne-pill disabled:opacity-50 px-6 py-2.5 text-sm font-semibold rounded-full transition"
                 >
                   {loading ? "Saving..." : "Save Mapping Edits"}
                 </button>

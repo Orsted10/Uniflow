@@ -122,12 +122,13 @@ export function generateBaselineMappings(
         break;
 
       case "enum_mismatch": {
-        // Construct basic lookup table
+        // Construct basic case-insensitive lookup table
         const lookupTable: Record<string, string> = {};
         if (targetField?.enum) {
           for (const val of targetField.enum) {
             lookupTable[val.toLowerCase()] = val;
             lookupTable[val.toUpperCase()] = val;
+            lookupTable[val] = val;
           }
         }
         transformation = {
@@ -135,7 +136,7 @@ export function generateBaselineMappings(
           sourceType: "string",
           targetType: "string",
           lookupTable,
-          policyOnMissing: "fail",
+          policyOnMissing: item.targetRequired ? "fail" : "omit",
         };
         rationale = `Enum conversion: Map source value through verified lookup dictionary.`;
         uncertaintyScore = "HIGH";
