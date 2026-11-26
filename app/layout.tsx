@@ -31,8 +31,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark" suppressHydrationWarning>
       <body
+        suppressHydrationWarning
         className={`${inter.variable} ${instrumentSerif.variable} ${caveat.variable} ${jetbrainsMono.variable} font-sans antialiased bg-[#0b0a09] text-[#f5f2eb] min-h-screen`}
       >
         {children}
