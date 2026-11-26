@@ -1,4 +1,5 @@
 import * as React from "react";
+import Link from "next/link";
 
 export interface EmptyStateProps {
   title: string;
@@ -21,33 +22,35 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <div
-      className={`border border-dashed border-zinc-800 rounded-lg p-8 text-center bg-zinc-950/60 flex flex-col items-center justify-center ${className}`}
+      className={`apple-glass rounded-3xl p-12 sm:p-16 text-center flex flex-col items-center justify-center ${className}`}
     >
       {icon ? (
-        <div className="mb-3 text-zinc-400">{icon}</div>
+        <div className="mb-5 text-[#f5dfb8]">{icon}</div>
       ) : (
-        <div className="w-9 h-9 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 font-mono text-sm mb-3">
-          ∅
+        <div className="w-16 h-16 rounded-2xl bg-amber-500/15 border border-amber-400/30 flex items-center justify-center text-[#f5dfb8] font-mono text-2xl mb-5 shadow-[0_0_30px_rgba(245,223,184,0.12)]">
+          ∿
         </div>
       )}
-      <h3 className="text-sm font-semibold text-zinc-100 tracking-tight">{title}</h3>
-      <p className="mt-1 text-xs text-zinc-400 max-w-md leading-relaxed">{description}</p>
+      <h3 className="text-2xl font-semibold text-white tracking-tight">{title}</h3>
+      <p className="mt-2.5 text-sm sm:text-base text-zinc-300 max-w-lg leading-relaxed">
+        {description}
+      </p>
       {action && (
-        <div className="mt-4">
+        <div className="mt-7">
           {action.href ? (
-            <a
+            <Link
               href={action.href}
-              className="inline-flex items-center text-xs font-medium px-3.5 py-1.5 rounded-md bg-emerald-500 text-zinc-950 hover:bg-emerald-400 transition shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+              className="champagne-pill inline-flex items-center gap-2 text-sm sm:text-[15px] font-semibold px-7 py-3.5 rounded-full transition"
             >
-              {action.label}
-            </a>
+              {action.label} →
+            </Link>
           ) : (
             <button
               type="button"
               onClick={action.onClick}
-              className="inline-flex items-center text-xs font-medium px-3.5 py-1.5 rounded-md bg-emerald-500 text-zinc-950 hover:bg-emerald-400 transition shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+              className="champagne-pill inline-flex items-center gap-2 text-sm sm:text-[15px] font-semibold px-7 py-3.5 rounded-full transition"
             >
-              {action.label}
+              {action.label} →
             </button>
           )}
         </div>

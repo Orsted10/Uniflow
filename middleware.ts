@@ -14,7 +14,10 @@ export async function middleware(request: NextRequest) {
   // If Supabase credentials are not configured in local dev, allow bypass with warning header
   if (!url || !anonKey) {
     response.headers.set("x-uniflow-auth-mode", "local-dev-fallback");
-    return response;
+    response.headers.set("X-Security-Standard", "CERT-In / DPDP-Act-2023");
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("X-Frame-Options", "DENY");
+  return response;
   }
 
   const supabase = createServerClient(url, anonKey, {
@@ -62,6 +65,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
+  response.headers.set("X-Security-Standard", "CERT-In / DPDP-Act-2023");
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("X-Frame-Options", "DENY");
   return response;
 }
 

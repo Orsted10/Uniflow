@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useParams } from "next/navigation";
 import { TopBar } from "@/components/shell/topbar";
+import { HeroBackdrop } from "@/components/ui/hero-backdrop";
 import { ProjectSidebar, WorkspaceTab } from "@/components/shell/sidebar";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { StatusChip } from "@/components/ui/status-chip";
@@ -694,26 +695,32 @@ export default function ProjectWorkspacePage() {
   }, [mappings, mappingFilterStatus, mappingFilterUncertainty, mappingSearchQuery]);
 
   return (
-    <div className="min-h-screen bg-[#050507] text-slate-100 flex flex-col font-sans selection:bg-teal-950/400 selection:text-white">
+    <div className="min-h-screen bg-[#090807] text-[#f5f2eb] flex flex-col font-sans relative overflow-x-hidden selection:bg-teal-950/400 selection:text-white">
+      <HeroBackdrop />
       <TopBar />
 
       {/* Project Subheader */}
-      <div className="bg-white/[0.03] backdrop-blur-xl border-b border-white/[0.08] px-4 sm:px-6 lg:px-8 py-3">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div className="relative z-10 bg-black/45 backdrop-blur-2xl border-b border-white/[0.08] px-6 sm:px-10 lg:px-12 py-4">
+        <div className="max-w-[1680px] mx-auto flex flex-wrap items-center justify-between gap-4">
           <div>
             <Breadcrumb
               items={[
-                { label: "Home", href: "/" },
-                { label: "Projects", href: "/projects" },
+                { label: "Overview", href: "/" },
+                { label: "Workspaces", href: "/projects" },
                 { label: project?.name || projectId, current: true },
               ]}
-              className="mb-1 text-zinc-500"
+              className="mb-1.5 text-zinc-400"
             />
-            <div className="flex items-center space-x-2 flex-wrap gap-y-1">
-              <h1 className="text-base font-bold text-white tracking-tight">
+            <div className="flex items-center gap-2.5 flex-wrap gap-y-1">
+              <h1 className="text-xl font-semibold text-white tracking-tight">
                 {project?.name || "Workspace"}
               </h1>
-              <span className="font-mono text-[11px] text-zinc-400">({projectId})</span>
+              <span className="font-mono text-xs text-zinc-400 bg-white/[0.05] px-2.5 py-0.5 rounded-full border border-white/[0.08]">
+                {projectId}
+              </span>
+              <span className="font-mono text-[11px] text-emerald-300 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-400/25">
+                CERT-In &bull; DPDP 2023
+              </span>
 
               {cloudStatus && (
                 <div className="flex items-center space-x-1.5 ml-2">
@@ -762,18 +769,18 @@ export default function ProjectWorkspacePage() {
             </div>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex flex-wrap items-center gap-2.5">
             <button
               type="button"
               onClick={loadCanonicalFixtures}
-              className="text-xs bg-zinc-800 hover:bg-slate-700 text-slate-200 border border-white/[0.12] px-2.5 py-1 rounded font-medium transition"
+              className="text-xs sm:text-[13px] bg-white/[0.06] hover:bg-white/[0.12] text-zinc-100 border border-white/[0.12] px-4 py-2 rounded-full font-medium transition"
             >
               Load Canonical Pair
             </button>
             <button
               type="button"
               onClick={loadSampleJsonFixture}
-              className="text-xs bg-amber-950/60 hover:bg-amber-900/60 text-amber-300 border border-amber-800/60 px-2.5 py-1 rounded font-medium transition"
+              className="text-xs sm:text-[13px] bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 border border-amber-400/30 px-4 py-2 rounded-full font-medium transition"
               title="Demonstrate schema inference from arbitrary sample JSON payload"
             >
               Load Sample JSON
@@ -782,21 +789,21 @@ export default function ProjectWorkspacePage() {
               type="button"
               onClick={() => triggerImport(false)}
               disabled={loading}
-              className="text-xs bg-teal-950/400 hover:bg-teal-400 disabled:opacity-50 text-slate-950 font-semibold font-mono px-3 py-1 rounded transition shadow-sm"
+              className="champagne-pill disabled:opacity-50 text-xs sm:text-[13px] font-semibold px-5 py-2 rounded-full transition"
             >
-              Parse & Compare
+              Parse &amp; Compare →
             </button>
           </div>
         </div>
       </div>
 
       {/* Messages */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full mt-3">
+      <div className="relative z-10 max-w-[1680px] mx-auto px-6 sm:px-10 lg:px-12 w-full mt-4">
         {errorMsg && <ErrorPanel message={errorMsg} onDismiss={() => setErrorMsg(null)} className="mb-2" />}
         {successMsg && (
-          <div className="p-3 mb-2 bg-emerald-950/40 border border-emerald-800/60 text-emerald-300 text-xs rounded flex items-center justify-between">
+          <div className="p-3.5 mb-2 bg-emerald-950/50 border border-emerald-500/30 text-emerald-200 text-xs sm:text-sm rounded-2xl flex items-center justify-between backdrop-blur-md">
             <span>{successMsg}</span>
-            <button type="button" onClick={() => setSuccessMsg(null)} className="text-emerald-400 font-bold ml-2">
+            <button type="button" onClick={() => setSuccessMsg(null)} className="text-emerald-300 font-bold ml-2">
               ×
             </button>
           </div>
@@ -804,7 +811,7 @@ export default function ProjectWorkspacePage() {
       </div>
 
       {/* Workspace Body with Sidebar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 w-full flex-1 flex flex-col md:flex-row gap-5">
+      <div className="relative z-10 max-w-[1680px] mx-auto px-6 sm:px-10 lg:px-12 py-6 w-full flex-1 flex flex-col md:flex-row gap-6">
         <ProjectSidebar
           activeTab={activeTab}
           onTabChange={setActiveTab}
@@ -2549,8 +2556,8 @@ export default function ProjectWorkspacePage() {
         </div>
       )}
 
-      <footer className="border-t border-white/[0.08] bg-white/[0.03] backdrop-blur-xl py-3 text-center text-xs text-zinc-500">
-        UNIFLOW ∞ — API Compatibility Compiler • Cloud Security • System Design • DBMS • PBL / DP-900 Azure
+      <footer className="relative z-10 border-t border-white/[0.08] bg-black/45 backdrop-blur-xl py-4 text-center text-xs text-zinc-400">
+        UNIFLOW ∞ — API Compatibility Compiler &bull; CERT-In &amp; DPDP Act 2023 Aligned &bull; PostgreSQL RLS &bull; Azure SQL &amp; Blob Evidence
       </footer>
     </div>
   );
