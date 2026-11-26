@@ -62,6 +62,131 @@ function HighlightedJson({ value }: { value: unknown }) {
   );
 }
 
+/**
+ * Lightweight zero-dependency TypeScript syntax highlighter for the Adapters tab.
+ */
+const TS_TOKEN_REGEX =
+  /(\/\/.*$|\/\*[\s\S]*?\*\/|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`|\b(?:export|function|const|let|var|if|else|for|while|return|typeof|throw|new|type|interface|import|from|as|in|of|switch|case|break|default)\b|\b(?:true|false|null|undefined)\b|\b(?:Record|unknown|string|number|boolean|void|never|any|Array|Error|Object)\b|\b\d+(?:\.\d+)?\b|[A-Za-z_$][\w$]*(?=\s*\()|\.[A-Za-z_$][\w$]*)/gm;
+
+const TS_KEYWORDS = new Set([
+  "export",
+  "function",
+  "const",
+  "let",
+  "var",
+  "if",
+  "else",
+  "for",
+  "while",
+  "return",
+  "typeof",
+  "throw",
+  "new",
+  "type",
+  "interface",
+  "import",
+  "from",
+  "as",
+  "in",
+  "of",
+  "switch",
+  "case",
+  "break",
+  "default",
+]);
+
+const TS_LITERALS = new Set(["true", "false", "null", "undefined"]);
+const TS_TYPES = new Set([
+  "Record",
+  "unknown",
+  "string",
+  "number",
+  "boolean",
+  "void",
+  "never",
+  "any",
+  "Array",
+  "Error",
+  "Object",
+]);
+
+function highlightTypeScriptLine(line: string): React.ReactNode[] {
+  const parts: React.ReactNode[] = [];
+  let lastIndex = 0;
+  TS_TOKEN_REGEX.lastIndex = 0;
+
+  let match: RegExpExecArray | null;
+  while ((match = TS_TOKEN_REGEX.exec(line)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(
+        <span key={`p-${lastIndex}`} className="text-zinc-300">
+          {line.slice(lastIndex, match.index)}
+        </span>
+      );
+    }
+
+    const token = match[0];
+    let cls = "text-zinc-200";
+    if (token.startsWith("//") || token.startsWith("/*")) {
+      cls = "text-zinc-500 italic";
+    } else if (token.startsWith('"') || token.startsWith("'") || token.startsWith("`")) {
+      cls = "text-emerald-300";
+    } else if (TS_KEYWORDS.has(token)) {
+      cls = "text-[#f4845f] font-medium";
+    } else if (TS_LITERALS.has(token)) {
+      cls = "text-amber-300";
+    } else if (TS_TYPES.has(token)) {
+      cls = "text-violet-300";
+    } else if (/^\d/.test(token)) {
+      cls = "text-sky-300";
+    } else if (token.startsWith(".")) {
+      cls = "text-teal-300";
+    } else {
+      cls = "text-[#f5dfb8]";
+    }
+
+    parts.push(
+      <span key={`t-${match.index}`} className={cls}>
+        {token}
+      </span>
+    );
+    lastIndex = match.index + token.length;
+  }
+
+  if (lastIndex < line.length) {
+    parts.push(
+      <span key={`e-${lastIndex}`} className="text-zinc-300">
+        {line.slice(lastIndex)}
+      </span>
+    );
+  }
+
+  return parts.length > 0 ? parts : [" "];
+}
+
+function HighlightedTypeScript({ code }: { code: string }) {
+  const lines = code.split("\n");
+
+  return (
+    <div className="font-mono text-[12.5px] leading-relaxed min-w-max">
+      {lines.map((line, i) => (
+        <div
+          key={i}
+          className="flex items-start px-3 py-0.5 hover:bg-white/[0.03] transition-colors rounded"
+        >
+          <span
+            aria-hidden="true"
+            className="select-none w-9 pr-3 mr-3 text-right text-zinc-600 border-r border-white/[0.06] shrink-0"
+          >
+            {i + 1}
+          </span>
+          <span className="whitespace-pre">{highlightTypeScriptLine(line)}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function LandingDashboardPage() {
   const router = useRouter();
   const [userEmail, setUserEmail] = React.useState<string | null>(null);
@@ -659,22 +784,38 @@ export default function LandingDashboardPage() {
                         )}
 
                         {sandboxTab === "adapter" && (
-                          <div className="p-5 space-y-3">
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs font-mono text-zinc-300">
-                                Standalone TypeScript adapter (zero dynamic eval)
-                              </span>
-                              <button
-                                type="button"
-                                onClick={handleCopyAdapter}
-                                className="text-xs font-medium px-3.5 py-1 rounded-full bg-white/[0.09] hover:bg-white/[0.16] text-white border border-white/[0.12] transition"
-                              >
-                                {copiedAdapter ? "Copied ✓" : "Copy .ts"}
-                              </button>
+                          <div className="p-5 sm:p-6 space-y-3.5">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="inline-flex items-center gap-1.5 text-xs font-mono px-2.5 py-1 rounded-lg bg-sky-500/15 text-sky-300 border border-sky-400/30 font-semibold">
+                                  TS
+                                </span>
+                                <span className="text-xs font-mono text-[#f5dfb8] font-medium">
+                                  invoice-adapter.ts
+                                </span>
+                                <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-400/25">
+                                  Zero Eval
+                                </span>
+                                <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-violet-500/10 text-violet-300 border border-violet-400/25">
+                                  Type-Safe
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2.5">
+                                <span className="text-[11px] font-mono text-zinc-400">
+                                  {liveCompiled.adapterCode.split("\n").length} lines
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={handleCopyAdapter}
+                                  className="text-xs font-medium px-4 py-1.5 rounded-full bg-[#f5dfb8]/15 hover:bg-[#f5dfb8]/25 text-[#f5dfb8] border border-[#f5dfb8]/30 transition"
+                                >
+                                  {copiedAdapter ? "Copied ✓" : "Copy .ts"}
+                                </button>
+                              </div>
                             </div>
-                            <pre className="p-4 rounded-xl bg-[#090807]/95 border border-white/[0.09] text-[12px] font-mono text-zinc-200 overflow-auto max-h-[275px] leading-relaxed">
-                              <code>{liveCompiled.adapterCode}</code>
-                            </pre>
+                            <div className="rounded-2xl bg-[#090807]/95 border border-white/[0.1] shadow-inner overflow-auto max-h-[320px] py-3 px-1">
+                              <HighlightedTypeScript code={liveCompiled.adapterCode} />
+                            </div>
                           </div>
                         )}
             </div>
