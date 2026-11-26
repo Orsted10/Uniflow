@@ -108,15 +108,15 @@ export function TopBar() {
   return (
     <>
       <header className="border-b border-white/[0.08] bg-[#090807]/75 backdrop-blur-2xl sticky top-0 z-50 text-zinc-100 shadow-[inset_0_-1px_0_0_rgba(255,244,224,0.04)]">
-        <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-10 h-14 flex items-center justify-between gap-4">
+        <div className="max-w-[1680px] mx-auto px-6 sm:px-10 lg:px-12 h-[70px] flex items-center justify-between gap-5">
           {/* Brand & Authenticated App Navigation Only */}
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-6">
             <Link
               href="/"
-              className="flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/40 rounded-lg px-1 transition group"
+              className="flex items-center gap-3 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/40 rounded-lg px-1 transition group"
             >
-              <div className="w-7 h-7 rounded-full bg-gradient-to-b from-white/[0.14] to-white/[0.04] border border-white/[0.18] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.25)] flex items-center justify-center text-[#f5dfb8] group-hover:scale-105 transition-transform">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-b from-white/[0.14] to-white/[0.04] border border-white/[0.18] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.25)] flex items-center justify-center text-[#f5dfb8] group-hover:scale-105 transition-transform">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <path
                     d="M4.5 12C4.5 9.5 6.5 7.5 9 7.5C11.5 7.5 12.5 10 14.5 12C16.5 14 17.5 16.5 20 16.5C21.38 16.5 22.5 15.38 22.5 14"
                     stroke="currentColor"
@@ -126,16 +126,16 @@ export function TopBar() {
                   <circle cx="4.5" cy="12" r="2" fill="currentColor" />
                 </svg>
               </div>
-              <span className="font-semibold tracking-[0.08em] text-xs text-white uppercase">
+              <span className="font-semibold tracking-[0.08em] text-[15px] text-white uppercase">
                 UNIFLOW
               </span>
             </Link>
 
             {userEmail && (
-              <nav className="hidden md:flex items-center gap-1 p-1 rounded-full bg-white/[0.04] border border-white/[0.07] text-xs font-medium shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]">
+              <nav className="hidden md:flex items-center gap-1.5 p-1.5 rounded-full bg-white/[0.04] border border-white/[0.07] text-[14px] font-medium shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]">
                 <Link
                   href="/"
-                  className={`px-3.5 py-1 rounded-full transition-all duration-150 ${
+                  className={`px-4 py-1.5 rounded-full transition-all duration-150 ${
                     pathname === "/"
                       ? "bg-[#f3e7d3] text-[#141210] font-semibold shadow-sm"
                       : "text-zinc-400 hover:text-zinc-100"
@@ -145,7 +145,7 @@ export function TopBar() {
                 </Link>
                 <Link
                   href="/projects"
-                  className={`px-3.5 py-1 rounded-full transition-all duration-150 ${
+                  className={`px-4 py-1.5 rounded-full transition-all duration-150 ${
                     pathname === "/projects"
                       ? "bg-[#f3e7d3] text-[#141210] font-semibold shadow-sm"
                       : "text-zinc-400 hover:text-zinc-100"
@@ -155,7 +155,7 @@ export function TopBar() {
                 </Link>
                 <Link
                   href="/projects/new"
-                  className={`px-3.5 py-1 rounded-full transition-all duration-150 ${
+                  className={`px-4 py-1.5 rounded-full transition-all duration-150 ${
                     pathname === "/projects/new"
                       ? "bg-[#f3e7d3] text-[#141210] font-semibold shadow-sm"
                       : "text-zinc-400 hover:text-zinc-100"
@@ -172,40 +172,40 @@ export function TopBar() {
             <button
               type="button"
               onClick={() => setPaletteOpen(true)}
-              className="hidden sm:flex items-center justify-between gap-6 px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.09] hover:border-white/[0.16] text-xs text-zinc-400 hover:text-zinc-200 transition w-56 lg:w-72 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]"
+              className="hidden sm:flex items-center justify-between gap-6 px-4 py-2 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.09] hover:border-white/[0.16] text-[14px] text-zinc-400 hover:text-zinc-200 transition w-64 lg:w-80 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]"
             >
-              <span className="flex items-center gap-2 truncate">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <span className="flex items-center gap-2.5 truncate">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
                   <path d="M20 20L16.5 16.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
                 <span>Search workspaces &amp; actions...</span>
               </span>
-              <kbd className="font-mono text-[10px] text-zinc-300 bg-black/50 border border-white/[0.1] px-1.5 py-0.5 rounded">
+              <kbd className="font-mono text-xs text-zinc-300 bg-black/50 border border-white/[0.1] px-2 py-0.5 rounded">
                 ⌘K
               </kbd>
             </button>
           )}
 
           {/* Right: Interactive Live Cloud Diagnostics Capsule + Real Session */}
-          <div className="flex items-center gap-3 text-xs relative">
+          <div className="flex items-center gap-3.5 text-sm relative">
             <button
               type="button"
               onClick={() => setCloudPopoverOpen((o) => !o)}
-              className="hidden xl:flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.09] hover:border-white/[0.18] font-mono text-[11px] transition shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]"
+              className="hidden xl:flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.09] hover:border-white/[0.18] font-mono text-[13px] transition shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]"
               title="Click to inspect live multi-cloud diagnostics"
             >
               <StatusDot label="Supabase" active={Boolean(cloudStatus?.supabase.configured)} />
               <StatusDot label="Groq" active={Boolean(cloudStatus?.groq.configured)} />
               <StatusDot label="Azure SQL" active={Boolean(cloudStatus?.azureSql.configured)} />
               <StatusDot label="Azure Blob" active={Boolean(cloudStatus?.azureBlob.configured)} />
-              <span className="text-zinc-500 pl-0.5 text-[10px]">
+              <span className="text-zinc-500 pl-0.5 text-xs">
                 {cloudPopoverOpen ? "▴" : "▾"}
               </span>
             </button>
 
             {cloudPopoverOpen && (
-              <div className="absolute right-0 top-12 w-80 apple-glass rounded-2xl p-4 z-50 text-xs space-y-3">
+              <div className="absolute right-0 top-14 w-96 apple-glass rounded-2xl p-5 z-50 text-[13px] space-y-3.5">
                 <div className="flex items-center justify-between border-b border-white/[0.08] pb-2.5">
                   <div>
                     <div className="font-semibold text-white">Live Cloud Diagnostics</div>
@@ -249,17 +249,17 @@ export function TopBar() {
             )}
 
             {userEmail ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5">
                 <span
                   title={userEmail}
-                  className="w-7 h-7 rounded-full bg-[#f3e7d3]/15 border border-[#f3e7d3]/30 flex items-center justify-center text-[11px] font-semibold text-[#f5dfb8] uppercase"
+                  className="w-9 h-9 rounded-full bg-[#f3e7d3]/15 border border-[#f3e7d3]/30 flex items-center justify-center text-xs font-semibold text-[#f5dfb8] uppercase"
                 >
                   {userEmail[0]}
                 </span>
                 <button
                   type="button"
                   onClick={handleSignOut}
-                  className="text-xs text-zinc-300 hover:text-white font-medium px-2.5 py-1 rounded-full border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.09] transition"
+                  className="text-[14px] text-zinc-300 hover:text-white font-medium px-3.5 py-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.09] transition"
                 >
                   Sign out
                 </button>
@@ -267,7 +267,7 @@ export function TopBar() {
             ) : (
               <Link
                 href="/login"
-                className="champagne-pill inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-1.5 rounded-full transition"
+                className="champagne-pill inline-flex items-center gap-2 text-[14px] font-semibold px-5 py-2 rounded-full transition"
               >
                 Sign in
               </Link>
@@ -289,9 +289,9 @@ export function TopBar() {
 
 function StatusDot({ label, active }: { label: string; active: boolean }) {
   return (
-    <span className="inline-flex items-center gap-1.5 px-1">
+    <span className="inline-flex items-center gap-2 px-1">
       <span
-        className={`w-1.5 h-1.5 rounded-full ${
+        className={`w-2 h-2 rounded-full ${
           active ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.75)]" : "bg-zinc-600"
         }`}
       />
