@@ -24,9 +24,6 @@ import { generateTypeScriptAdapter } from "@/lib/transformation/generator";
 type SandboxTab = "execute" | "diff" | "adapter";
 type OutputSubTab = "output" | "steps" | "details";
 
-/**
- * Vibrant multi-tone JSON syntax highlighter.
- */
 function HighlightedJson({ value }: { value: unknown }) {
   const json = JSON.stringify(value, null, 2);
   const lines = json.split("\n");
@@ -39,14 +36,14 @@ function HighlightedJson({ value }: { value: unknown }) {
           const [, indent, key, colon, rest] = keyMatch;
           let valColor = "text-zinc-200";
           if (rest.startsWith('"')) valColor = "text-emerald-300";
-          else if (/^-?\d/.test(rest)) valColor = "text-amber-300";
+          else if (/^-?\d/.test(rest)) valColor = "text-sky-300";
           else if (rest.startsWith("true") || rest.startsWith("false") || rest.startsWith("null"))
-            valColor = "text-pink-300";
+            valColor = "text-amber-300";
 
           return (
             <div key={i} className="whitespace-pre">
               <span>{indent}</span>
-              <span className="text-sky-300">&quot;{key}&quot;</span>
+              <span className="text-[#f5dfb8]">&quot;{key}&quot;</span>
               <span className="text-zinc-500">{colon}</span>
               <span className={valColor}>{rest}</span>
             </div>
@@ -78,9 +75,6 @@ export default function LandingDashboardPage() {
   const [copiedInput, setCopiedInput] = React.useState(false);
   const [compileNonce, setCompileNonce] = React.useState(0);
   const [hoveredStep, setHoveredStep] = React.useState<string | null>(null);
-
-  const [spotlight, setSpotlight] = React.useState({ x: 50, y: 30 });
-  const [tilt, setTilt] = React.useState({ rx: 0, ry: 0 });
 
   React.useEffect(() => {
     fetch("/api/projects")
@@ -148,24 +142,6 @@ export default function LandingDashboardPage() {
     }
   }, [payloadText, liveCompiled]);
 
-  function handleMouseMove(e: React.MouseEvent<HTMLElement>) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    setSpotlight({ x, y });
-  }
-
-  function handleWindowMouseMove(e: React.MouseEvent<HTMLDivElement>) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const nx = (e.clientX - rect.left) / rect.width - 0.5;
-    const ny = (e.clientY - rect.top) / rect.height - 0.5;
-    setTilt({ rx: -ny * 2.4, ry: nx * 2.4 });
-  }
-
-  function handleWindowMouseLeave() {
-    setTilt({ rx: 0, ry: 0 });
-  }
-
   async function launchCanonicalWorkspace() {
     setLaunchingSandbox(true);
     try {
@@ -220,26 +196,6 @@ export default function LandingDashboardPage() {
     setCompileNonce((n) => n + 1);
   }
 
-  function handleRandomizeOrder() {
-    const currencies = ["USD", "EUR", "GBP"] as const;
-    const notes = [
-      "express priority dispatch",
-      "vip enterprise renewal",
-      "gift wrap + custom invoice",
-      "multi-region fulfillment",
-    ];
-    const randomPayload = {
-      id: Math.floor(1000 + Math.random() * 9000),
-      amount: Number((Math.random() * 450 + 15).toFixed(2)),
-      currency: currencies[Math.floor(Math.random() * currencies.length)],
-      created_at: new Date().toISOString(),
-      note: notes[Math.floor(Math.random() * notes.length)],
-    };
-    setFixtureIdx(-1);
-    setPayloadText(JSON.stringify(randomPayload, null, 2));
-    setCompileNonce((n) => n + 1);
-  }
-
   function handlePayloadEdit(val: string) {
     setPayloadText(val);
     setCompileNonce((n) => n + 1);
@@ -262,439 +218,450 @@ export default function LandingDashboardPage() {
   const isAllValid = Boolean(!liveRun?.parseError && liveRun?.exec?.success && liveRun?.validation?.valid);
 
   return (
-    <div
-      onMouseMove={handleMouseMove}
-      className="min-h-screen bg-[#07080f] text-zinc-100 flex flex-col font-sans relative overflow-x-hidden"
-    >
-      {/* Interactive Cursor Spotlight */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed inset-0 z-0 transition-opacity duration-300"
-        style={{
-          background: `radial-gradient(640px circle at ${spotlight.x}% ${spotlight.y}%, rgba(45, 212, 191, 0.08), rgba(129, 140, 248, 0.04) 40%, transparent 70%)`,
-        }}
-      />
+    <div className="min-h-screen bg-[#090807] text-[#f5f2eb] flex flex-col font-sans relative overflow-x-hidden">
+      {/* Supplied Warm Photographic Developer Desk Foundation */}
+      <HeroBackdrop />
 
       <TopBar />
 
-      <main className="flex-1 relative z-10">
-        {/* Hero + Live Interactive Studio */}
-        <section className="relative overflow-hidden">
-          <HeroBackdrop />
+      <main className="flex-1 relative z-10 flex flex-col justify-between">
+        {/* Hero & Live JSON Execution Workbench */}
+        <section className="max-w-[1440px] w-full mx-auto px-5 sm:px-8 lg:px-10 pt-8 pb-6 lg:pt-12 lg:pb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+            {/* Left Column: Editorial Headline + Hand-Drawn Coral Brush + Tactile Capability Cards */}
+            <div className="lg:col-span-5 space-y-5">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/55 backdrop-blur-md border border-white/[0.12] text-[11px] font-mono text-zinc-300">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                <span>UNIFLOW v1.2.0</span>
+                <span className="text-zinc-600">&bull;</span>
+                <span className="text-emerald-400">Live</span>
+              </div>
 
-          <div className="relative max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-10 pt-8 pb-8 lg:pt-10 lg:pb-10">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
-              {/* Left Column: Expressive Bricolage Grotesque Display */}
-              <div className="lg:col-span-5 space-y-6">
-                <h1 className="font-display text-[44px] sm:text-[54px] xl:text-[62px] font-bold tracking-[-0.03em] text-white leading-[1.03]">
-                  Compile breaking API migrations into{" "}
-                  <span className="bg-gradient-to-r from-emerald-300 via-teal-200 to-sky-300 bg-clip-text text-transparent">
+              <h1 className="font-editorial text-[46px] sm:text-[56px] xl:text-[64px] font-normal tracking-[-0.02em] text-[#fdfaf5] leading-[1.02] drop-shadow-[0_2px_18px_rgba(0,0,0,0.65)]">
+                Compile breaking API migrations into{" "}
+                <span className="relative inline-block">
+                  <span className="font-brush text-[54px] sm:text-[64px] xl:text-[74px] text-[#f4845f] font-bold tracking-normal leading-none pr-1">
                     verified
-                  </span>{" "}
-                  adapters.
-                </h1>
-
-                <p className="text-[15px] sm:text-base text-zinc-300 leading-[1.6] max-w-lg">
-                  Compare OpenAPI 3.x and JSON Schemas with deterministic 9-facet diffs, review Groq
-                  AI mapping proposals behind human gates, and ship zero-eval TypeScript adapters
-                  backed by Azure SQL &amp; Blob evidence.
-                </p>
-
-                <div className="flex flex-wrap items-center gap-3.5 pt-1">
-                  <button
-                    type="button"
-                    onClick={launchCanonicalWorkspace}
-                    disabled={launchingSandbox}
-                    className="vibrant-cta inline-flex items-center justify-center gap-2 text-xs sm:text-[13px] font-bold px-6 py-3 rounded-full disabled:opacity-60 transition-all duration-200"
+                  </span>
+                  {/* Subtle hand-drawn brush underline */}
+                  <svg
+                    viewBox="0 0 180 14"
+                    fill="none"
+                    aria-hidden="true"
+                    className="absolute -bottom-1 left-0 w-full h-3 text-[#f4845f]/85"
                   >
-                    <span>{launchingSandbox ? "Initializing Workspace..." : "Launch Live Workbench"}</span>
-                    <span aria-hidden="true">→</span>
-                  </button>
-                  <Link
-                    href="/projects/new"
-                    className="inline-flex items-center justify-center gap-2 text-xs sm:text-[13px] font-medium px-6 py-3 rounded-full border border-white/[0.16] bg-white/[0.06] text-white hover:bg-white/[0.12] hover:border-teal-400/40 transition-all duration-200 backdrop-blur-md"
-                  >
-                    <span>+ New Custom Project</span>
-                  </Link>
+                    <path
+                      d="M3 10.5C45 4.2 118 2.8 176 7.5"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </span>{" "}
+                adapters.
+              </h1>
+
+              <p className="text-[15px] text-[#e5ddd2] leading-[1.6] max-w-md drop-shadow-[0_1px_10px_rgba(0,0,0,0.8)]">
+                Compare OpenAPI 3.x and JSON Schemas with deterministic 9-facet diffs, review Groq
+                AI mapping proposals behind human gates, and ship zero-eval TypeScript adapters
+                backed by Azure SQL &amp; Blob evidence.
+              </p>
+
+              <div className="flex flex-wrap items-center gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={launchCanonicalWorkspace}
+                  disabled={launchingSandbox}
+                  className="champagne-pill inline-flex items-center justify-center gap-2 text-xs sm:text-[13px] font-semibold px-6 py-3 rounded-full disabled:opacity-60 transition-all duration-200"
+                >
+                  <span>{launchingSandbox ? "Initializing..." : "Launch Live Workbench"}</span>
+                  <span aria-hidden="true">→</span>
+                </button>
+                <Link
+                  href="/projects/new"
+                  className="inline-flex items-center justify-center gap-2 text-xs sm:text-[13px] font-medium px-6 py-3 rounded-full border border-white/[0.18] bg-black/55 text-zinc-100 hover:bg-black/75 hover:border-white/[0.3] transition-all duration-200 backdrop-blur-xl"
+                >
+                  <span>+ New Custom Project</span>
+                </Link>
+              </div>
+
+              {/* Capability Cards with Rich Amber, Teal & Muted Violet Accents */}
+              <div className="pt-2 grid grid-cols-3 gap-3 max-w-md">
+                <div className="apple-glass rounded-2xl px-3.5 py-3 hover:border-amber-400/40 hover:-translate-y-0.5 transition-all duration-200 flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-amber-500/15 border border-amber-400/30 flex items-center justify-center text-amber-300 text-xs shrink-0">
+                    ⚡
+                  </div>
+                  <div>
+                    <div className="text-xs font-semibold text-white leading-tight">Zero Eval</div>
+                    <div className="text-[10px] text-zinc-400 mt-0.5">Sandboxed IR</div>
+                  </div>
                 </div>
 
-                {/* Energetic Colored Metric Cards */}
-                <div className="pt-2 grid grid-cols-3 gap-3 max-w-md">
-                  <div className="apple-glass rounded-2xl px-3.5 py-3 hover:border-amber-400/45 hover:-translate-y-0.5 transition-all duration-200">
-                    <div className="text-amber-400 text-sm mb-1">⚡</div>
-                    <div className="text-xs font-bold text-white">Zero Eval</div>
-                    <div className="text-[11px] text-zinc-400">Sandboxed IR</div>
+                <div className="apple-glass rounded-2xl px-3.5 py-3 hover:border-teal-400/40 hover:-translate-y-0.5 transition-all duration-200 flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-teal-500/15 border border-teal-400/30 flex items-center justify-center text-teal-300 text-xs shrink-0">
+                    ✓
                   </div>
-                  <div className="apple-glass rounded-2xl px-3.5 py-3 hover:border-emerald-400/45 hover:-translate-y-0.5 transition-all duration-200">
-                    <div className="text-emerald-400 text-sm mb-1">✓</div>
-                    <div className="text-xs font-bold text-white">100%</div>
-                    <div className="text-[11px] text-zinc-400">Type-Safe</div>
+                  <div>
+                    <div className="text-xs font-semibold text-white leading-tight">100%</div>
+                    <div className="text-[10px] text-zinc-400 mt-0.5">Type-Safe</div>
                   </div>
-                  <div className="apple-glass rounded-2xl px-3.5 py-3 hover:border-indigo-400/45 hover:-translate-y-0.5 transition-all duration-200">
-                    <div className="text-indigo-400 text-sm mb-1">☁</div>
-                    <div className="text-xs font-bold text-white">Multi-Cloud</div>
-                    <div className="text-[11px] text-zinc-400">Azure + Supabase</div>
+                </div>
+
+                <div className="apple-glass rounded-2xl px-3.5 py-3 hover:border-violet-400/40 hover:-translate-y-0.5 transition-all duration-200 flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-violet-500/15 border border-violet-400/30 flex items-center justify-center text-violet-300 text-xs shrink-0">
+                    ☁
+                  </div>
+                  <div>
+                    <div className="text-xs font-semibold text-white leading-tight">Multi-Cloud</div>
+                    <div className="text-[10px] text-zinc-400 mt-0.5">Azure + Supabase</div>
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Right Column: Interactive 3D-Tilted Studio Window */}
-              <div
-                onMouseMove={handleWindowMouseMove}
-                onMouseLeave={handleWindowMouseLeave}
-                style={{
-                  transform: `perspective(1400px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)`,
-                }}
-                className="lg:col-span-7 apple-glass rounded-2xl overflow-hidden transition-transform duration-300 ease-out will-change-transform"
-              >
-                {/* macOS Window Chrome + Segmented Control */}
-                <div className="px-4 py-3 bg-white/[0.04] border-b border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full bg-[#ff5f56] shadow-[0_0_8px_rgba(255,95,86,0.6)]" />
-                    <span className="w-3 h-3 rounded-full bg-[#ffbd2e] shadow-[0_0_8px_rgba(255,189,46,0.5)]" />
-                    <span className="w-3 h-3 rounded-full bg-[#27c93f] shadow-[0_0_8px_rgba(39,201,63,0.6)]" />
-                  </div>
-
-                  <div className="flex items-center p-0.5 rounded-full bg-black/50 border border-white/[0.1] text-xs font-medium">
-                    <button
-                      type="button"
-                      onClick={() => setSandboxTab("execute")}
-                      className={`px-4 py-1 rounded-full transition-all duration-150 ${
-                        sandboxTab === "execute"
-                          ? "bg-gradient-to-r from-emerald-400 to-teal-300 text-zinc-950 font-semibold shadow-sm"
-                          : "text-zinc-400 hover:text-white"
-                      }`}
-                    >
-                      Execution
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSandboxTab("diff")}
-                      className={`px-4 py-1 rounded-full transition-all duration-150 ${
-                        sandboxTab === "diff"
-                          ? "bg-gradient-to-r from-emerald-400 to-teal-300 text-zinc-950 font-semibold shadow-sm"
-                          : "text-zinc-400 hover:text-white"
-                      }`}
-                    >
-                      Diff ({liveCompiled.diff.items.length})
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSandboxTab("adapter")}
-                      className={`px-4 py-1 rounded-full transition-all duration-150 ${
-                        sandboxTab === "adapter"
-                          ? "bg-gradient-to-r from-emerald-400 to-teal-300 text-zinc-950 font-semibold shadow-sm"
-                          : "text-zinc-400 hover:text-white"
-                      }`}
-                    >
-                      Adapters
-                    </button>
-                  </div>
-
-                  <div className="hidden sm:flex items-center gap-2 font-mono text-[11px]">
-                    <span className="text-zinc-400">v1.2.0</span>
-                    <span className="text-emerald-300 flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-400/30">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      Live
-                    </span>
-                  </div>
+            {/* Right Column: JSON Execution Workbench */}
+            <div className="lg:col-span-7 apple-glass rounded-2xl overflow-hidden">
+              {/* macOS Chrome + Segmented Tabs */}
+              <div className="px-4 py-3 bg-white/[0.04] border-b border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-[#ff5f56]" />
+                  <span className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
+                  <span className="w-3 h-3 rounded-full bg-[#27c93f]" />
                 </div>
 
-                {/* Live Animated Data-Flow Beam */}
-                <div className="relative h-[2px] w-full bg-white/[0.04] overflow-hidden">
-                  <div
-                    className={`animate-beam h-full w-1/3 ${
-                      isAllValid
-                        ? "bg-gradient-to-r from-transparent via-teal-400 to-transparent"
-                        : "bg-gradient-to-r from-transparent via-rose-400 to-transparent"
+                <div className="flex items-center p-0.5 rounded-full bg-black/60 border border-white/[0.1] text-xs font-medium">
+                  <button
+                    type="button"
+                    onClick={() => setSandboxTab("execute")}
+                    className={`px-4 py-1 rounded-full transition-all duration-150 ${
+                      sandboxTab === "execute"
+                        ? "bg-[#f3e7d3] text-[#141210] font-semibold shadow-sm"
+                        : "text-zinc-400 hover:text-zinc-100"
                     }`}
-                  />
+                  >
+                    Execution
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSandboxTab("diff")}
+                    className={`px-4 py-1 rounded-full transition-all duration-150 ${
+                      sandboxTab === "diff"
+                        ? "bg-[#f3e7d3] text-[#141210] font-semibold shadow-sm"
+                        : "text-zinc-400 hover:text-zinc-100"
+                    }`}
+                  >
+                    Diff ({liveCompiled.diff.items.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSandboxTab("adapter")}
+                    className={`px-4 py-1 rounded-full transition-all duration-150 ${
+                      sandboxTab === "adapter"
+                        ? "bg-[#f3e7d3] text-[#141210] font-semibold shadow-sm"
+                        : "text-zinc-400 hover:text-zinc-100"
+                    }`}
+                  >
+                    Adapters
+                  </button>
                 </div>
 
-                {/* Tab 1: Real Execution & Validation */}
-                {sandboxTab === "execute" && (
-                  <div className="p-4 sm:p-5 space-y-3.5">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      {/* Interactive Live Mapping Chips */}
-                      <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-mono">
-                        {[
-                          { id: "id", label: "id → order_id" },
-                          { id: "amount", label: "amount → total" },
-                          { id: "currency", label: "USD → usd" },
-                          { id: "region", label: "+ region" },
-                        ].map((chip) => (
-                          <span
-                            key={chip.id}
-                            onMouseEnter={() => setHoveredStep(chip.id)}
-                            onMouseLeave={() => setHoveredStep(null)}
-                            className={`px-2 py-0.5 rounded-full border transition cursor-default ${
-                              hoveredStep === chip.id
-                                ? "bg-indigo-500/25 text-indigo-200 border-indigo-400/50"
-                                : "bg-white/[0.04] text-zinc-300 border-white/[0.1]"
-                            }`}
-                          >
-                            {chip.label}
-                          </span>
-                        ))}
-                      </div>
+                <div className="hidden sm:flex items-center gap-2 font-mono text-[11px]">
+                  <span className="text-zinc-400">v1.2.0</span>
+                  <span className="text-emerald-400 flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/25">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Live
+                  </span>
+                </div>
+              </div>
 
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={handleRandomizeOrder}
-                          className="text-[11px] font-mono px-2.5 py-1 rounded-full bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-200 border border-indigo-400/35 transition"
-                          title="Generate a random live order payload and compile it instantly"
-                        >
-                          ↻ Randomize
-                        </button>
-                        {CANONICAL_TEST_FIXTURES.map((f, idx) => (
-                          <button
-                            key={idx}
-                            type="button"
-                            onClick={() => handleSelectFixture(idx)}
-                            className={`text-[11px] font-mono px-2.5 py-1 rounded-full border transition-all ${
-                              fixtureIdx === idx
-                                ? f.expectValid
-                                  ? "bg-emerald-500/20 text-emerald-200 border-emerald-400/45"
-                                  : "bg-rose-500/20 text-rose-200 border-rose-400/45"
-                                : "bg-black/40 text-zinc-400 border-white/[0.08] hover:text-white"
-                            }`}
-                          >
-                            {f.expectValid ? `Fixture ${idx + 1}` : `Invalid ${idx + 1}`}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+              {/* Subtle compiler progress beam */}
+              <div className="relative h-[2px] w-full bg-white/[0.04] overflow-hidden">
+                <div
+                  className={`animate-beam h-full w-1/3 ${
+                    isAllValid
+                      ? "bg-gradient-to-r from-transparent via-teal-400 to-transparent"
+                      : "bg-gradient-to-r from-transparent via-rose-400 to-transparent"
+                  }`}
+                />
+              </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Left Code Editor Pane */}
-                      <div className="bg-[#080a12]/95 border border-white/[0.1] rounded-xl overflow-hidden flex flex-col">
-                        <div className="px-3.5 py-2.5 border-b border-white/[0.07] bg-white/[0.03] flex items-center justify-between text-xs">
-                          <span className="font-mono text-zinc-200 flex items-center gap-2">
-                            <span className="text-sky-400">{"{}"}</span> Source JSON Input
-                          </span>
-                          <button
-                            type="button"
-                            onClick={handleCopyInput}
-                            className="text-[11px] font-mono text-zinc-400 hover:text-white transition"
-                          >
-                            {copiedInput ? "Copied ✓" : "Copy"}
-                          </button>
-                        </div>
-
-                        <div className="flex flex-1 p-3.5 font-mono text-xs leading-relaxed min-h-[260px]">
-                          <div
-                            aria-hidden="true"
-                            className="select-none text-zinc-600 pr-3 text-right border-r border-white/[0.06] mr-3 shrink-0"
-                          >
-                            {inputLines.map((_, i) => (
-                              <div key={i}>{i + 1}</div>
-                            ))}
-                          </div>
-                          <textarea
-                            value={payloadText}
-                            onChange={(e) => handlePayloadEdit(e.target.value)}
-                            spellCheck={false}
-                            rows={Math.max(10, inputLines.length)}
-                            aria-label="Source JSON payload"
-                            className="w-full bg-transparent text-sky-200 focus:outline-none resize-none leading-relaxed"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Right Syntax-Highlighted Output & Verification Pane */}
-                      <div
-                        key={compileNonce}
-                        className="animate-compile-flash bg-[#080a12]/95 border border-white/[0.1] rounded-xl overflow-hidden flex flex-col"
-                      >
-                        <div
-                          className={`px-3.5 py-2.5 border-b flex items-center justify-between text-xs ${
-                            isAllValid
-                              ? "bg-emerald-500/15 border-emerald-400/30 text-emerald-300"
-                              : "bg-rose-500/15 border-rose-400/30 text-rose-300"
+              {/* Tab 1: Execution */}
+              {sandboxTab === "execute" && (
+                <div className="p-4 sm:p-5 space-y-3.5">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-mono">
+                      {[
+                        { id: "id", label: "id → order_id" },
+                        { id: "amount", label: "amount → total" },
+                        { id: "currency", label: "USD → usd" },
+                        { id: "region", label: "+ region" },
+                      ].map((chip) => (
+                        <span
+                          key={chip.id}
+                          onMouseEnter={() => setHoveredStep(chip.id)}
+                          onMouseLeave={() => setHoveredStep(null)}
+                          className={`px-2.5 py-0.5 rounded-full border transition cursor-default ${
+                            hoveredStep === chip.id
+                              ? "bg-[#f4845f]/20 text-[#f9a88b] border-[#f4845f]/40"
+                              : "bg-black/45 text-zinc-300 border-white/[0.09]"
                           }`}
                         >
-                          <span className="font-semibold flex items-center gap-2">
-                            <span
-                              className={`w-2 h-2 rounded-full ${
-                                isAllValid ? "bg-emerald-400" : "bg-rose-400"
-                              }`}
-                            />
-                            <span>
-                              {isAllValid
-                                ? "Compilation Successful"
-                                : liveRun?.parseError
-                                ? "JSON Syntax Error"
-                                : "Contract Violation"}
-                            </span>
-                          </span>
-                          <span className="font-mono text-[11px] font-semibold">
-                            {liveRun?.elapsedMs || "0.4"}ms ⚡
-                          </span>
-                        </div>
-
-                        <div className="px-3.5 pt-2.5 border-b border-white/[0.07] flex items-center gap-5 text-xs">
-                          <button
-                            type="button"
-                            onClick={() => setOutputSubTab("output")}
-                            className={`pb-2 border-b-2 transition ${
-                              outputSubTab === "output"
-                                ? "border-teal-400 text-white font-semibold"
-                                : "border-transparent text-zinc-500 hover:text-zinc-300"
-                            }`}
-                          >
-                            Output
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setOutputSubTab("steps")}
-                            className={`pb-2 border-b-2 transition ${
-                              outputSubTab === "steps"
-                                ? "border-teal-400 text-white font-semibold"
-                                : "border-transparent text-zinc-500 hover:text-zinc-300"
-                            }`}
-                          >
-                            Steps ({liveRun?.exec?.stepResults.length || 0})
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setOutputSubTab("details")}
-                            className={`pb-2 border-b-2 transition ${
-                              outputSubTab === "details"
-                                ? "border-teal-400 text-white font-semibold"
-                                : "border-transparent text-zinc-500 hover:text-zinc-300"
-                            }`}
-                          >
-                            Validation
-                          </button>
-                        </div>
-
-                        <div className="p-3.5 flex-1 overflow-auto max-h-[235px] font-mono text-xs">
-                          {outputSubTab === "output" && (
-                            <>
-                              {liveRun?.parseError ? (
-                                <p className="text-rose-300">{liveRun.parseError}</p>
-                              ) : liveRun?.exec?.success ? (
-                                <HighlightedJson value={liveRun.exec.outputPayload} />
-                              ) : (
-                                <p className="text-rose-300 leading-relaxed">{liveRun?.exec?.error}</p>
-                              )}
-                            </>
-                          )}
-
-                          {outputSubTab === "steps" && (
-                            <div className="space-y-2">
-                              {liveRun?.exec?.stepResults.map((s) => (
-                                <div
-                                  key={s.stepId}
-                                  className="flex items-center justify-between text-[11px] py-1.5 border-b border-white/[0.05]"
-                                >
-                                  <span className="text-zinc-200 truncate pr-2">
-                                    <span className="text-indigo-300">{s.operation}</span> → {s.targetPath}
-                                  </span>
-                                  <span
-                                    className={`font-semibold ${
-                                      s.success ? "text-emerald-400" : "text-rose-400"
-                                    }`}
-                                  >
-                                    {s.success ? "OK" : "FAIL"}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-
-                          {outputSubTab === "details" && (
-                            <div className="space-y-2 text-[11px]">
-                              {liveRun?.validation?.valid ? (
-                                <div className="text-emerald-300 leading-relaxed">
-                                  ✓ All {liveRun.validation.checkedFieldCount} target contract fields
-                                  validated against InvoiceFulfillmentTargetAPI v2.0.0.
-                                </div>
-                              ) : (
-                                liveRun?.validation?.errors.map((e, i) => (
-                                  <div key={i} className="text-rose-300 leading-relaxed">
-                                    • {e.message}
-                                  </div>
-                                ))
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                          {chip.label}
+                        </span>
+                      ))}
                     </div>
-                  </div>
-                )}
 
-                {/* Tab 2: Structural Diff */}
-                {sandboxTab === "diff" && (
-                  <div className="p-5">
-                    <div className="max-h-[320px] overflow-y-auto divide-y divide-white/[0.06] border border-white/[0.09] rounded-xl bg-[#080a12]/95">
-                      {liveCompiled.diff.items.map((item) => (
-                        <div key={item.id} className="p-3.5 flex items-start justify-between gap-3 text-xs">
-                          <div className="space-y-1 min-w-0">
-                            <div className="flex items-center gap-2 font-mono text-xs">
-                              <span className="text-zinc-400 truncate">
-                                {item.sourcePath || "(none)"}
-                              </span>
-                              <span className="text-teal-400">→</span>
-                              <span className="text-sky-300 font-semibold truncate">{item.targetPath}</span>
-                            </div>
-                            <p className="text-[11px] text-zinc-400">{item.message}</p>
-                          </div>
-                          <span
-                            className={`shrink-0 font-mono text-[10px] px-2.5 py-0.5 rounded-full border ${
-                              item.severity === "error"
-                                ? "bg-rose-500/15 text-rose-300 border-rose-500/30"
-                                : item.severity === "warning"
-                                ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
-                                : "bg-white/[0.06] text-zinc-300 border-white/[0.12]"
-                            }`}
-                          >
-                            {item.category}
-                          </span>
-                        </div>
+                    <div className="flex items-center gap-1.5">
+                      {CANONICAL_TEST_FIXTURES.map((f, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => handleSelectFixture(idx)}
+                          className={`text-[11px] font-mono px-3 py-1 rounded-full border transition-all ${
+                            fixtureIdx === idx
+                              ? f.expectValid
+                                ? "bg-violet-600/80 text-white border-violet-400/50 shadow-sm"
+                                : "bg-rose-600/75 text-white border-rose-400/50 shadow-sm"
+                              : "bg-black/45 text-zinc-400 border-white/[0.09] hover:text-white"
+                          }`}
+                        >
+                          {f.expectValid ? `Fixture ${idx + 1}` : `Invalid ${idx + 1}`}
+                        </button>
                       ))}
                     </div>
                   </div>
-                )}
 
-                {/* Tab 3: Generated Adapter.ts */}
-                {sandboxTab === "adapter" && (
-                  <div className="p-5 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-mono text-zinc-300">
-                        Standalone TypeScript adapter (zero dynamic eval)
-                      </span>
-                      <button
-                        type="button"
-                        onClick={handleCopyAdapter}
-                        className="text-xs font-medium px-3.5 py-1 rounded-full bg-white/[0.09] hover:bg-white/[0.16] text-white border border-white/[0.12] transition"
-                      >
-                        {copiedAdapter ? "Copied ✓" : "Copy .ts"}
-                      </button>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Left Source JSON Pane */}
+                    <div className="bg-[#090807]/95 border border-white/[0.1] rounded-xl overflow-hidden flex flex-col">
+                      <div className="px-3.5 py-2.5 border-b border-white/[0.07] bg-white/[0.03] flex items-center justify-between text-xs">
+                        <span className="font-mono text-zinc-200 flex items-center gap-2">
+                          <span className="text-amber-300">{"{}"}</span> Source JSON Input
+                        </span>
+                        <button
+                          type="button"
+                          onClick={handleCopyInput}
+                          className="text-[11px] font-mono text-zinc-400 hover:text-white transition"
+                        >
+                          {copiedInput ? "Copied ✓" : "Copy"}
+                        </button>
+                      </div>
+
+                      <div className="flex flex-1 p-3.5 font-mono text-xs leading-relaxed min-h-[250px]">
+                        <div
+                          aria-hidden="true"
+                          className="select-none text-zinc-600 pr-3 text-right border-r border-white/[0.06] mr-3 shrink-0"
+                        >
+                          {inputLines.map((_, i) => (
+                            <div key={i}>{i + 1}</div>
+                          ))}
+                        </div>
+                        <textarea
+                          value={payloadText}
+                          onChange={(e) => handlePayloadEdit(e.target.value)}
+                          spellCheck={false}
+                          rows={Math.max(10, inputLines.length)}
+                          aria-label="Source JSON payload"
+                          className="w-full bg-transparent text-[#f5dfb8] focus:outline-none resize-none leading-relaxed"
+                        />
+                      </div>
                     </div>
-                    <pre className="max-h-[280px] overflow-auto bg-[#080a12]/95 border border-white/[0.09] rounded-xl p-4 font-mono text-xs text-teal-100 leading-relaxed">
-                      {liveCompiled.adapterCode}
-                    </pre>
+
+                    {/* Right Output & Verification Pane */}
+                    <div
+                      key={compileNonce}
+                      className="animate-compile-flash bg-[#090807]/95 border border-white/[0.1] rounded-xl overflow-hidden flex flex-col"
+                    >
+                      <div
+                        className={`px-3.5 py-2.5 border-b flex items-center justify-between text-xs ${
+                          isAllValid
+                            ? "bg-emerald-500/15 border-emerald-500/25 text-emerald-300"
+                            : "bg-rose-500/15 border-rose-500/25 text-rose-300"
+                        }`}
+                      >
+                        <span className="font-semibold flex items-center gap-2">
+                          <span
+                            className={`w-2 h-2 rounded-full ${
+                              isAllValid ? "bg-emerald-400" : "bg-rose-400"
+                            }`}
+                          />
+                          <span>
+                            {isAllValid
+                              ? "Compilation Successful"
+                              : liveRun?.parseError
+                              ? "JSON Syntax Error"
+                              : "Contract Violation"}
+                          </span>
+                        </span>
+                        <span className="font-mono text-[11px] font-semibold">
+                          {liveRun?.elapsedMs || "0.2"}ms ⚡
+                        </span>
+                      </div>
+
+                      <div className="px-3.5 pt-2.5 border-b border-white/[0.07] flex items-center gap-5 text-xs">
+                        <button
+                          type="button"
+                          onClick={() => setOutputSubTab("output")}
+                          className={`pb-2 border-b-2 transition ${
+                            outputSubTab === "output"
+                              ? "border-[#f3e7d3] text-white font-semibold"
+                              : "border-transparent text-zinc-500 hover:text-zinc-300"
+                          }`}
+                        >
+                          Output
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setOutputSubTab("steps")}
+                          className={`pb-2 border-b-2 transition ${
+                            outputSubTab === "steps"
+                              ? "border-[#f3e7d3] text-white font-semibold"
+                              : "border-transparent text-zinc-500 hover:text-zinc-300"
+                          }`}
+                        >
+                          Steps ({liveRun?.exec?.stepResults.length || 0})
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setOutputSubTab("details")}
+                          className={`pb-2 border-b-2 transition ${
+                            outputSubTab === "details"
+                              ? "border-[#f3e7d3] text-white font-semibold"
+                              : "border-transparent text-zinc-500 hover:text-zinc-300"
+                          }`}
+                        >
+                          Validation
+                        </button>
+                      </div>
+
+                      <div className="p-3.5 flex-1 overflow-auto max-h-[225px] font-mono text-xs">
+                        {outputSubTab === "output" && (
+                          <>
+                            {liveRun?.parseError ? (
+                              <p className="text-rose-300">{liveRun.parseError}</p>
+                            ) : liveRun?.exec?.success ? (
+                              <HighlightedJson value={liveRun.exec.outputPayload} />
+                            ) : (
+                              <p className="text-rose-300 leading-relaxed">{liveRun?.exec?.error}</p>
+                            )}
+                          </>
+                        )}
+
+                        {outputSubTab === "steps" && (
+                          <div className="space-y-2">
+                            {liveRun?.exec?.stepResults.map((s) => (
+                              <div
+                                key={s.stepId}
+                                className="flex items-center justify-between text-[11px] py-1.5 border-b border-white/[0.05]"
+                              >
+                                <span className="text-zinc-200 truncate pr-2">
+                                  <span className="text-amber-300">{s.operation}</span> → {s.targetPath}
+                                </span>
+                                <span
+                                  className={`font-semibold ${
+                                    s.success ? "text-emerald-400" : "text-rose-400"
+                                  }`}
+                                >
+                                  {s.success ? "OK" : "FAIL"}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {outputSubTab === "details" && (
+                          <div className="space-y-2 text-[11px]">
+                            {liveRun?.validation?.valid ? (
+                              <div className="text-emerald-300 leading-relaxed">
+                                ✓ All {liveRun.validation.checkedFieldCount} target contract fields
+                                validated against InvoiceFulfillmentTargetAPI v2.0.0.
+                              </div>
+                            ) : (
+                              liveRun?.validation?.errors.map((e, i) => (
+                                <div key={i} className="text-rose-300 leading-relaxed">
+                                  • {e.message}
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
+
+              {/* Tab 2: Diff */}
+              {sandboxTab === "diff" && (
+                <div className="p-5">
+                  <div className="max-h-[310px] overflow-y-auto divide-y divide-white/[0.06] border border-white/[0.09] rounded-xl bg-[#090807]/95">
+                    {liveCompiled.diff.items.map((item) => (
+                      <div key={item.id} className="p-3.5 flex items-start justify-between gap-3 text-xs">
+                        <div className="space-y-1 min-w-0">
+                          <div className="flex items-center gap-2 font-mono text-xs">
+                            <span className="text-zinc-400 truncate">
+                              {item.sourcePath || "(none)"}
+                            </span>
+                            <span className="text-teal-400">→</span>
+                            <span className="text-[#f5dfb8] font-semibold truncate">{item.targetPath}</span>
+                          </div>
+                          <p className="text-[11px] text-zinc-400">{item.message}</p>
+                        </div>
+                        <span
+                          className={`shrink-0 font-mono text-[10px] px-2.5 py-0.5 rounded-full border ${
+                            item.severity === "error"
+                              ? "bg-rose-500/15 text-rose-300 border-rose-500/30"
+                              : item.severity === "warning"
+                              ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
+                              : "bg-white/[0.06] text-zinc-300 border-white/[0.12]"
+                          }`}
+                        >
+                          {item.category}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 3: Adapters */}
+              {sandboxTab === "adapter" && (
+                <div className="p-5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-mono text-zinc-300">
+                      Standalone TypeScript adapter (zero dynamic eval)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleCopyAdapter}
+                      className="text-xs font-medium px-3.5 py-1 rounded-full bg-white/[0.09] hover:bg-white/[0.16] text-white border border-white/[0.12] transition"
+                    >
+                      {copiedAdapter ? "Copied ✓" : "Copy .ts"}
+                    </button>
+                  </div>
+                  <pre className="max-h-[270px] overflow-auto bg-[#090807]/95 border border-white/[0.09] rounded-xl p-4 font-mono text-xs text-[#f3eadc] leading-relaxed">
+                    {liveCompiled.adapterCode}
+                  </pre>
+                </div>
+              )}
             </div>
           </div>
         </section>
 
-        {/* Full-Width Workspaces Glass Dock */}
-        <section className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-10 pb-10 relative z-10">
+        {/* Active Workspaces Glass Dock */}
+        <section className="max-w-[1440px] w-full mx-auto px-5 sm:px-8 lg:px-10 pb-8 pt-2">
           <div className="apple-glass rounded-2xl overflow-hidden">
             <div className="px-6 py-4 border-b border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <h2 className="font-display text-base font-bold text-white tracking-tight">
-                  Active Workspaces
-                </h2>
-                <p className="text-xs text-zinc-400 mt-0.5">
-                  Resume a compatibility project or initialize a fresh contract pair.
-                </p>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-violet-500/15 border border-violet-400/30 flex items-center justify-center text-violet-300 text-sm shrink-0">
+                  ∿
+                </div>
+                <div>
+                  <h2 className="text-base font-semibold text-white tracking-tight">Active Workspaces</h2>
+                  <p className="text-xs text-zinc-400">
+                    Resume a compatibility project or initialize a fresh contract pair.
+                  </p>
+                </div>
               </div>
               <div className="flex items-center gap-2.5">
                 <Link
@@ -705,7 +672,7 @@ export default function LandingDashboardPage() {
                 </Link>
                 <Link
                   href="/projects/new"
-                  className="vibrant-cta text-xs font-bold px-4 py-1.5 rounded-full transition"
+                  className="champagne-pill text-xs font-semibold px-4 py-1.5 rounded-full transition"
                 >
                   + New Workspace
                 </Link>
@@ -719,12 +686,12 @@ export default function LandingDashboardPage() {
                   <div className="h-10 bg-white/[0.04] rounded-lg animate-pulse" />
                 </div>
               ) : projects.length === 0 ? (
-                <div className="p-10 text-center text-xs text-zinc-400">
+                <div className="p-8 text-center text-xs text-zinc-400">
                   No workspaces yet.{" "}
                   <button
                     type="button"
                     onClick={launchCanonicalWorkspace}
-                    className="text-teal-300 hover:underline font-medium"
+                    className="text-[#f4845f] hover:underline font-medium"
                   >
                     Launch the canonical e-commerce workspace →
                   </button>
@@ -740,15 +707,15 @@ export default function LandingDashboardPage() {
                       <div
                         className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-mono shrink-0 border transition-transform duration-200 group-hover:scale-105 ${
                           i % 2 === 0
-                            ? "bg-emerald-500/20 border-emerald-400/35 text-emerald-300"
-                            : "bg-indigo-500/20 border-indigo-400/35 text-indigo-300"
+                            ? "bg-teal-500/15 border-teal-400/30 text-teal-300"
+                            : "bg-violet-500/15 border-violet-400/30 text-violet-300"
                         }`}
                       >
-                        {i % 2 === 0 ? "⇄" : "◈"}
+                        {i % 2 === 0 ? "↗" : "⚡"}
                       </div>
                       <div className="space-y-0.5 min-w-0">
                         <div className="flex items-center gap-2.5">
-                          <span className="text-sm font-semibold text-zinc-100 group-hover:text-teal-300 transition truncate">
+                          <span className="text-sm font-semibold text-zinc-100 group-hover:text-[#f5dfb8] transition truncate">
                             {p.name}
                           </span>
                           <span className="font-mono text-[11px] text-zinc-400 bg-white/[0.05] border border-white/[0.09] px-2.5 py-0.5 rounded-full">
@@ -762,10 +729,10 @@ export default function LandingDashboardPage() {
                     </div>
 
                     <div className="flex items-center gap-5 shrink-0 text-xs">
-                      <span className="font-mono text-xs text-zinc-500">
+                      <span className="font-mono text-xs text-zinc-400">
                         {new Date(p.updated_at).toLocaleDateString()}
                       </span>
-                      <span className="inline-flex items-center gap-2 text-zinc-200 group-hover:text-white font-medium px-3 py-1 rounded-full bg-white/[0.05] group-hover:bg-white/[0.12] border border-white/[0.08] transition">
+                      <span className="inline-flex items-center gap-2 text-zinc-200 group-hover:text-white font-medium px-3 py-1 rounded-full bg-white/[0.05] group-hover:bg-white/[0.12] border border-white/[0.1] transition">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
                         Open →
                       </span>

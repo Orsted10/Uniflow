@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
-import { Inter, Bricolage_Grotesque, JetBrains_Mono } from "next/font/google";
+import { Inter, Instrument_Serif, JetBrains_Mono, Caveat } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const bricolage = Bricolage_Grotesque({
+const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
-  variable: "--font-display",
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--font-serif",
+});
+const caveat = Caveat({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  variable: "--font-caveat",
 });
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
@@ -27,7 +33,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${inter.variable} ${bricolage.variable} ${jetbrainsMono.variable} font-sans antialiased bg-[#07080f] text-zinc-100 min-h-screen`}
+        className={`${inter.variable} ${instrumentSerif.variable} ${caveat.variable} ${jetbrainsMono.variable} font-sans antialiased bg-[#0b0a09] text-[#f5f2eb] min-h-screen`}
       >
         {children}
       </body>
